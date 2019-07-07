@@ -28,8 +28,6 @@
     "lint:fix": "standard --fix",
     "lint:staged": "lint-staged",
     "fresh-install": "rm -rf node_modules && npm cache clean --force && npm install",
-    "travis-deploy-once": "travis-deploy-once",
-    "semantic-release": "semantic-release",
     "docker:script": "docker-compose run --rm web",
     "docker:db:reset": "npm run docker:script yarn db:reset",
     "docker:db:refresh": "npm run docker:script yarn db:refresh",
