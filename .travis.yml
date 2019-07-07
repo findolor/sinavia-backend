@@ -1,0 +1,15 @@
+language: node_js
+
+services:
+  - docker
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+before_install:
+  - yarn install
+
+script:
+  - yarn docker:test
