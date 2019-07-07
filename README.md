@@ -66,6 +66,7 @@ $ npm install -g lint-staged
 
 Follow the the steps in the next section to enable Posgresql SSL connections.
 
+
 ```sh
 $ psql
 psql (9.6.0)
@@ -76,6 +77,8 @@ $ CREATE DATABASE node_ddd_test;
 ```
 
 ## Overview
+
+
 
 - uses Node.js > v9
 - written using ES6
