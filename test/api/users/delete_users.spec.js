@@ -1,7 +1,5 @@
 /* eslint-env mocha */
-const {
-  userRepository
-} = app.resolve('repository')
+const { userRepository } = app.resolve('repository')
 
 describe('Routes: DELETE Users', () => {
   const BASE_URI = `/api/${config.version}`
@@ -10,7 +8,7 @@ describe('Routes: DELETE Users', () => {
   let token
   let userId
 
-  beforeEach((done) => {
+  beforeEach(done => {
     // we need to add user before we can request our token
     userRepository
       .destroy({ where: {} })
@@ -25,7 +23,8 @@ describe('Routes: DELETE Users', () => {
           isDeleted: 0,
           createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
         })
-      ).then((user) => {
+      )
+      .then(user => {
         userId = user.id
         token = signIn({
           id: user.id,
@@ -39,9 +38,10 @@ describe('Routes: DELETE Users', () => {
   })
 
   describe('Should DELETE users', () => {
-    it('should delete user', (done) => {
-      request.delete(`${BASE_URI}/users/${userId}`)
-        .set('Authorization', `JWT ${token}`)
+    it('should delete user', done => {
+      request
+        .delete(`${BASE_URI}/users/${userId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .end((err, res) => {
           expect(res.body.success).to.eql(true)
@@ -50,8 +50,9 @@ describe('Routes: DELETE Users', () => {
         })
     })
 
-    it('should return unauthorized if no token', (done) => {
-      request.delete(`${BASE_URI}/users/${userId}`)
+    it('should return unauthorized if no token', done => {
+      request
+        .delete(`${BASE_URI}/users/${userId}`)
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equals('Unauthorized')

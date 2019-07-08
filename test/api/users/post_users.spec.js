@@ -1,7 +1,5 @@
 /* eslint-env mocha */
-const {
-  userRepository
-} = app.resolve('repository')
+const { userRepository } = app.resolve('repository')
 
 describe('Routes: POST Users', () => {
   const BASE_URI = `/api/${config.version}`
@@ -9,7 +7,7 @@ describe('Routes: POST Users', () => {
   const signIn = app.resolve('jwt').signin()
   let token
 
-  beforeEach((done) => {
+  beforeEach(done => {
     // we need to add user before we can request our token
     userRepository
       .destroy({ where: {} })
@@ -24,7 +22,8 @@ describe('Routes: POST Users', () => {
           isDeleted: 0,
           createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
         })
-      ).then((user) => {
+      )
+      .then(user => {
         token = signIn({
           id: user.id,
           firstName: user.firstName,
@@ -37,9 +36,10 @@ describe('Routes: POST Users', () => {
   })
 
   describe('Should post users', () => {
-    it('should return create user', (done) => {
-      request.post(`${BASE_URI}/users`)
-        .set('Authorization', `JWT ${token}`)
+    it('should return create user', done => {
+      request
+        .post(`${BASE_URI}/users`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           firstName: 'John',
           lastName: 'Doe',
@@ -58,9 +58,10 @@ describe('Routes: POST Users', () => {
         })
     })
 
-    it('should validate user object is not complete', (done) => {
-      request.post(`${BASE_URI}/users`)
-        .set('Authorization', `JWT ${token}`)
+    it('should validate user object is not complete', done => {
+      request
+        .post(`${BASE_URI}/users`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           firstName: 'John',
           lastName: 'Doe',
@@ -73,8 +74,9 @@ describe('Routes: POST Users', () => {
         })
     })
 
-    it('should return unauthorized if no token', (done) => {
-      request.post(`${BASE_URI}/users`)
+    it('should return unauthorized if no token', done => {
+      request
+        .post(`${BASE_URI}/users`)
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equals('Unauthorized')

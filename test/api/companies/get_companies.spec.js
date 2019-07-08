@@ -58,7 +58,7 @@ describe('Routes: GET Companies', () => {
 
     it('should return all companies', (done) => {
       request.get(`${BASE_URI}/companies`)
-        .set('Authorization', `JWT ${token}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .end((err, res) => {
           expect(res.body.data).to.have.length(1)

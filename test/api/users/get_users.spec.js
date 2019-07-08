@@ -1,8 +1,6 @@
 /* eslint-env mocha */
 
-const {
-  userRepository
-} = app.resolve('repository')
+const { userRepository } = app.resolve('repository')
 
 describe('Routes: GET UsersEntity', () => {
   const BASE_URI = `/api/${config.version}`
@@ -10,7 +8,7 @@ describe('Routes: GET UsersEntity', () => {
   const signIn = app.resolve('jwt').signin()
   let token
 
-  beforeEach((done) => {
+  beforeEach(done => {
     // we need to add user before we can request our token
     userRepository
       .destroy({ where: {} })
@@ -25,7 +23,8 @@ describe('Routes: GET UsersEntity', () => {
           isDeleted: 0,
           createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
         })
-      ).then(() =>
+      )
+      .then(() =>
         userRepository.create({
           firstName: 'John',
           lastName: 'doe',
@@ -36,7 +35,8 @@ describe('Routes: GET UsersEntity', () => {
           isDeleted: 0,
           createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
         })
-      ).then((user) => {
+      )
+      .then(user => {
         token = signIn({
           id: user.id,
           firstName: user.firstName,
@@ -49,9 +49,10 @@ describe('Routes: GET UsersEntity', () => {
   })
 
   describe('Should return users', () => {
-    it('should return all users', (done) => {
-      request.get(`${BASE_URI}/users`)
-        .set('Authorization', `JWT ${token}`)
+    it('should return all users', done => {
+      request
+        .get(`${BASE_URI}/users`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .end((err, res) => {
           expect(res.body.data).to.have.length(2)
@@ -59,8 +60,9 @@ describe('Routes: GET UsersEntity', () => {
         })
     })
 
-    it('should return unauthorized if no token', (done) => {
-      request.get(`${BASE_URI}/users`)
+    it('should return unauthorized if no token', done => {
+      request
+        .get(`${BASE_URI}/users`)
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equals('Unauthorized')

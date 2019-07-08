@@ -62,7 +62,7 @@ describe('Routes: DELETE Companies', () => {
 
     it('should delete company', (done) => {
       request.delete(`${BASE_URI}/companies/${companyId}`)
-        .set('Authorization', `JWT ${token}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .end((err, res) => {
           console.log(res.body)
