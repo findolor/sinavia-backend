@@ -4,9 +4,6 @@ const { userRepository } = app.resolve('repository')
 describe('Routes: POST Users', () => {
   const BASE_URI = `/api/${config.version}`
 
-  const signIn = app.resolve('jwt').signin()
-  let token
-
   beforeEach(done => {
     // we need to add user before we can request our token
     userRepository
@@ -25,22 +22,13 @@ describe('Routes: POST Users', () => {
           coverPicture: 'cddcdcdc'
         })
       )
-      .then(user => {
-        token = signIn({
-          id: user.id,
-          name: user.name,
-          lastname: user.lastname,
-          email: user.email
-        })
-        done()
-      })
+      .then(() => done())
   })
 
   describe('Should post users', () => {
     it('should return create user', done => {
       request
         .post(`${BASE_URI}/users`)
-        .set('Authorization', `Bearer ${token}`)
         .send({
           name: 'john',
           lastname: 'Doe',
@@ -65,7 +53,6 @@ describe('Routes: POST Users', () => {
     it('should validate user object is not complete', done => {
       request
         .post(`${BASE_URI}/users`)
-        .set('Authorization', `Bearer ${token}`)
         .send({
           name: 'John',
           lastname: 'Doe',
@@ -78,14 +65,14 @@ describe('Routes: POST Users', () => {
         })
     })
 
-    it('should return unauthorized if no token', done => {
+    /* it('should return unauthorized if no token', done => {
       request
         .post(`${BASE_URI}/users`)
-        .expect(401)
+        .expect(400)
         .end((err, res) => {
-          expect(res.text).to.equals('Unauthorized')
+          expect(res.body.error).to.equals('Missing server secret.')
           done(err)
         })
-    })
+    }) */
   })
 })

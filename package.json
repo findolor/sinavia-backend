@@ -33,12 +33,12 @@
     "docker:db:refresh": "npm run docker:script yarn db:refresh",
     "docker:db:refresh-test": "npm run docker:script yarn db:refresh",
     "docker:test": "npm run docker:script yarn test",
-    "docker:test:specs": "npm run docker:script npm run test:specs"
+    "docker:test:specs": "npm run docker:script npm run test:specs",
+    "pre-commit": "lint:staged"
   },
   "lint-staged": {
     "*.js": "lint"
   },
-  "pre-commit": "lint:staged",
   "dependencies": {
     "awilix": "4.2.0",
     "awilix-express": "2.1.1",
