@@ -7,11 +7,8 @@ module.exports = ({ userRepository }) => {
     return Promise
       .resolve()
       .then(() =>
-        userRepository.getAll({
-          attributes: [
-            'id', 'firstName', 'lastName', 'middleName', 'email', 'roleId', 'isDeleted', 'createdBy', 'updatedBy'
-          ]
-        })
+      // TODO Add what attributes to get from the database. Right now it returns every attribute so this is obviously wrong.
+        userRepository.getAll()
       )
       .catch(error => {
         throw new Error(error)

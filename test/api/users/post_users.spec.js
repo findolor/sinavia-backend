@@ -13,22 +13,23 @@ describe('Routes: POST Users', () => {
       .destroy({ where: {} })
       .then(() =>
         userRepository.create({
-          firstName: 'Test',
-          lastName: 'Dev',
-          middleName: 'Super Dev',
+          name: 'Test',
+          lastname: 'Dev',
+          username: 'testus',
           email: 'testdev1@gmail.com',
           password: 'pass',
-          roleId: 1,
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'siti',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
       )
       .then(user => {
         token = signIn({
           id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          middleName: user.middleName,
+          name: user.name,
+          lastname: user.lastname,
           email: user.email
         })
         done()
@@ -41,19 +42,22 @@ describe('Routes: POST Users', () => {
         .post(`${BASE_URI}/users`)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          firstName: 'John',
-          lastName: 'Doe',
-          middleName: 'JohnDoe',
-          email: 'johndoe@mgail.com.com',
-          roleId: 1,
+          name: 'john',
+          lastname: 'Doe',
+          username: 'mrrrrr',
+          email: 'test@gmail.com',
+          password: 'passsss',
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'sidsds',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
         .expect(200)
         .end((err, res) => {
-          expect(res.body.data.firstName).to.eql('John')
-          expect(res.body.data.lastName).to.eql('Doe')
-          expect(res.body.data.email).to.eql('johndoe@mgail.com.com')
+          expect(res.body.data.name).to.eql('john')
+          expect(res.body.data.lastname).to.eql('Doe')
+          expect(res.body.data.email).to.eql('test@gmail.com')
           done(err)
         })
     })
@@ -63,9 +67,9 @@ describe('Routes: POST Users', () => {
         .post(`${BASE_URI}/users`)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          firstName: 'John',
-          lastName: 'Doe',
-          middleName: 'JohnDoe'
+          name: 'John',
+          lastname: 'Doe',
+          email: 'dsdss'
         })
         .expect(400)
         .end((err, res) => {

@@ -8,15 +8,16 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
-      firstName: {
+      username: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      lastName: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      middleName: {
+      lastname: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -25,34 +26,34 @@ module.exports = {
         allowNull: false,
         unique: true
       },
+      city: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      profilePicture: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      coverPicture: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false
-      },
-      roleId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      verificationCode: {
-        type: Sequelize.STRING,
-        defaultValue: ''
-      },
-      isVerified: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
       },
       isDeleted: {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
-      createdBy: {
-        type: Sequelize.UUID,
+      birthDate: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      updatedBy: {
-        type: Sequelize.UUID,
-        allowNull: true
-      },
+      /* userLevel: {
+        type: Sequelize.JSON,
+        allowNull: false
+      }, */
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

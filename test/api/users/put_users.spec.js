@@ -15,23 +15,24 @@ describe('Routes: PUT Users', () => {
       .destroy({ where: {} })
       .then(() =>
         userRepository.create({
-          firstName: 'Test',
-          lastName: 'Dev',
-          middleName: 'Super Dev',
+          name: 'Test',
+          lastname: 'Dev',
+          username: 'testus',
           email: 'testdev1@gmail.com',
           password: 'pass',
-          roleId: 1,
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'siti',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
       )
       .then(user => {
         userId = user.id
         token = signIn({
           id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          middleName: user.middleName,
+          name: user.name,
+          lastname: user.lastname,
           email: user.email
         })
         done()
@@ -44,20 +45,21 @@ describe('Routes: PUT Users', () => {
         .put(`${BASE_URI}/users/${userId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          firstName: 'John',
-          lastName: 'Doe',
-          middleName: 'JohnDoe',
+          name: 'John',
+          lastname: 'Doe',
+          username: 'testus',
           email: 'testdev1@gmail.com',
           password: 'pass',
-          roleId: 1,
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'siti',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
         .expect(200)
         .end((err, res) => {
-          expect(res.body.data.firstName).to.eql('John')
-          expect(res.body.data.lastName).to.eql('Doe')
-          expect(res.body.data.middleName).to.eql('JohnDoe')
+          expect(res.body.data.name).to.eql('John')
+          expect(res.body.data.lastname).to.eql('Doe')
           done(err)
         })
     })
@@ -69,7 +71,7 @@ describe('Routes: PUT Users', () => {
         .send({
           firstName: 'John',
           lastName: 'Doe',
-          middleName: 'JohnDoe'
+          email: 'dsdsdsd'
         })
         .expect(400)
         .end((err, res) => {

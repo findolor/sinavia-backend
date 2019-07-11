@@ -5,8 +5,8 @@ const getUsecase = require('src/app/user/get')
 describe('App -> User -> Get', () => {
   let useCase
   const mockData = [{
-    firstName: 'Test',
-    lastName: 'Developer'
+    name: 'Test',
+    lastname: 'Developer'
   }]
 
   describe('Success path', () => {

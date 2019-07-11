@@ -4,17 +4,17 @@ const { cleanData } = require('../helper')
 
 const User = t.struct({
   id: t.maybe(t.String),
-  firstName: t.String,
-  lastName: t.String,
-  middleName: t.String,
+  username: t.String,
+  name: t.String,
+  lastname: t.String,
   email: t.String,
+  city: t.String,
+  birthDate: t.String,
+  profilePicture: t.String,
+  coverPicture: t.String,
+  // userLevel: t.maybe(t.Object),
   password: t.maybe(t.String),
-  roleId: t.Number,
-  verificationCode: t.maybe(t.String),
-  isVerified: t.maybe(t.Number),
   isDeleted: t.Number,
-  createdBy: t.maybe(t.String),
-  updatedBy: t.maybe(t.String),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

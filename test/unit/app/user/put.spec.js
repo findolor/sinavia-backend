@@ -9,13 +9,15 @@ use(sinonChai)
 
 describe('App -> User -> Put', () => {
   const body = {
-    firstName: 'test',
-    lastName: 'dev',
-    middleName: 'test',
+    username: 'username',
+    name: 'test',
+    lastname: 'dev',
     email: 'test@gmail.com',
-    roleId: 1,
     isDeleted: 0,
-    createdBy: '123'
+    city: 'siti',
+    birthDate: '3123123123',
+    profilePicture: 'dsdsds',
+    coverPicture: 'cddcdcdc'
   }
   let useCase
   let method

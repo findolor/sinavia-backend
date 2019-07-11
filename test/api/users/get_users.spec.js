@@ -14,34 +14,37 @@ describe('Routes: GET UsersEntity', () => {
       .destroy({ where: {} })
       .then(() =>
         userRepository.create({
-          firstName: 'Test',
-          lastName: 'Dev',
-          middleName: 'Super Dev',
+          name: 'Test',
+          lastname: 'Dev',
+          username: 'testus',
           email: 'testdev1@gmail.com',
           password: 'pass',
-          roleId: 1,
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'siti',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
       )
       .then(() =>
         userRepository.create({
-          firstName: 'John',
-          lastName: 'doe',
-          middleName: 'JohnDoe',
-          email: 'superjohndoe@gmail.com',
-          password: 'pass',
-          roleId: 1,
+          name: 'john',
+          lastname: 'Doe',
+          username: 'mrrrrr',
+          email: 'test@gmail.com',
+          password: 'passsss',
           isDeleted: 0,
-          createdBy: '48e40a9c-c5e9-4d63-9aba-b77cdf4ca67b'
+          city: 'sidsds',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
       )
       .then(user => {
         token = signIn({
           id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          middleName: user.middleName,
+          name: user.name,
+          lastname: user.lastname,
           email: user.email
         })
         done()

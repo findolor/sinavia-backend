@@ -8,15 +8,16 @@ module.exports = function (sequelize, DataTypes) {
       primaryKey: true,
       allowNull: false
     },
-    firstName: {
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    middleName: {
+    lastname: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -25,34 +26,34 @@ module.exports = function (sequelize, DataTypes) {
       allowNull: false,
       unique: true
     },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    profilePicture: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    coverPicture: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    roleId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    verificationCode: {
-      type: DataTypes.STRING,
-      defaultValue: ''
-    },
-    isVerified: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
     },
     isDeleted: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
-    createdBy: {
-      type: DataTypes.UUID,
+    birthDate: {
+      type: DataTypes.STRING,
       allowNull: false
-    },
-    updatedBy: {
-      type: DataTypes.UUID,
-      allowNull: true
     }
+    /* userLevel: {
+      type: DataTypes.JSON,
+      allowNull: false
+    } */
   }, {
     hooks: {
       beforeCreate: user => {

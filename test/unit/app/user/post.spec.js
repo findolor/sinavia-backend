@@ -18,30 +18,34 @@ describe('App -> User -> Post', () => {
 
     it('should create the records and list the data and append the default password', async () => {
       const body = {
-        firstName: 'test',
-        lastName: 'dev',
-        middleName: 'test',
+        username: 'username',
+        name: 'test',
+        lastname: 'dev',
         email: 'test@gmail.com',
-        roleId: 1,
         isDeleted: 0,
-        createdBy: '123'
+        city: 'siti',
+        birthDate: '3123123123',
+        profilePicture: 'dsdsds',
+        coverPicture: 'cddcdcdc'
       }
       const lists = await useCase.create({ body })
-      expect(lists.firstName).to.equal(body.firstName)
-      expect(lists.lastName).to.equal(body.lastName)
-      expect(lists.middleName).to.equal(body.middleName)
+      expect(lists.name).to.equal(body.name)
+      expect(lists.lastname).to.equal(body.lastname)
+      expect(lists.email).to.equal(body.email)
     })
   })
 
   describe('Fail path', () => {
     const body = {
-      firstName: 'test',
-      lastName: 'dev',
-      middleName: 'test',
+      username: 'username',
+      name: 'test',
+      lastname: 'dev',
       email: 'test@gmail.com',
-      roleId: 1,
       isDeleted: 0,
-      createdBy: '123'
+      city: 'siti',
+      birthDate: '3123123123',
+      profilePicture: 'dsdsds',
+      coverPicture: 'cddcdcdc'
     }
 
     beforeEach(() => {

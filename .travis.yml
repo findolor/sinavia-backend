@@ -19,7 +19,7 @@ before_install:
 before_script:
   - psql -c 'create database sinavia;' -U postgres
   - psql -c 'create database sinavia_test;' -U postgres
-  - cp .env-sample .env
+  - cp .env-travis .env
   - sed -ri 's/^APP_BASE_URL=/APP_BASE_URL=\$APP_BASE_URL/' .env
   - sed -ri 's/^APP_VERSION=/APP_VERSION=\$APP_VERSION/' .env
   - sed -ri 's/^API_SWAGGER=/API_SWAGGER=\$API_SWAGGER/' .env
@@ -29,6 +29,7 @@ before_script:
   - sed -ri 's/^PORT=/PORT=\$PORT/' .env
   - sed -ri 's/^TIMEZONE=/TIMEZONE=\$TIMEZONE/' .env
   - sed -ri 's/^SECRET=/SECRET=\$SECRET/' .env
+  - yarn db:reset
 
 script:
   - yarn test

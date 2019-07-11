@@ -13,9 +13,6 @@ module.exports = ({ userRepository, webToken }) => {
       try {
         const credentials = Token(body)
         const userCredentials = await userRepository.findOne({
-          attributes: [
-            'id', 'firstName', 'lastName', 'middleName', 'email', 'password', 'roleId', 'isDeleted', 'createdBy'
-          ],
           where: {
             email: credentials.email,
             isDeleted: 0
@@ -32,9 +29,8 @@ module.exports = ({ userRepository, webToken }) => {
         resolve({
           token: signIn({
             id: userCredentials.id,
-            firstName: userCredentials.firstName,
-            lastName: userCredentials.lastName,
-            middleName: userCredentials.middleName,
+            name: userCredentials.name,
+            lastname: userCredentials.lastname,
             email: userCredentials.email
           })
         })
