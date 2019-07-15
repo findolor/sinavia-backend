@@ -1,6 +1,7 @@
 const { createContainer, asValue, asFunction } = require('awilix')
 // you can do this
 const app = require('./app')
+const gameEngine = require('./interfaces/http/gameEngine')
 const server = require('./interfaces/http/server')
 const router = require('./interfaces/http/router')
 const auth = require('./interfaces/http/auth')
@@ -18,6 +19,7 @@ const container = createContainer()
 container
   .register({
     app: asFunction(app).singleton(),
+    gameEngine: asFunction(gameEngine).singleton(),
     server: asFunction(server).singleton(),
     router: asFunction(router).singleton(),
     logger: asFunction(logger).singleton(),

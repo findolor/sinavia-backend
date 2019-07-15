@@ -40,10 +40,12 @@
     "*.js": "lint"
   },
   "dependencies": {
+    "@colyseus/monitor": "^0.10.0",
     "awilix": "4.2.0",
     "awilix-express": "2.1.1",
     "bcrypt": "3.0.6",
     "body-parser": "1.18.3",
+    "colyseus": "^0.10.8",
     "compression": "1.7.3",
     "cors": "2.8.5",
     "cross-env": "5.2.0",
