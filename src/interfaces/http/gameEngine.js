@@ -2,6 +2,7 @@ const http = require('http')
 const colyseus = require('colyseus')
 const express = require('express')
 const monitor = require('@colyseus/monitor').monitor
+const rooms = require('../../infra/gameEngine/rooms')
 
 module.exports = ({ logger }) => {
   const port = 5000
@@ -9,6 +10,8 @@ module.exports = ({ logger }) => {
 
   const server = http.createServer(app)
   const gameEngine = new colyseus.Server({ server })
+
+  gameEngine.register('exampleRoom', rooms.exampleRoom)
 
   app.use('/game', monitor(gameEngine))
 
