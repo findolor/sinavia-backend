@@ -12,7 +12,7 @@ module.exports = ({ server, database, gameEngine, logger }) => {
         .resolve()
         .then(database.authenticate)
         .then(server.start)
-        .then(gameEngine.start)
+        .then(app => gameEngine.start(app))
         .catch(err => logger.error(err.stack))
   }
 }

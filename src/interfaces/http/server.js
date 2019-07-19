@@ -16,7 +16,7 @@ module.exports = ({ config, router, logger, auth }) => {
       const http = app.listen(config.port, () => {
         const { port } = http.address()
         logger.info(`🤘 API - Port ${port}`)
-        resolve()
+        resolve(app)
       })
     })
   }
