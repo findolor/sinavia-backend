@@ -100,9 +100,9 @@ module.exports = ({
  *        $ref: '#/responses/Unauthorized'
  */
   router
-    .get('/', (req, res) => {
+    .get('/:id', (req, res) => {
       getUseCase
-        .all(req, res)
+        .getOne({ id: req.params.id })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })

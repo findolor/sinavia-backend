@@ -1,6 +1,6 @@
 const rooms = require('./rooms')
 
-module.exports = (gameEngine) => {
+module.exports = (gameEngine) => { // TODO Remove console.log from here
   gameEngine.register('rankedRoom', rooms.rankedRoom).then((handler) => {
     handler
       .on('create', (room) => console.log('room created:', room.roomId))

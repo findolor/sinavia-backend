@@ -1,12 +1,12 @@
-
 const { expect } = require('chai')
-const getUsecase = require('src/app/user/get')
+const getUsecase = require('src/app/question/get')
 
-describe('App -> User Logic -> Get Request', () => {
+describe('App -> Question Logic -> Get Request', () => {
   let useCase
   const mockData = [{
-    name: 'Test',
-    lastname: 'Developer'
+    examName: 'LGS',
+    courseName: 'Matematik',
+    subjectName: 'Sayilar'
   }]
 
   describe('Success path', () => {
@@ -16,13 +16,13 @@ describe('App -> User Logic -> Get Request', () => {
       }
 
       useCase = getUsecase({
-        userRepository: MockRepository
+        questionRepository: MockRepository
       })
     })
 
     it('should display one record on success', async () => {
-      const user = await useCase.getOne(1)
-      expect(user).to.equal(mockData)
+      const question = await useCase.getOne(1)
+      expect(question).to.equal(mockData)
     })
   })
 
@@ -34,14 +34,14 @@ describe('App -> User Logic -> Get Request', () => {
       }
 
       useCase = getUsecase({
-        userRepository: MockRepository
+        questionRepository: MockRepository
       })
     })
 
     it('should display error on rejection', async () => {
       let error
       try {
-        await useCase.getOne(1)
+        await useCase.getOne({ id: 1 })
       } catch (e) {
         error = e.message
       }

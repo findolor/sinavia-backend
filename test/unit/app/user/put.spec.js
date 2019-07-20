@@ -7,7 +7,7 @@ const updateUsecase = require('src/app/user/put')
 
 use(sinonChai)
 
-describe('App -> User -> Put', () => {
+describe('App -> User Logic -> Put Request', () => {
   const body = {
     username: 'username',
     name: 'test',

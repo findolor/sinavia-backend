@@ -15,7 +15,26 @@ module.exports = ({ userRepository }) => {
       })
   }
 
+  const getOne = ({ id }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        return userRepository.findOne({
+          where: {
+            id: id
+          },
+          attributes: [
+            'id', 'username', 'name', 'lastname', 'email', 'city', 'birthDate', 'profilePicture', 'coverPicture', 'isDeleted'
+          ]
+        })
+      })
+      .catch(error => {
+        throw new Error(error)
+      })
+  }
+
   return {
-    all
+    all,
+    getOne
   }
 }

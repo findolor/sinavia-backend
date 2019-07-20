@@ -2,7 +2,7 @@
 const { expect } = require('chai')
 const postUsecase = require('src/app/user/post')
 
-describe('App -> User -> Post', () => {
+describe('App -> User Logic -> Post Request', () => {
   let useCase
 
   describe('Success path', () => {

@@ -7,7 +7,7 @@ const deleteUsecase = require('src/app/user/delete')
 
 use(sinonChai)
 
-describe('App -> User -> Delete', () => {
+describe('App -> User Logic -> Delete Request', () => {
   let useCase
   let method
 

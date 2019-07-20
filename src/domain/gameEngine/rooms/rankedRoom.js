@@ -2,6 +2,9 @@ const colyseus = require('colyseus')
 const log = require('../../../infra/logging/logger')
 const config = require('../../../../config')
 const logger = log({ config })
+const {
+  getOneQuestion
+} = require('../../../interfaces/engineInterface/interface')
 
 class RankedState {
   constructor (
@@ -103,14 +106,22 @@ class RankedRoom extends colyseus.Room {
     this.finishedPlayerCount = 0
   }
 
-  onInit (options) {
+  async onInit (options) {
     // Options will include the exam-course-subject information
     // TODO Add question fetching mechanisim to here. We need to get the questions when the room starts
     this.setState(new RankedGame())
+    try {
+      const data = await getOneQuestion(1)
+      console.log(data, 'data')
+    } catch (error) { // TODO will remove these console.logs don't worry lol
+      console.log(error, 'error')
+    }
   }
 
-  requestJoin (options, isNew) { // If this room is full new users will join another room
+  // If this room is full new users will join another room
+  requestJoin (options, isNew) {
     if (isNew) {
+      // We set the match information when the first user joins. --> Creator
       this.state.setMatchInformation(
         options.userLevel,
         options.examName,
@@ -141,7 +152,6 @@ class RankedRoom extends colyseus.Room {
       clientNumber: this.clients.length
     })
     this.state.addPlayer(client.id, options.username)
-    console.log(this.state)
   }
   onMessage (client, data) {
     const that = this
