@@ -14,7 +14,28 @@ module.exports = ({ questionRepository }) => {
       })
   }
 
+  const getMultiple = ({ idList }) => {
+    const questionList = []
+    return Promise
+      .resolve()
+      .then(() => {
+        idList.forEach(element => {
+          const question = questionRepository.findOne({
+            where: {
+              id: element
+            }
+          })
+          questionList.push(question)
+        })
+        return questionList
+      })
+      .catch(error => {
+        throw new Error(error)
+      })
+  }
+
   return {
-    getOne
+    getOne,
+    getMultiple
   }
 }
