@@ -8,3 +8,12 @@ exports.getOneQuestion = async (id) => {
     throw new Error(error.message)
   }
 }
+
+exports.getMultipleQuestion = async (idList) => {
+  try {
+    const data = await engineInterface().getUseCase.getMultiple({ idList: idList })
+    return data
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
