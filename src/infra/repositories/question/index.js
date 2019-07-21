@@ -19,9 +19,12 @@ module.exports = ({ model }) => {
       .catch((error) => { throw new Error(error) })
 
   const findAll = (...args) =>
-    model.findAll(...args)
-      .then(({ dataValues }) => toEntity(dataValues))
-      .catch((error) => { throw new Error(error) })
+    model.findAll(...args).then((entity) =>
+      entity.map((data) => {
+        const { dataValues } = data
+        return toEntity(dataValues)
+      })
+    )
 
   const destroy = (...args) =>
     model.destroy(...args)

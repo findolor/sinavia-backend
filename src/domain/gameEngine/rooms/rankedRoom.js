@@ -3,7 +3,7 @@ const log = require('../../../infra/logging/logger')
 const config = require('../../../../config')
 const logger = log({ config })
 const {
-  getOneQuestion
+  getMultipleQuestions
 } = require('../../../interfaces/engineInterface/interface')
 
 class RankedState {
@@ -98,6 +98,15 @@ class RankedGame {
   }
 }
 
+function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
+  let arr = []
+  while (arr.length < uniqueItemNumber) {
+    let r = Math.floor(Math.random() * topNumber) + 1
+    if (arr.indexOf(r) === -1) arr.push(r)
+  }
+  return arr
+}
+
 class RankedRoom extends colyseus.Room {
   constructor () {
     super()
@@ -107,12 +116,13 @@ class RankedRoom extends colyseus.Room {
   }
 
   async onInit (options) {
-    // Options will include the exam-course-subject information
-    // TODO Add question fetching mechanisim to here. We need to get the questions when the room starts
     this.setState(new RankedGame())
+
+    const idList = getRandomUniqueNumbers(5, 5)
+
     try {
-      const data = await getOneQuestion(1)
-      console.log(data, 'data')
+      const questions = await getMultipleQuestions(idList)
+      console.log(questions, 'questions')
     } catch (error) { // TODO will remove these console.logs don't worry lol
       console.log(error, 'error')
     }
