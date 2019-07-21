@@ -15,17 +15,13 @@ module.exports = ({ questionRepository }) => {
   }
 
   const getMultiple = ({ idList }) => {
-    const questionList = []
     return Promise
       .resolve()
       .then(() => {
-        idList.forEach(element => {
-          const question = questionRepository.findOne({
-            where: {
-              id: element
-            }
-          })
-          questionList.push(question)
+        const questionList = questionRepository.findAll({
+          where: {
+            id: idList
+          }
         })
         return questionList
       })

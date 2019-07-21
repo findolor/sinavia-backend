@@ -9,7 +9,7 @@ exports.getOneQuestion = async (id) => {
   }
 }
 
-exports.getMultipleQuestion = async (idList) => {
+exports.getMultipleQuestions = async (idList) => {
   try {
     const data = await engineInterface().getUseCase.getMultiple({ idList: idList })
     return data

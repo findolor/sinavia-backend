@@ -18,6 +18,11 @@ module.exports = ({ model }) => {
       .then(({ dataValues }) => toEntity(dataValues))
       .catch((error) => { throw new Error(error) })
 
+  const findAll = (...args) =>
+    model.findAll(...args)
+      .then(({ dataValues }) => toEntity(dataValues))
+      .catch((error) => { throw new Error(error) })
+
   const destroy = (...args) =>
     model.destroy(...args)
 
@@ -26,6 +31,7 @@ module.exports = ({ model }) => {
     update,
     findById,
     findOne,
-    destroy
+    destroy,
+    findAll
   }
 }
