@@ -36,7 +36,7 @@ class RankedState {
 }
 
 class RankedGame {
-  constructor (questionProps) {
+  constructor () {
     this.rankedState = new RankedState(
       '', // p1 username
       '', // p2 username
@@ -44,7 +44,7 @@ class RankedGame {
       '', // p2 id
       0, // p1 button
       0, // p2 button
-      questionProps, // question props
+      {}, // question props
       [], // player answers
       [], // player answers
       -1, // current question number
@@ -72,6 +72,10 @@ class RankedGame {
     }
   }
 
+  setQuestions (questions) {
+    this.rankedState.questionProps = questions
+  }
+
   resetButtons () {
     this.rankedState.playerOneButton = 0
     this.rankedState.playerTwoButton = 0
@@ -81,16 +85,8 @@ class RankedGame {
     this.rankedState.questionNumber++
   }
 
-  setMatchInformation (
-    matchLevel,
-    examName,
-    courseName,
-    subjectName
-  ) {
-    this.rankedState.matchInformation.matchLevel = matchLevel
-    this.rankedState.matchInformation.examName = examName
-    this.rankedState.matchInformation.courseName = courseName
-    this.rankedState.matchInformation.subjectName = subjectName
+  setMatchInformation (matchInformation) {
+    this.rankedState.matchInformation = matchInformation
   }
 
   getMatchInformation () {
@@ -107,37 +103,34 @@ function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
   return arr
 }
 
+async function getQuestions (matchInformation, questionIdList) {
+  try {
+    const questions = await getMultipleQuestions(questionIdList, matchInformation)
+    return questions
+  } catch (error) { // TODO will remove these console.logs don't worry lol
+    console.log(error, 'error')
+  }
+}
+
 class RankedRoom extends colyseus.Room {
   constructor () {
     super()
     this.maxClients = 2
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
+    this.questionIdList = []
+    this.isFetched = false
   }
 
-  async onInit (options) {
+  onInit (options) {
+    this.questionIdList = getRandomUniqueNumbers(5, 5)
+
     this.setState(new RankedGame())
-
-    const idList = getRandomUniqueNumbers(5, 5)
-
-    try {
-      const questions = await getMultipleQuestions(idList)
-      console.log(questions, 'questions')
-    } catch (error) { // TODO will remove these console.logs don't worry lol
-      console.log(error, 'error')
-    }
   }
 
   // If this room is full new users will join another room
   requestJoin (options, isNew) {
     if (isNew) {
-      // We set the match information when the first user joins. --> Creator
-      this.state.setMatchInformation(
-        options.userLevel,
-        options.examName,
-        options.courseName,
-        options.subjectName
-      )
       return ((options.create && isNew) || this.clients.length > 0)
     } else {
       const matchInformation = this.state.getMatchInformation()
@@ -156,12 +149,30 @@ class RankedRoom extends colyseus.Room {
     }
   }
 
-  onJoin (client, options) {
+  async onJoin (client, options) {
     logger.info({
       clientId: client.id,
       clientNumber: this.clients.length
     })
+
+    if (!this.isFetched) {
+      this.isFetched = true
+
+      const matchInformation = {
+        userLevel: options.userLevel,
+        examName: options.examName,
+        courseName: options.courseName,
+        subjectName: options.subjectName
+      }
+
+      const questions = await getQuestions(matchInformation, this.questionIdList)
+
+      this.state.setQuestions(questions)
+      this.state.setMatchInformation(matchInformation)
+    }
+
     this.state.addPlayer(client.id, options.username)
+    console.log(this.state)
   }
   onMessage (client, data) {
     const that = this
@@ -180,6 +191,9 @@ class RankedRoom extends colyseus.Room {
             that.state.nextQuestion()
           }, 5000)
         }
+        return
+      case 'button-press':
+        this.state.setPlayerButton(client.id, data.button)
     }
   }
   onLeave (client, consented) {

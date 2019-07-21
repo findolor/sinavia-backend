@@ -9,9 +9,9 @@ exports.getOneQuestion = async (id) => {
   }
 }
 
-exports.getMultipleQuestions = async (idList) => {
+exports.getMultipleQuestions = async (idList, matchInformation) => {
   try {
-    const data = await engineInterface().getUseCase.getMultiple({ idList: idList })
+    const data = await engineInterface().getUseCase.getMultiple({ idList: idList, matchInformation: matchInformation })
     return data
   } catch (error) {
     throw new Error(error.message)
