@@ -12,26 +12,26 @@ class RankedState {
     playerTwoUsername,
     playerOneId,
     playerTwoId,
-    playerOneButton,
-    playerTwoButton,
     questionProps,
+    questionList,
     playerOneAnswers,
     playerTwoAnswers,
     questionNumber,
-    matchInformation
+    matchInformation,
+    stateInformation
     // TODO Think if you will add more attributes
   ) {
     this.playerOneUsername = playerOneUsername
     this.playerTwoUsername = playerTwoUsername
     this.playerOneId = playerOneId
     this.playerTwoId = playerTwoId
-    this.playerOneButton = playerOneButton
-    this.playerTwoButton = playerTwoButton
     this.questionProps = questionProps
+    this.questionList = questionList
     this.playerOneAnswers = playerOneAnswers
     this.playerTwoAnswers = playerTwoAnswers
     this.questionNumber = questionNumber
     this.matchInformation = matchInformation
+    this.stateInformation = stateInformation
   }
 }
 
@@ -42,16 +42,17 @@ class RankedGame {
       '', // p2 username
       '', // p1 id
       '', // p2 id
-      0, // p1 button
-      0, // p2 button
-      {}, // question props
+      [], // question props
+      [], // question list
       [], // player answers
       [], // player answers
       -1, // current question number
-      {} // match information (level, exam, course, subject, )
+      {}, // match information (level, exam, course, subject, )
+      ''
     )
   }
 
+  // Adds the player to our room state
   addPlayer (clientId, username) {
     if (this.rankedState.playerOneId === '') {
       this.rankedState.playerOneId = clientId
@@ -62,23 +63,45 @@ class RankedGame {
     }
   }
 
-  setPlayerButton (clientId, button) {
+  // Sets the players answers then sends a response to our client
+  setPlayerAnswerResults (clientId, button) {
     if (clientId === this.rankedState.playerOneId) {
-      this.rankedState.playerOneButton = button
-      this.rankedState.playerOneAnswers[this.rankedState.questionNumber] = button
+      this.rankedState.playerOneAnswers[this.rankedState.questionNumber] = {
+        answer: button,
+        result: this.checkAnswer(button)
+      }
+      // result-one means that playerOne answered the question
+      this.rankedState.stateInformation = 'results-one'
     } else {
-      this.rankedState.playerTwoButton = button
-      this.rankedState.playerTwoAnswers[this.rankedState.questionNumber] = button
+      this.rankedState.playerTwoAnswers[this.rankedState.questionNumber] = {
+        answer: button,
+        result: this.checkAnswer(button)
+      }
+      // result-one means that playerTwo answered the question
+      this.rankedState.stateInformation = 'results-two'
     }
   }
 
-  setQuestions (questions) {
-    this.rankedState.questionProps = questions
+  // Checks the players answer and returns the proper response
+  checkAnswer (playerAnswer) {
+    const questionProps = this.rankedState.questionProps[this.rankedState.questionNumber]
+
+    switch (playerAnswer) {
+      // Question unanswered
+      case 6:
+        return null
+      // Answer is correct
+      case questionProps.correctAnswer:
+        return true
+      // Answer is incorrect
+      default:
+        return false
+    }
   }
 
-  resetButtons () {
-    this.rankedState.playerOneButton = 0
-    this.rankedState.playerTwoButton = 0
+  setQuestions (questionProps, questionList) {
+    this.rankedState.questionProps = questionProps
+    this.rankedState.questionList = questionList
   }
 
   nextQuestion () {
@@ -92,8 +115,13 @@ class RankedGame {
   getMatchInformation () {
     return this.rankedState.matchInformation
   }
+
+  changeStateInformation (state) {
+    this.rankedState.stateInformation = state
+  }
 }
 
+// Gets random numbers for given range and lenght
 function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
   let arr = []
   while (arr.length < uniqueItemNumber) {
@@ -103,6 +131,7 @@ function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
   return arr
 }
 
+// Gets questions by providing it with random indexes
 async function getQuestions (matchInformation, questionIdList) {
   try {
     const questions = await getMultipleQuestions(questionIdList, matchInformation)
@@ -119,12 +148,13 @@ class RankedRoom extends colyseus.Room {
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
     this.questionIdList = []
-    this.isFetched = false
   }
 
   onInit (options) {
+    // We get a random list of numbers for our question fetching
     this.questionIdList = getRandomUniqueNumbers(5, 5)
 
+    // We initialize our game here
     this.setState(new RankedGame())
   }
 
@@ -155,45 +185,66 @@ class RankedRoom extends colyseus.Room {
       clientNumber: this.clients.length
     })
 
-    if (!this.isFetched) {
-      this.isFetched = true
-
+    // We don't do these steps again for a second player. Only for once
+    if (this.clients.length !== 2) {
       const matchInformation = {
-        userLevel: options.userLevel,
+        matchLevel: options.userLevel,
         examName: options.examName,
         courseName: options.courseName,
         subjectName: options.subjectName
       }
 
-      const questions = await getQuestions(matchInformation, this.questionIdList)
+      // Fetching questions from database
+      const questionProps = await getQuestions(matchInformation, this.questionIdList)
+      const questionList = []
 
-      this.state.setQuestions(questions)
+      // Getting only the question links
+      questionProps.forEach(element => {
+        questionList.push(element.questionLink)
+      })
+
+      // Setting general match related info
+      this.state.setQuestions(questionProps, questionList)
       this.state.setMatchInformation(matchInformation)
     }
 
+    // Finally adding the player to our room state
     this.state.addPlayer(client.id, options.username)
-    console.log(this.state)
+    if (this.clients.length === this.maxClients) {
+      // If we have reached the maxClients, we lock the room for unexpected things
+      this.lock()
+    }
   }
+
   onMessage (client, data) {
     const that = this
-    logger.info(data)
     switch (data.action) {
+      // Players send 'ready' action to server for letting it know that they are ready for the game
       case 'ready':
         if (++this.readyPlayerCount === 2) {
-          this.state.nextQuestion() // When the server updates questionNumber, clients will know to start the question
+          // When players get the 'question' action they start the round and play.
+          // This delay will be longer due to pre-match player showcases.
+          setTimeout(() => {
+            that.state.nextQuestion()
+            that.state.changeStateInformation('question')
+          }, 2000)
         }
         return
+      // 'finished' action is sent after a player answers a question.
       case 'finished':
         if (++this.finishedPlayerCount === 2) {
+          // If both players are finished, we reset the round for them and start another round.
           this.finishedPlayerCount = 0
+          this.state.changeStateInformation('reset')
           setTimeout(() => {
-            that.state.resetButtons()
             that.state.nextQuestion()
+            that.state.changeStateInformation('question')
           }, 5000)
         }
         return
+      // 'button-press' action is sent when a player presses a button
       case 'button-press':
-        this.state.setPlayerButton(client.id, data.button)
+        this.state.setPlayerAnswerResults(client.id, data.button)
     }
   }
   onLeave (client, consented) {
@@ -209,6 +260,9 @@ class RankedRoom extends colyseus.Room {
     // TODO We need to send the results to our database here before the room is disposed
   }
 }
+
+// We are not syncing questionProps to clients. This array contains question answers
+colyseus.nosync(RankedState.prototype, 'questionProps')
 
 colyseus.serialize(colyseus.FossilDeltaSerializer)(RankedRoom)
 
