@@ -119,6 +119,10 @@ class RankedGame {
   changeStateInformation (state) {
     this.rankedState.stateInformation = state
   }
+
+  getQuestionNumber () {
+    return this.rankedState.questionNumber
+  }
 }
 
 // Gets random numbers for given range and lenght
@@ -148,11 +152,14 @@ class RankedRoom extends colyseus.Room {
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
     this.questionIdList = []
+    this.questionAmount = 0
   }
 
   onInit (options) {
     // We get a random list of numbers for our question fetching
-    this.questionIdList = getRandomUniqueNumbers(5, 5)
+    const questionAmount = 3
+    this.questionIdList = getRandomUniqueNumbers(questionAmount, 5)
+    this.questionAmount = questionAmount
 
     // We initialize our game here
     this.setState(new RankedGame())
@@ -233,9 +240,15 @@ class RankedRoom extends colyseus.Room {
       // 'finished' action is sent after a player answers a question.
       case 'finished':
         if (++this.finishedPlayerCount === 2) {
+          // We check if this is the last question
+          // We extract one because questionNumber started from -1
+          if (this.state.getQuestionNumber() === this.questionAmount - 1) {
+            this.state.changeStateInformation('match-finished')
+            return
+          }
           // If both players are finished, we reset the round for them and start another round.
           this.finishedPlayerCount = 0
-          this.state.changeStateInformation('reset')
+          this.state.changeStateInformation('reset-round')
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
