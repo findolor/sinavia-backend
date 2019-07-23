@@ -8,77 +8,62 @@ const {
 
 class RankedState {
   constructor (
-    playerOneUsername,
-    playerTwoUsername,
     playerOneId,
     playerTwoId,
     questionProps,
     questionList,
-    playerOneAnswers,
-    playerTwoAnswers,
     questionNumber,
     matchInformation,
-    stateInformation
+    stateInformation,
+    playerProps
     // TODO Think if you will add more attributes
   ) {
-    this.playerOneUsername = playerOneUsername
-    this.playerTwoUsername = playerTwoUsername
     this.playerOneId = playerOneId
     this.playerTwoId = playerTwoId
     this.questionProps = questionProps
     this.questionList = questionList
-    this.playerOneAnswers = playerOneAnswers
-    this.playerTwoAnswers = playerTwoAnswers
     this.questionNumber = questionNumber
     this.matchInformation = matchInformation
     this.stateInformation = stateInformation
+    this.playerProps = playerProps
   }
 }
 
 class RankedGame {
   constructor () {
     this.rankedState = new RankedState(
-      '', // p1 username
-      '', // p2 username
       '', // p1 id
       '', // p2 id
       [], // question props
       [], // question list
-      [], // player answers
-      [], // player answers
       -1, // current question number
       {}, // match information (level, exam, course, subject, )
-      ''
+      '', // state information => which action is being proccessed
+      {} // general player information like username, answers, ...
     )
   }
 
   // Adds the player to our room state
   addPlayer (clientId, username) {
-    if (this.rankedState.playerOneId === '') {
-      this.rankedState.playerOneId = clientId
-      this.rankedState.playerOneUsername = username
-    } else {
-      this.rankedState.playerTwoId = clientId
-      this.rankedState.playerTwoUsername = username
+    this.rankedState.playerProps[clientId] = {
+      username: username,
+      answers: []
     }
+    this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
 
   // Sets the players answers then sends a response to our client
   setPlayerAnswerResults (clientId, button) {
+    this.rankedState.playerProps[clientId].answers.push({
+      answer: button,
+      result: this.checkAnswer(button)
+    })
     if (clientId === this.rankedState.playerOneId) {
-      this.rankedState.playerOneAnswers[this.rankedState.questionNumber] = {
-        answer: button,
-        result: this.checkAnswer(button)
-      }
       // result-one means that playerOne answered the question
-      this.rankedState.stateInformation = 'results-one'
+      this.changeStateInformation('results-one')
     } else {
-      this.rankedState.playerTwoAnswers[this.rankedState.questionNumber] = {
-        answer: button,
-        result: this.checkAnswer(button)
-      }
       // result-one means that playerTwo answered the question
-      this.rankedState.stateInformation = 'results-two'
+      this.changeStateInformation('results-two')
     }
   }
 
@@ -138,9 +123,13 @@ function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
 // Gets questions by providing it with random indexes
 async function getQuestions (matchInformation, questionIdList) {
   try {
-    const questions = await getMultipleQuestions(questionIdList, matchInformation)
+    const questions = await getMultipleQuestions(
+      questionIdList,
+      matchInformation
+    )
     return questions
-  } catch (error) { // TODO will remove these console.logs don't worry lol
+  } catch (error) {
+    // TODO will remove these console.logs don't worry lol
     console.log(error, 'error')
   }
 }
@@ -168,7 +157,7 @@ class RankedRoom extends colyseus.Room {
   // If this room is full new users will join another room
   requestJoin (options, isNew) {
     if (isNew) {
-      return ((options.create && isNew) || this.clients.length > 0)
+      return (options.create && isNew) || this.clients.length > 0
     } else {
       const matchInformation = this.state.getMatchInformation()
       const ROOM_AVAILABILITY_CHECK = (options.create && isNew) || this.clients.length > 0
@@ -202,7 +191,10 @@ class RankedRoom extends colyseus.Room {
       }
 
       // Fetching questions from database
-      const questionProps = await getQuestions(matchInformation, this.questionIdList)
+      const questionProps = await getQuestions(
+        matchInformation,
+        this.questionIdList
+      )
       const questionList = []
 
       // Getting only the question links
@@ -234,7 +226,7 @@ class RankedRoom extends colyseus.Room {
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
-          }, 2000)
+          }, 3000)
         }
         return
       // 'finished' action is sent after a player answers a question.
@@ -252,7 +244,7 @@ class RankedRoom extends colyseus.Room {
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
-          }, 5000)
+          }, 3000)
         }
         return
       // 'button-press' action is sent when a player presses a button
