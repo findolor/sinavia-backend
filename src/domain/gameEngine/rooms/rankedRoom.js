@@ -103,6 +103,10 @@ class RankedGame {
   getQuestionNumber () {
     return this.rankedState.questionNumber
   }
+
+  getPlayerProps () {
+    return this.rankedState.playerProps
+  }
 }
 
 // Gets random numbers for given range and lenght
@@ -207,6 +211,7 @@ class RankedRoom extends colyseus.Room {
     if (this.clients.length === this.maxClients) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()
+      this.broadcast(this.state.getPlayerProps())
     }
   }
 
