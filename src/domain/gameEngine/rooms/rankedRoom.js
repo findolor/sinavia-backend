@@ -56,15 +56,10 @@ class RankedGame {
   setPlayerAnswerResults (clientId, button) {
     this.rankedState.playerProps[clientId].answers.push({
       answer: button,
-      result: this.checkAnswer(button)
+      result: this.checkAnswer(button),
+      correctAnswer: this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
     })
-    if (clientId === this.rankedState.playerOneId) {
-      // result-one means that playerOne answered the question
-      this.changeStateInformation('results-one')
-    } else {
-      // result-one means that playerTwo answered the question
-      this.changeStateInformation('results-two')
-    }
+    this.changeStateInformation('result')
   }
 
   // Checks the players answer and returns the proper response
@@ -235,16 +230,19 @@ class RankedRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('match-finished')
+            this.state.changeStateInformation('show-results')
+            setTimeout(() => {
+              this.state.changeStateInformation('match-finished')
+            }, 8000)
             return
           }
           // If both players are finished, we reset the round for them and start another round.
           this.finishedPlayerCount = 0
-          this.state.changeStateInformation('reset-round')
+          this.state.changeStateInformation('show-results')
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
-          }, 3000)
+          }, 8000)
         }
         return
       // 'button-press' action is sent when a player presses a button
