@@ -16,7 +16,6 @@ class RankedState {
     matchInformation,
     stateInformation,
     playerProps
-    // TODO Think if you will add more attributes
   ) {
     this.playerOneId = playerOneId
     this.playerTwoId = playerTwoId
@@ -57,8 +56,9 @@ class RankedGame {
     this.rankedState.playerProps[clientId].answers.push({
       answer: button,
       result: this.checkAnswer(button),
-      correctAnswer: this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
+      correctAnswer: this.getQuestionAnswer()
     })
+
     this.changeStateInformation('result')
   }
 
@@ -114,11 +114,11 @@ class RankedGame {
 
   removeOptionsJokerPressed (alreadyDisabled) {
     let disabledButton
-
+    // We check if the user has a disabled button. We don't include it if we have one
     alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
 
     const examName = this.rankedState.matchInformation.examName
-    const questionAnswer = this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
+    const questionAnswer = this.getQuestionAnswer()
 
     const optionsToRemove = []
 
@@ -129,26 +129,38 @@ class RankedGame {
     if (examName === 'LGS') {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
-        console.log(randomNumber)
+        // Random number shouldn't be equal to the answer and the other choosen number
         if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
           if (disabledButton === true) {
             loop++
             firstRandomOption = randomNumber
             optionsToRemove.push(randomNumber)
-          } else if (disabledButton !== randomNumber) {
-            loop++
-            firstRandomOption = randomNumber
-            optionsToRemove.push(randomNumber)
+          } else {
+            // Random number shouldn't be equal to the disabled number
+            if (disabledButton !== randomNumber) {
+              loop++
+              firstRandomOption = randomNumber
+              optionsToRemove.push(randomNumber)
+            }
           }
         }
       }
     } else {
+      // Same logic but for 4 options
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 5) + 1
         if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
-          loop++
-          firstRandomOption = randomNumber
-          optionsToRemove.push(randomNumber)
+          if (disabledButton === true) {
+            loop++
+            firstRandomOption = randomNumber
+            optionsToRemove.push(randomNumber)
+          } else {
+            if (disabledButton !== randomNumber) {
+              loop++
+              firstRandomOption = randomNumber
+              optionsToRemove.push(randomNumber)
+            }
+          }
         }
       }
     }
@@ -222,11 +234,6 @@ class RankedRoom extends colyseus.Room {
   }
 
   async onJoin (client, options) {
-    logger.info({
-      clientId: client.id,
-      clientNumber: this.clients.length
-    })
-
     // We don't do these steps again for a second player. Only for once
     if (this.clients.length !== 2) {
       const matchInformation = {
@@ -247,7 +254,6 @@ class RankedRoom extends colyseus.Room {
       questionProps.forEach(element => {
         questionList.push(element.questionLink)
       })
-
       // Setting general match related info
       this.state.setQuestions(questionProps, questionList)
       this.state.setMatchInformation(matchInformation)
@@ -263,6 +269,7 @@ class RankedRoom extends colyseus.Room {
     }
   }
 
+  // TODO Move the actions into their own functions
   onMessage (client, data) {
     const that = this
     switch (data.action) {
@@ -284,6 +291,7 @@ class RankedRoom extends colyseus.Room {
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
+            // Like always there is a delay to show the answers
             setTimeout(() => {
               this.state.changeStateInformation('match-finished')
             }, 8000)
@@ -292,6 +300,7 @@ class RankedRoom extends colyseus.Room {
           // If both players are finished, we reset the round for them and start another round.
           this.finishedPlayerCount = 0
           this.state.changeStateInformation('show-results')
+          // Delay for showing the results
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
@@ -305,6 +314,7 @@ class RankedRoom extends colyseus.Room {
       case 'remove-options-joker':
         let optionsToRemove
 
+        // If we have a disabled button before hand, we send it. Otherwise we don't
         if (data.disabled === false) { optionsToRemove = this.state.removeOptionsJokerPressed() } else { optionsToRemove = this.state.removeOptionsJokerPressed(data.disabled) }
 
         this.send(client, {
@@ -312,9 +322,10 @@ class RankedRoom extends colyseus.Room {
           optionsToRemove: optionsToRemove
         })
         return
-      case 'second-change-joker':
+      case 'second-chance-joker':
         const questionAnswer = this.state.getQuestionAnswer()
 
+        // We send the question answer to client for checking if it choose the correct option
         this.send(client, {
           action: 'second-chance-joker',
           questionAnswer: questionAnswer
