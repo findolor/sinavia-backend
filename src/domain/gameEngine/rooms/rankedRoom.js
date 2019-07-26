@@ -107,6 +107,38 @@ class RankedGame {
   getPlayerProps () {
     return this.rankedState.playerProps
   }
+
+  removeOptionsJokerPressed () {
+    const examName = this.rankedState.matchInformation.examName
+    const questionAnswer = this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
+
+    const optionsToRemove = []
+
+    let randomNumber
+    let loop = 0
+    let firstRandomOption = -1
+
+    if (examName === 'LGS') {
+      while (loop < 2) {
+        randomNumber = Math.floor(Math.random() * 4) + 1
+        if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
+          loop++
+          firstRandomOption = randomNumber
+          optionsToRemove.push(randomNumber)
+        }
+      }
+    } else {
+      while (loop < 2) {
+        randomNumber = Math.floor(Math.random() * 5) + 1
+        if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
+          loop++
+          firstRandomOption = randomNumber
+          optionsToRemove.push(randomNumber)
+        }
+      }
+    }
+    return optionsToRemove
+  }
 }
 
 // Gets random numbers for given range and lenght
@@ -211,6 +243,7 @@ class RankedRoom extends colyseus.Room {
     if (this.clients.length === this.maxClients) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()
+      // We send the clients player information
       this.broadcast(this.state.getPlayerProps())
     }
   }
@@ -253,6 +286,16 @@ class RankedRoom extends colyseus.Room {
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
         this.state.setPlayerAnswerResults(client.id, data.button)
+        return
+      case 'remove-options-joker':
+        const optionsToRemove = this.state.removeOptionsJokerPressed()
+
+        console.log(optionsToRemove)
+
+        this.send(client, {
+          action: 'remove-options-joker',
+          optionsToRemove: optionsToRemove
+        })
     }
   }
   onLeave (client, consented) {
