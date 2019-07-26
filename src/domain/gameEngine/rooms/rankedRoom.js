@@ -104,11 +104,19 @@ class RankedGame {
     return this.rankedState.questionNumber
   }
 
+  getQuestionAnswer () {
+    return this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
+  }
+
   getPlayerProps () {
     return this.rankedState.playerProps
   }
 
-  removeOptionsJokerPressed () {
+  removeOptionsJokerPressed (alreadyDisabled) {
+    let disabledButton
+
+    alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
+
     const examName = this.rankedState.matchInformation.examName
     const questionAnswer = this.rankedState.questionProps[this.rankedState.questionNumber].correctAnswer
 
@@ -121,10 +129,17 @@ class RankedGame {
     if (examName === 'LGS') {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
+        console.log(randomNumber)
         if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
-          loop++
-          firstRandomOption = randomNumber
-          optionsToRemove.push(randomNumber)
+          if (disabledButton === true) {
+            loop++
+            firstRandomOption = randomNumber
+            optionsToRemove.push(randomNumber)
+          } else if (disabledButton !== randomNumber) {
+            loop++
+            firstRandomOption = randomNumber
+            optionsToRemove.push(randomNumber)
+          }
         }
       }
     } else {
@@ -288,13 +303,21 @@ class RankedRoom extends colyseus.Room {
         this.state.setPlayerAnswerResults(client.id, data.button)
         return
       case 'remove-options-joker':
-        const optionsToRemove = this.state.removeOptionsJokerPressed()
+        let optionsToRemove
 
-        console.log(optionsToRemove)
+        if (data.disabled === false) { optionsToRemove = this.state.removeOptionsJokerPressed() } else { optionsToRemove = this.state.removeOptionsJokerPressed(data.disabled) }
 
         this.send(client, {
           action: 'remove-options-joker',
           optionsToRemove: optionsToRemove
+        })
+        return
+      case 'second-change-joker':
+        const questionAnswer = this.state.getQuestionAnswer()
+
+        this.send(client, {
+          action: 'second-chance-joker',
+          questionAnswer: questionAnswer
         })
     }
   }
