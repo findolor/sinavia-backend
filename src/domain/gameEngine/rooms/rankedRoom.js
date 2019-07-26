@@ -338,7 +338,11 @@ class RankedRoom extends colyseus.Room {
       clientId: client.id,
       consented: consented
     })
-    // TODO Implement a gracefull shutdown mechanic for user leaving the match
+    const lastClient = this.clients[0]
+
+    this.send(lastClient, {
+      action: 'client-leaving'
+    })
   }
   onDispose () {
     logger.info('Room disposed')
