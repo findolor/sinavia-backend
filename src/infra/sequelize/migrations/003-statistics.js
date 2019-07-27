@@ -35,10 +35,14 @@ module.exports = {
       timestamp: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      userId: {
+        type: Sequelize.STRING,
+        allowNull: false
       }
     })
   },
   down: function (queryInterface) {
-    return queryInterface.dropTable('statistic')
+    return queryInterface.dropTable('statistics')
   }
 }

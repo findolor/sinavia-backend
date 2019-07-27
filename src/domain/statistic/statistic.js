@@ -11,6 +11,7 @@ const Statistic = t.struct({
   incorrectNumber: t.Number,
   unansweredNumber: t.Number,
   timestamp: t.String,
+  userId: t.String
   // earnedPoints: t.Number
 })
 

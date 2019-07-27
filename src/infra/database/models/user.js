@@ -64,12 +64,5 @@ module.exports = function (sequelize, DataTypes) {
     timestamps: false,
   })
 
-  User.associate = function(models) {
-    User.belongsTo(models.UserStatistic, {
-      foreignKey: 'id',
-      targetKey: 'userId'
-    })
-  }
-
   return User
 }

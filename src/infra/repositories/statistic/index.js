@@ -1,14 +1,6 @@
 const { toEntity } = require('./transform')
 
 module.exports = ({ model }) => {
-    const findAll = (...args) =>
-    model.findAll(...args).then((entity) =>
-      entity.map((data) => {
-        const { dataValues } = data
-        return toEntity(dataValues)
-      })
-    )
-
   const create = (...args) =>
     model.create(...args).then(({ dataValues }) => toEntity(dataValues))
 
@@ -25,6 +17,14 @@ module.exports = ({ model }) => {
     model.findOne(...args)
       .then(({ dataValues }) => toEntity(dataValues))
       .catch((error) => { throw new Error(error) })
+
+  const findAll = (...args) =>
+    model.findAll(...args).then((entity) =>
+      entity.map((data) => {
+        const { dataValues } = data
+        return toEntity(dataValues)
+      })
+    )
 
   const destroy = (...args) =>
     model.destroy(...args)

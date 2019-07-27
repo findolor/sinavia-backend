@@ -5,7 +5,7 @@ const Statistic = require('./statistic')
 module.exports = ({ database }) => {
   const userModel = database.models.users
   const questionModel = database.models.questions
-  const statisticModel = database.models.statistic
+  const statisticModel = database.models.statistics
 
   return {
     userRepository: User({ model: userModel }),

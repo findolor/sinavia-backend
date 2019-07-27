@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       timestamp: {
         type: DataTypes.STRING,
         allowNull: false
+      },
+      userId: {
+        type: DataTypes.STRING,
+        allowNull: false
       }
       /* earnedPoints: {
         type: DataTypes.NUMBER,
@@ -42,13 +46,6 @@ module.exports = (sequelize, DataTypes) => {
       freezeTableName: true,
       timestamps: false,
     })
-  
-    Statistic.associate = function(models) {
-      Statistic.belongsTo(models.UserStatistics, {
-        foreignKey: 'id',
-        targerKey: 'statisticId'
-      })
-    }
 
     return Statistic
   }

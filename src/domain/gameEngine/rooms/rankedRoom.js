@@ -3,7 +3,8 @@ const log = require('../../../infra/logging/logger')
 const config = require('../../../../config')
 const logger = log({ config })
 const {
-  getMultipleQuestions
+  getMultipleQuestions,
+  postStatistic
 } = require('../../../interfaces/engineInterface/interface')
 
 class RankedState {
@@ -43,10 +44,11 @@ class RankedGame {
   }
 
   // Adds the player to our room state
-  addPlayer (clientId, username) {
+  addPlayer (clientId, username, databaseId) {
     this.rankedState.playerProps[clientId] = {
       username: username,
-      answers: []
+      answers: [],
+      databaseId: databaseId
     }
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
@@ -110,6 +112,70 @@ class RankedGame {
 
   getPlayerProps () {
     return this.rankedState.playerProps
+  }
+
+  getPlayerId (playerNumber) {
+    switch(playerNumber) {
+      case 1:
+        return this.rankedState.playerOneId
+      case 2:
+        return this.rankedState.playerTwoId
+    }
+  }
+
+  getTotalResults() {
+    let playerOneCorrect = 0
+    let playerTwoCorrect = 0
+    let playerOneIncorrect = 0
+    let playerTwoIncorrect = 0
+    let playerOneUnanswered = 0
+    let playerTwoUnanswered = 0
+
+    const playerOneAnswers = this.rankedState.playerProps[this.rankedState.playerOneId].answers
+    const playerTwoAnswers = this.rankedState.playerProps[this.rankedState.playerTwoId].answers
+
+    playerOneAnswers.forEach(element => {
+      switch(element.result) {
+        case null:
+          playerOneUnanswered++
+          return
+        case true:
+          playerOneCorrect++
+          return
+        case false:
+          playerOneIncorrect++
+          return
+      }
+    })
+
+    playerTwoAnswers.forEach(element => {
+      switch(element.result) {
+        case null:
+          playerTwoUnanswered++
+          return
+        case true:
+          playerTwoCorrect++
+          return
+        case false:
+          playerTwoIncorrect++
+          return
+      }
+    })
+
+    const results = {
+      playerOne: {
+        correct: playerOneCorrect,
+        incorrect: playerOneIncorrect,
+        unanswered: playerOneUnanswered
+      },
+      playerTwo: {
+        correct: playerTwoCorrect,
+        incorrect: playerTwoIncorrect,
+        unanswered: playerTwoUnanswered
+      }
+    }
+
+    return results
   }
 
   removeOptionsJokerPressed (alreadyDisabled) {
@@ -260,7 +326,7 @@ class RankedRoom extends colyseus.Room {
     }
 
     // Finally adding the player to our room state
-    this.state.addPlayer(client.id, options.username)
+    this.state.addPlayer(client.id, options.username, options.databaseId)
     if (this.clients.length === this.maxClients) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()
@@ -338,15 +404,60 @@ class RankedRoom extends colyseus.Room {
       clientId: client.id,
       consented: consented
     })
-    const lastClient = this.clients[0]
+    let det = new Date().toISOString()
+    let det2
+    console.log(det)
+    setTimeout(() => {
+      det2 = new Date().toISOString()
+      console.log(det2)
+      if(det < det2) console.log('aaaaaa')
+    }, 5000)
 
-    this.send(lastClient, {
-      action: 'client-leaving'
-    })
+
+    if(this.clients.length !== 0) {
+      const lastClient = this.clients[0]
+
+      this.send(lastClient, {
+        action: 'client-leaving'
+      })
+    }
   }
-  onDispose () {
+  async onDispose () {
     logger.info('Room disposed')
-    // TODO We need to send the results to our database here before the room is disposed
+    
+    const matchInformation = this.state.getMatchInformation()
+    const playerProps = this.state.getPlayerProps()
+
+    const results = this.state.getTotalResults()
+
+    const gameResultPlayerOne = {
+      examName: matchInformation.examName,
+      subjectName: matchInformation.subjectName,
+      courseName: matchInformation.courseName,
+      correctNumber: results.playerOne.correct,
+      incorrectNumber: results.playerOne.incorrect,
+      unansweredNumber: results.playerOne.unanswered,
+      timestamp: new Date().toISOString(),
+      userId: playerProps[this.state.getPlayerId(1)].databaseId
+    }
+
+    const gameResultPlayerTwo = {
+      examName: matchInformation.examName,
+      subjectName: matchInformation.subjectName,
+      courseName: matchInformation.courseName,
+      correctNumber: results.playerTwo.correct,
+      incorrectNumber: results.playerTwo.incorrect,
+      unansweredNumber: results.playerTwo.unanswered,
+      timestamp: new Date().toISOString(),
+      userId: playerProps[this.state.getPlayerId(2)].databaseId
+    }
+    
+    const dataOne = await postStatistic(gameResultPlayerOne)
+    console.log(dataOne)
+
+    const dataTwo = await postStatistic(gameResultPlayerTwo)
+    console.log(dataTwo)
+
   }
 }
 

@@ -1,23 +1,22 @@
 const { Statistic } = require('src/domain/statistic')
 
 module.exports = ({ statisticRepository }) => {
-    const create = ({ gameResults }) => {
+    const createStat = ({ gameResults }) => {
       return Promise
         .resolve()
         .then(() => {
-
-            // TODO Actually make the object
-            const statistic = Statistic(questionResults)
-
+            const statistic = Statistic(gameResults)
+            
           return statisticRepository.create(statistic)
         })
         .catch(error => {
+          console.log(error)
           throw new Error(error)
         })
     }
   
     return {
-      create
+      createStat
     }
   }
   
