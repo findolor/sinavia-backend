@@ -62,12 +62,14 @@ module.exports = function (sequelize, DataTypes) {
     },
     freezeTableName: true,
     timestamps: false,
-    classMethods: {
-      associate () {
-        // associations can be defined here
-      }
-    }
   })
+
+  User.associate = function(models) {
+    User.belongsTo(models.UserStatistic, {
+      foreignKey: 'id',
+      targetKey: 'userId'
+    })
+  }
 
   return User
 }
