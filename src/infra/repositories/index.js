@@ -9,6 +9,7 @@ module.exports = ({ database }) => {
 
   return {
     userRepository: User({ model: userModel }),
-    questionRepository: Question({ model: questionModel })
+    questionRepository: Question({ model: questionModel }),
+    statisticRepository: Statistic({ model: statisticModel})
   }
 }

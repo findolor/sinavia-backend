@@ -34,11 +34,22 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       }
+      /* earnedPoints: {
+        type: DataTypes.NUMBER,
+        allowNull: false
+      } */
     }, {
       freezeTableName: true,
       timestamps: false,
     })
   
+    Statistic.associate = function(models) {
+      Statistic.belongsTo(models.UserStatistics, {
+        foreignKey: 'id',
+        targerKey: 'statisticId'
+      })
+    }
+
     return Statistic
   }
   
