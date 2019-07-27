@@ -123,6 +123,7 @@ class RankedGame {
     }
   }
 
+  // Calculates the number of different answers and returns it
   getTotalResults() {
     let playerOneCorrect = 0
     let playerTwoCorrect = 0
@@ -232,6 +233,39 @@ class RankedGame {
     }
     return optionsToRemove
   }
+
+  async saveMatchResults() {
+    const matchInformation = this.getMatchInformation()
+    const playerProps = this.getPlayerProps()
+
+    const results = this.getTotalResults()
+
+    // Statistic information for player one
+    const gameResultPlayerOne = {
+      examName: matchInformation.examName,
+      subjectName: matchInformation.subjectName,
+      courseName: matchInformation.courseName,
+      correctNumber: results.playerOne.correct,
+      incorrectNumber: results.playerOne.incorrect,
+      unansweredNumber: results.playerOne.unanswered,
+      timestamp: new Date().toISOString(),
+      userId: playerProps[this.getPlayerId(1)].databaseId
+    }
+
+    // Statistic information for player two
+    const gameResultPlayerTwo = {
+      examName: matchInformation.examName,
+      subjectName: matchInformation.subjectName,
+      courseName: matchInformation.courseName,
+      correctNumber: results.playerTwo.correct,
+      incorrectNumber: results.playerTwo.incorrect,
+      unansweredNumber: results.playerTwo.unanswered,
+      timestamp: new Date().toISOString(),
+      userId: playerProps[this.getPlayerId(2)].databaseId
+    }
+    
+    await postMatchResults(gameResultPlayerOne, gameResultPlayerTwo)
+  }
 }
 
 // Gets random numbers for given range and lenght
@@ -256,6 +290,22 @@ async function getQuestions (matchInformation, questionIdList) {
     // TODO will remove these console.logs don't worry lol
     console.log(error, 'error')
   }
+}
+
+// Saves the results to the database
+async function postMatchResults (gameResultPlayerOne, gameResultPlayerTwo) {
+    try {
+      // For player one
+      const dataOne = await postStatistic(gameResultPlayerOne)
+      console.log(dataOne)
+
+      // For player two
+      const dataTwo = await postStatistic(gameResultPlayerTwo)
+      console.log(dataTwo)
+    } catch(error) {
+      // TODO will remove these console.logs don't worry lol
+      console.log(error, 'error')
+    }
 }
 
 class RankedRoom extends colyseus.Room {
@@ -358,8 +408,10 @@ class RankedRoom extends colyseus.Room {
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
-            setTimeout(() => {
+            setTimeout(async () => {
               this.state.changeStateInformation('match-finished')
+              // We save the results after the match is finished
+              await this.state.saveMatchResults()
             }, 8000)
             return
           }
@@ -404,15 +456,6 @@ class RankedRoom extends colyseus.Room {
       clientId: client.id,
       consented: consented
     })
-    let det = new Date().toISOString()
-    let det2
-    console.log(det)
-    setTimeout(() => {
-      det2 = new Date().toISOString()
-      console.log(det2)
-      if(det < det2) console.log('aaaaaa')
-    }, 5000)
-
 
     if(this.clients.length !== 0) {
       const lastClient = this.clients[0]
@@ -422,41 +465,10 @@ class RankedRoom extends colyseus.Room {
       })
     }
   }
-  async onDispose () {
+  onDispose () {
     logger.info('Room disposed')
     
-    const matchInformation = this.state.getMatchInformation()
-    const playerProps = this.state.getPlayerProps()
-
-    const results = this.state.getTotalResults()
-
-    const gameResultPlayerOne = {
-      examName: matchInformation.examName,
-      subjectName: matchInformation.subjectName,
-      courseName: matchInformation.courseName,
-      correctNumber: results.playerOne.correct,
-      incorrectNumber: results.playerOne.incorrect,
-      unansweredNumber: results.playerOne.unanswered,
-      timestamp: new Date().toISOString(),
-      userId: playerProps[this.state.getPlayerId(1)].databaseId
-    }
-
-    const gameResultPlayerTwo = {
-      examName: matchInformation.examName,
-      subjectName: matchInformation.subjectName,
-      courseName: matchInformation.courseName,
-      correctNumber: results.playerTwo.correct,
-      incorrectNumber: results.playerTwo.incorrect,
-      unansweredNumber: results.playerTwo.unanswered,
-      timestamp: new Date().toISOString(),
-      userId: playerProps[this.state.getPlayerId(2)].databaseId
-    }
     
-    const dataOne = await postStatistic(gameResultPlayerOne)
-    console.log(dataOne)
-
-    const dataTwo = await postStatistic(gameResultPlayerTwo)
-    console.log(dataTwo)
 
   }
 }
