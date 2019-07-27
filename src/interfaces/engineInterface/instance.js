@@ -1,17 +1,22 @@
 const container = require('src/container') // we have to get the DI
 const { get } = require('src/app/question')
+const { post } = require('src/app/statistic')
 
 module.exports = () => {
   const { repository: {
-    questionRepository
+    questionRepository,
+    statisticRepository
   } } = container.cradle
 
-  const getUseCase = get({ questionRepository })
+  const getQuestionUseCase = get({ questionRepository })
   /* const postUseCase = post({ questionRepository })
   const putUseCase = put({ questionRepository })
   const deleteUseCase = remove({ questionRepository }) */
 
+  const postStatisticUseCase = post({ statisticRepository })
+
   return {
-    getUseCase
+    getQuestionUseCase,
+    postStatisticUseCase
   }
 }
