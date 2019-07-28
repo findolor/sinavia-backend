@@ -1,17 +1,21 @@
 const container = require('src/container') // we have to get the DI
-const { get } = require('src/app/question')
+const { getQuestion } = require('src/app/question')
+const { getUser } = require('src/app/user')
 
 module.exports = () => {
-  const { repository: {
-    questionRepository
-  } } = container.cradle
+  const { repository: {questionRepository },
+          repository: { userRepository }
+  } = container.cradle
 
   const getUseCase = get({ questionRepository })
   /* const postUseCase = post({ questionRepository })
   const putUseCase = put({ questionRepository })
   const deleteUseCase = remove({ questionRepository }) */
 
+  const getUserUseCase = getUser({ userRepository })
+
   return {
-    getUseCase
+    getUseCase,
+    getUserUseCase
   }
 }
