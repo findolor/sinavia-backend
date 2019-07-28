@@ -1,5 +1,6 @@
 const container = require('src/container') // we have to get the DI
-const { get } = require('src/app/question')
+const { getQuestion } = require('src/app/question')
+const { getUser } = require('src/app/user')
 const { post } = require('src/app/statistic')
 
 module.exports = () => {
@@ -9,6 +10,9 @@ module.exports = () => {
     },
     repository: {
       statisticRepository
+    },
+    repository: {
+      userRepository
     }
   } = container.cradle
 
@@ -19,8 +23,11 @@ module.exports = () => {
   
   const postStatisticUseCase = post({ statisticRepository })
 
+  const getUserUseCase = getUser({ userRepository })
+
   return {
     getQuestionUseCase,
-    postStatisticUseCase
+    postStatisticUseCase,
+    getUserUseCase
   }
 }
