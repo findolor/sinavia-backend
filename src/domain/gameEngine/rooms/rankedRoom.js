@@ -4,7 +4,8 @@ const config = require('../../../../config')
 const logger = log({ config })
 const {
   getMultipleQuestions,
-  postStatistic
+  postStatistic,
+  getOneUser
 } = require('../../../interfaces/engineInterface/interface')
 
 class RankedState {
@@ -44,11 +45,12 @@ class RankedGame {
   }
 
   // Adds the player to our room state
-  addPlayer (clientId, username, databaseId) {
+  addPlayer (clientId, userInformation, databaseId) {
     this.rankedState.playerProps[clientId] = {
-      username: username,
+      username: userInformation.username,
       answers: [],
-      databaseId: databaseId
+      databaseId: databaseId,
+      profilePicture: userInformation.profilePicture
     }
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
@@ -292,6 +294,17 @@ async function getQuestions (matchInformation, questionIdList) {
   }
 }
 
+// Gets the user information
+async function getUser (id) {
+  try {
+    const user = await getOneUser(id)
+    return user
+  } catch(error) {
+    // TODO will remove these console.logs don't worry lol
+    console.log(error, 'error')
+  }
+}
+
 // Saves the results to the database
 async function postMatchResults (gameResultPlayerOne, gameResultPlayerTwo) {
     try {
@@ -376,8 +389,14 @@ class RankedRoom extends colyseus.Room {
       this.state.setMatchInformation(matchInformation)
     }
 
+    // Getting user information from database
+    const userInformation = await getUser(options.databaseId)
+
     // Finally adding the player to our room state
-    this.state.addPlayer(client.id, options.username, options.databaseId)
+    this.state.addPlayer(client.id, userInformation, options.databaseId)
+
+    console.log(this.state.getPlayerProps())
+
     if (this.clients.length === this.maxClients) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()

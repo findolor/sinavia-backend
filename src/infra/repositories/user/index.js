@@ -2,7 +2,7 @@ const { toEntity } = require('./transform')
 const { comparePassword } = require('../../encryption')
 
 module.exports = ({ model }) => {
-  const getAll = (...args) =>
+  const findAll = (...args) =>
     model.findAll(...args).then((entity) =>
       entity.map((data) => {
         const { dataValues } = data
@@ -34,7 +34,7 @@ module.exports = ({ model }) => {
     model.destroy(...args)
 
   return {
-    getAll,
+    findAll,
     create,
     update,
     findById,

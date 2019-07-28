@@ -1,4 +1,4 @@
-const post = require('./post')
+const postStatistic = require('./post')
 module.exports = {
-  post
+  postStatistic
 }

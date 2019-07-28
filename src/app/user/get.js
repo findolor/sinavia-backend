@@ -8,7 +8,7 @@ module.exports = ({ userRepository }) => {
       .resolve()
       .then(() =>
       // TODO Add what attributes to get from the database. Right now it returns every attribute so this is obviously wrong.
-        userRepository.getAll()
+        userRepository.findAll()
       )
       .catch(error => {
         throw new Error(error)
@@ -33,8 +33,25 @@ module.exports = ({ userRepository }) => {
       })
   }
 
+  const getMultiple = ({ idList }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const userList = userRepository.findAll({
+          where: {
+            id: idList
+          }
+        })
+        return userList
+      })
+      .catch(error => {
+        throw new Error(error)
+      })
+  }
+
   return {
     all,
-    getOne
+    getOne,
+    getMultiple
   }
 }
