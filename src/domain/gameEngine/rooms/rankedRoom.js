@@ -316,6 +316,7 @@ class RankedRoom extends colyseus.Room {
     this.finishedPlayerCount = 0
     this.questionIdList = []
     this.questionAmount = 0
+    this.isMatchFinished = false
   }
 
   onInit (options) {
@@ -410,6 +411,7 @@ class RankedRoom extends colyseus.Room {
             // Like always there is a delay to show the answers
             setTimeout(async () => {
               this.state.changeStateInformation('match-finished')
+              this.isMatchFinished = true
               // We save the results after the match is finished
               await this.state.saveMatchResults()
             }, 8000)
@@ -465,11 +467,13 @@ class RankedRoom extends colyseus.Room {
       })
     }
   }
-  onDispose () {
+  async onDispose () {
     logger.info('Room disposed')
     
+    if(!this.isMatchFinished) {
+      await this.state.saveMatchResults()
+    }
     
-
   }
 }
 
