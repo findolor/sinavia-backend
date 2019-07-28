@@ -1,39 +1,42 @@
 module.exports = () => {
   return [
     {
-      examName: 'LGS',
-      courseName: 'Matematik',
-      subjectName: 'Sayilar',
-      questionLink: 'https://i.vimeocdn.com/portrait/3212476_300x300',
+      examName: "LGS",
+      courseName: "Matematik",
+      subjectName: "Sayilar",
+      questionLink: "https://ygs-sorulari.com/img/2016/t/3.png",
       correctAnswer: 4
     },
     {
-      examName: 'LGS',
-      courseName: 'Matematik',
-      subjectName: 'Sayilar',
-      questionLink: 'https://media.npr.org/assets/img/2019/07/16/ap_19197525742263_wide-7e81b604b4c8bb6908bc70b0de066499a9392a09-s700-c85.jpg',
+      examName: "LGS",
+      courseName: "Matematik",
+      subjectName: "Sayilar",
+      questionLink:
+        "https://cdn1.ntv.com.tr/gorsel/turkiye/ygs-turkce-soru-ve-yanitlari/ygs-turkce-soru-ve-yanitlari,g5NqrnzVPE6BdCiYPpnqJA.jpg?w=960&mode=max&v=20100411163010000",
       correctAnswer: 1
     },
     {
-      examName: 'LGS',
-      courseName: 'Matematik',
-      subjectName: 'Sayilar',
-      questionLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTst0J-Sg97gWBCQ_1K6xbNyxllSlzXPmkYVKOqRe2PGR3Xp5Ev',
+      examName: "LGS",
+      courseName: "Matematik",
+      subjectName: "Sayilar",
+      questionLink:
+        "https://cdn1.ntv.com.tr/gorsel/turkiye/ygs-turkce-soru-ve-yanitlari/ygs-turkce-soru-ve-yanitlari,_TXZPTd8CEe6vbFk3B-OcA.jpg?w=960&mode=max&v=20100411163010000",
       correctAnswer: 2
     },
     {
-      examName: 'LGS',
-      courseName: 'Matematik',
-      subjectName: 'Sayilar',
-      questionLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_hW1G2KikAiGL7aK6NBGNPbO91FG5z_HFh5Sx7a7kq44iiWA7',
+      examName: "LGS",
+      courseName: "Matematik",
+      subjectName: "Sayilar",
+      questionLink:
+        "https://cdn1.ntv.com.tr/gorsel/turkiye/ygs-turkce-soru-ve-yanitlari/ygs-turkce-soru-ve-yanitlari,8tbxTEaWAkSJQtomL0GG-A.jpg?w=960&mode=max&v=20100411163010000",
       correctAnswer: 5
     },
     {
-      examName: 'LGS',
-      courseName: 'Matematik',
-      subjectName: 'Sayilar',
-      questionLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmpuayj7xEonjJBoaFzHrudgF6gRH8Pr73LnClVH9Vw0raX833',
+      examName: "LGS",
+      courseName: "Matematik",
+      subjectName: "Sayilar",
+      questionLink: "https://ygs-sorulari.com/img/2017/t/1.png",
       correctAnswer: 3
     }
-  ]
-}
+  ];
+};

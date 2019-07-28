@@ -334,7 +334,7 @@ class RankedRoom extends colyseus.Room {
 
   onInit (options) {
     // We get a random list of numbers for our question fetching
-    const questionAmount = 3
+    const questionAmount = 5
     this.questionIdList = getRandomUniqueNumbers(questionAmount, 5)
     this.questionAmount = questionAmount
 
