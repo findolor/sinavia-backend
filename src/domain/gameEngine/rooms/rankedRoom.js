@@ -117,7 +117,7 @@ class RankedGame {
   }
 
   getPlayerId (playerNumber) {
-    switch(playerNumber) {
+    switch (playerNumber) {
       case 1:
         return this.rankedState.playerOneId
       case 2:
@@ -126,7 +126,7 @@ class RankedGame {
   }
 
   // Calculates the number of different answers and returns it
-  getTotalResults() {
+  getTotalResults () {
     let playerOneCorrect = 0
     let playerTwoCorrect = 0
     let playerOneIncorrect = 0
@@ -138,7 +138,7 @@ class RankedGame {
     const playerTwoAnswers = this.rankedState.playerProps[this.rankedState.playerTwoId].answers
 
     playerOneAnswers.forEach(element => {
-      switch(element.result) {
+      switch (element.result) {
         case null:
           playerOneUnanswered++
           return
@@ -147,12 +147,11 @@ class RankedGame {
           return
         case false:
           playerOneIncorrect++
-          return
       }
     })
 
     playerTwoAnswers.forEach(element => {
-      switch(element.result) {
+      switch (element.result) {
         case null:
           playerTwoUnanswered++
           return
@@ -161,7 +160,6 @@ class RankedGame {
           return
         case false:
           playerTwoIncorrect++
-          return
       }
     })
 
@@ -236,7 +234,7 @@ class RankedGame {
     return optionsToRemove
   }
 
-  async saveMatchResults() {
+  async saveMatchResults () {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -265,11 +263,11 @@ class RankedGame {
       timestamp: new Date().toISOString(),
       userId: playerProps[this.getPlayerId(2)].databaseId
     }
-    
+
     await postMatchResults(gameResultPlayerOne, gameResultPlayerTwo)
   }
 
-  resetRoom() {
+  resetRoom () {
     const playerIds = Object.keys(this.rankedState.playerProps)
 
     playerIds.forEach(element => {
@@ -312,7 +310,7 @@ async function getUser (id) {
   try {
     const user = await getOneUser(id)
     return user
-  } catch(error) {
+  } catch (error) {
     // TODO will remove these console.logs don't worry lol
     console.log(error, 'error')
   }
@@ -320,18 +318,18 @@ async function getUser (id) {
 
 // Saves the results to the database
 async function postMatchResults (gameResultPlayerOne, gameResultPlayerTwo) {
-    try {
-      // For player one
-      const dataOne = await postStatistic(gameResultPlayerOne)
-      console.log(dataOne)
+  try {
+    // For player one
+    const dataOne = await postStatistic(gameResultPlayerOne)
+    console.log(dataOne)
 
-      // For player two
-      const dataTwo = await postStatistic(gameResultPlayerTwo)
-      console.log(dataTwo)
-    } catch(error) {
-      // TODO will remove these console.logs don't worry lol
-      console.log(error, 'error')
-    }
+    // For player two
+    const dataTwo = await postStatistic(gameResultPlayerTwo)
+    console.log(dataTwo)
+  } catch (error) {
+    // TODO will remove these console.logs don't worry lol
+    console.log(error, 'error')
+  }
 }
 
 class RankedRoom extends colyseus.Room {
@@ -482,7 +480,7 @@ class RankedRoom extends colyseus.Room {
         return
       case 'replay':
         this.clients.forEach(element => {
-          if(element.id !== client.id) {
+          if (element.id !== client.id) {
             console.log(element.id)
             this.send(element, {
               action: 'replay'
@@ -492,13 +490,13 @@ class RankedRoom extends colyseus.Room {
         return
       case 'reset-room':
         this.state.resetRoom()
-        
+
         this.questionAmount = 1
         this.readyPlayerCount = 0
         this.finishedPlayerCount = 0
         this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
         this.isMatchFinished = false
-        
+
         // Fetching questions from database
         const questionProps = await getQuestions(
           this.state.getMatchInformation(),
@@ -512,10 +510,9 @@ class RankedRoom extends colyseus.Room {
         })
         // Setting general match related info
         this.state.setQuestions(questionProps, questionList)
-        return
     }
   }
-  
+
   onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
@@ -523,7 +520,7 @@ class RankedRoom extends colyseus.Room {
       consented: consented
     })
 
-    if(this.clients.length !== 0) {
+    if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
 
       this.send(lastClient, {
@@ -533,11 +530,10 @@ class RankedRoom extends colyseus.Room {
   }
   async onDispose () {
     logger.info('Room disposed')
-    
-    if(!this.isMatchFinished) {
+
+    if (!this.isMatchFinished) {
       await this.state.saveMatchResults()
     }
-    
   }
 }
 

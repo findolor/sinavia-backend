@@ -20,7 +20,7 @@ exports.getMultipleQuestions = async (idList, matchInformation) => {
 
 exports.postStatistic = async (gameResults) => {
   try {
-    const data = await engineInterface().postStatisticUseCase.createStat({gameResults: gameResults})
+    const data = await engineInterface().postStatisticUseCase.createStat({ gameResults: gameResults })
     return data
   } catch (error) {
     throw new Error(error.message)
@@ -29,18 +29,18 @@ exports.postStatistic = async (gameResults) => {
 
 exports.getMultipleUsers = async (idList) => {
   try {
-    const data = await engineInterface().getUserUseCase.getMultiple({idList: idList})
+    const data = await engineInterface().getUserUseCase.getMultiple({ idList: idList })
     return data
-  } catch(error) {
+  } catch (error) {
     throw new Error(error.message)
   }
 }
 
 exports.getOneUser = async (id) => {
   try {
-    const data = await engineInterface().getUserUseCase.getOne({id: id})
+    const data = await engineInterface().getUserUseCase.getOne({ id: id })
     return data
-  } catch(error) {
+  } catch (error) {
     throw new Error(error.message)
   }
 }

@@ -1,52 +1,51 @@
 module.exports = (sequelize, DataTypes) => {
-    const Statistic = sequelize.define('statistics', {
-      id: {
-        type: DataTypes.NUMBER,
-        autoIncrement: true,
-        primaryKey: true,
-        allowNull: false
-      },
-      examName: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      courseName: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      subjectName: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      correctNumber: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-      },
-      incorrectNumber: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-      },
-      unansweredNumber: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-      },
-      timestamp: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      userId: {
-        type: DataTypes.STRING,
-        allowNull: false
-      }
-      /* earnedPoints: {
+  const Statistic = sequelize.define('statistics', {
+    id: {
+      type: DataTypes.NUMBER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false
+    },
+    examName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    courseName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    subjectName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    correctNumber: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    incorrectNumber: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    unansweredNumber: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    timestamp: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    userId: {
+      type: DataTypes.STRING,
+      allowNull: false
+    }
+    /* earnedPoints: {
         type: DataTypes.NUMBER,
         allowNull: false
       } */
-    }, {
-      freezeTableName: true,
-      timestamps: false,
-    })
+  }, {
+    freezeTableName: true,
+    timestamps: false
+  })
 
-    return Statistic
-  }
-  
+  return Statistic
+}
