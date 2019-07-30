@@ -268,6 +268,19 @@ class RankedGame {
     
     await postMatchResults(gameResultPlayerOne, gameResultPlayerTwo)
   }
+
+  resetRoom() {
+    const playerIds = Object.keys(this.rankedState.playerProps)
+
+    playerIds.forEach(element => {
+      this.rankedState.playerProps[element].answers = []
+    })
+
+    this.rankedState.questionNumber = -1
+    this.rankedState.questionProps = []
+    this.rankedState.questionList = []
+    this.rankedState.stateInformation = ''
+  }
 }
 
 // Gets random numbers for given range and lenght
@@ -334,9 +347,8 @@ class RankedRoom extends colyseus.Room {
 
   onInit (options) {
     // We get a random list of numbers for our question fetching
-    const questionAmount = 5
-    this.questionIdList = getRandomUniqueNumbers(questionAmount, 5)
-    this.questionAmount = questionAmount
+    this.questionAmount = 1
+    this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
 
     // We initialize our game here
     this.setState(new RankedGame())
@@ -395,8 +407,6 @@ class RankedRoom extends colyseus.Room {
     // Finally adding the player to our room state
     this.state.addPlayer(client.id, userInformation, options.databaseId)
 
-    console.log(this.state.getPlayerProps())
-
     if (this.clients.length === this.maxClients) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()
@@ -406,7 +416,7 @@ class RankedRoom extends colyseus.Room {
   }
 
   // TODO Move the actions into their own functions
-  onMessage (client, data) {
+  async onMessage (client, data) {
     const that = this
     switch (data.action) {
       // Players send 'ready' action to server for letting it know that they are ready for the game
@@ -469,8 +479,43 @@ class RankedRoom extends colyseus.Room {
           action: 'second-chance-joker',
           questionAnswer: questionAnswer
         })
+        return
+      case 'replay':
+        this.clients.forEach(element => {
+          if(element.id !== client.id) {
+            console.log(element.id)
+            this.send(element, {
+              action: 'replay'
+            })
+          }
+        })
+        return
+      case 'reset-room':
+        this.state.resetRoom()
+        
+        this.questionAmount = 1
+        this.readyPlayerCount = 0
+        this.finishedPlayerCount = 0
+        this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
+        this.isMatchFinished = false
+        
+        // Fetching questions from database
+        const questionProps = await getQuestions(
+          this.state.getMatchInformation(),
+          this.questionIdList
+        )
+        const questionList = []
+
+        // Getting only the question links
+        questionProps.forEach(element => {
+          questionList.push(element.questionLink)
+        })
+        // Setting general match related info
+        this.state.setQuestions(questionProps, questionList)
+        return
     }
   }
+  
   onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
