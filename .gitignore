@@ -13,4 +13,7 @@ logs
 postgres-data
 redis-data
 
-package-lock.json
+.elasticbeanstalk
+
+# local .env* files
+.env.*

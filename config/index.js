@@ -1,4 +1,6 @@
-require('dotenv').load()
+require('dotenv-flow').config({
+  node_env: process.env.NODE_ENV || 'development'
+})
 
 const fs = require('fs')
 const path = require('path')
@@ -11,13 +13,21 @@ function loadDbConfig () {
   throw new Error('Database is configuration is required')
 }
 
+function loadAppConfig () {
+  if (fs.existsSync(path.join(__dirname, './appConfig.js'))) {
+    return require('./appConfig')
+  }
+
+  throw new Error('Application configuration is required')
+}
 const ENV = process.env.NODE_ENV || 'development'
 
-const envConfig = require(path.join(__dirname, 'environments', ENV))
+const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
+
 const config = Object.assign({
   env: ENV,
   db: dbConfig
-}, envConfig)
+}, appConfig)
 
 module.exports = config
