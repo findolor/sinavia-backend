@@ -5,12 +5,12 @@ const path = require('path')
 const Sequelize = require('sequelize')
 
 module.exports = ({ config, basePath }) => {
+  console.log(config)
   const sequelize = new Sequelize(
     config.db.url,
     // we have to remove the depraction warning
     // https://github.com/sequelize/sequelize/issues/8417
     { ...config.db }
-
   )
 
   const db = {

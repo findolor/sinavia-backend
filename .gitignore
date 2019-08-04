@@ -13,7 +13,8 @@ logs
 postgres-data
 redis-data
 
-.elasticbeanstalk
-
-# local .env* files
 .env.*
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
