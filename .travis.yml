@@ -8,28 +8,33 @@ services:
   - postgresql
   - redis-server
 
-cache:
-  yarn: true
-  directories:
-    - node_modules
+cache: npm
 
 before_install:
-  - yarn install
+  - npm install
 
 before_script:
   - psql -c 'create database sinavia;' -U postgres
   - psql -c 'create database sinavia_test;' -U postgres
-  - cp .env-travis .env
-  - sed -ri 's/^APP_BASE_URL=/APP_BASE_URL=\$APP_BASE_URL/' .env
-  - sed -ri 's/^APP_VERSION=/APP_VERSION=\$APP_VERSION/' .env
-  - sed -ri 's/^API_SWAGGER=/API_SWAGGER=\$API_SWAGGER/' .env
-  - sed -ri 's/^DATABASE_URL_TEST=/DATABASE_URL_TEST=\$DATABASE_URL_TEST/' .env
-  - sed -ri 's/^DATABASE_URL_STAGING=/DATABASE_URL_STAGING=\$DATABASE_URL_STAGING/' .env
-  - sed -ri 's/^DATABASE_URL_PRODUCTION=/DATABASE_URL_PRODUCTION=\$DATABASE_URL_PRODUCTION/' .env
-  - sed -ri 's/^PORT=/PORT=\$PORT/' .env
-  - sed -ri 's/^TIMEZONE=/TIMEZONE=\$TIMEZONE/' .env
-  - sed -ri 's/^SECRET=/SECRET=\$SECRET/' .env
-  - yarn db:reset
+  - cp .env-example .env.test
+  # APP CONFIG
+  - sed -ri 's/^APP_BASE_URL=/APP_BASE_URL=\$APP_BASE_URL/' .env.test
+  - sed -ri 's/^APP_VERSION=/APP_VERSION=\$APP_VERSION/' .env.test
+  - sed -ri 's/^API_SWAGGER=/API_SWAGGER=\$API_SWAGGER/' .env.test
+  - sed -ri 's/^PORT=/PORT=\$PORT/' .env.test
+  - sed -ri 's/^TIMEZONE=/TIMEZONE=\$TIMEZONE/' .env.test
+  - sed -ri 's/^SECRET=/SECRET=\$SECRET/' .env.test
+  # DATABASE CONFIG
+  - sed -ri 's/^DATABASE_URL=/DATABASE_URL=\$DATABASE_URL/' .env.test
+  - sed -ri 's/^DATABASE_USER=/DATABASE_USER=\$DATABASE_USER/' .env.test
+  - sed -ri 's/^DATABASE_PASSWORD=/DATABASE_PASSWORD=\$DATABASE_PASSWORD/' .env.test
+  - sed -ri 's/^DATABASE_SSL_ENABLED=/DATABASE_SSL_ENABLED=\$DATABASE_SSL_ENABLED/' .env.test
+  # AWS CONFIG
+  - sed -ri 's/^AWS_QUESTION_BUCKET=/AWS_QUESTION_BUCKET=\$AWS_QUESTION_BUCKET/' .env.test
+  - sed -ri 's/^AWS_REGION=/AWS_REGION=\$AWS_REGION/' .env.test
+  - sed -ri 's/^AWS_ACCESS_KEY_ID=/AWS_ACCESS_KEY_ID=\$AWS_ACCESS_KEY_ID/' .env.test
+  - sed -ri 's/^AWS_ACCESS_SECRET_KEY=/AWS_ACCESS_SECRET_KEY=\$AWS_ACCESS_SECRET_KEY/' .env.test
+  - npm run db:reset
 
 script:
-  - yarn test
+  - npm run test:test
