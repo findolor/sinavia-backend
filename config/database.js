@@ -1,6 +1,7 @@
 /**
  * since mocha don't see enviroment variables we have to use dotenv
  */
+require('dotenv-flow').config()
 
 module.exports = {
   local: {
@@ -35,7 +36,8 @@ module.exports = {
     ssl: process.env.DATABASE_SSL_ENABLED,
     dialectOptions: {
       ssl: {
-        require: process.env.DATABASE_SSL_ENABLED
+        require: process.env.DATABASE_SSL_ENABLED,
+        ssl: 'Amazon RDS'
       }
     }
   },
