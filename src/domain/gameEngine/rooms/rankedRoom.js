@@ -179,6 +179,9 @@ class RankedGame {
     return results
   }
 
+  // This function is used for the remove options joker
+  // Already disabled variable is used to chech if the client has an already disabled button when this joker is pressed
+  // We don't pick that option when choosing which options to remove
   removeOptionsJokerPressed (alreadyDisabled) {
     let disabledButton
     // We check if the user has a disabled button. We don't include it if we have one
