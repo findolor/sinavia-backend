@@ -166,6 +166,7 @@ class RankedGame {
     let loop = 0
     let firstRandomOption = -1
 
+    // This code piece is for 4 options
     if (examName === 'LGS') {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
@@ -186,7 +187,7 @@ class RankedGame {
         }
       }
     } else {
-      // Same logic but for 4 options
+      // Same logic but for 5 options
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 5) + 1
         if (randomNumber !== questionAnswer && randomNumber !== firstRandomOption) {
