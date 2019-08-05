@@ -3,6 +3,7 @@
  */
 require('dotenv-flow').config()
 
+// TODO fix SSL issue
 module.exports = {
   local: {
     url: process.env.DATABASE_URL,

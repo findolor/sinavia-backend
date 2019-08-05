@@ -20,14 +20,24 @@ function loadAppConfig () {
 
   throw new Error('Application configuration is required')
 }
+
+function loadCacheConfig () {
+  if (fs.existsSync(path.join(__dirname, './cache.js'))) {
+    return require('./cache')[ENV]
+  }
+
+  throw new Error('Cache configuration is required')
+}
 const ENV = process.env.NODE_ENV || 'development'
 
 const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
+const cacheConfig = loadCacheConfig()
 
 const config = Object.assign({
   env: ENV,
-  db: dbConfig
+  db: dbConfig,
+  cache: cacheConfig
 }, appConfig)
 
 module.exports = config

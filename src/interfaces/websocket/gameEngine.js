@@ -3,7 +3,7 @@ const colyseus = require('colyseus')
 const monitor = require('@colyseus/monitor').monitor
 const roomRegisterService = require('../../domain/gameEngine')
 
-module.exports = ({ logger }) => {
+module.exports = ({ logger, config }) => {
   const port = Number(process.env.ENGINE_PORT) || 5000 + Number(process.env.NODE_APP_INSTANCE)
 
   return {
@@ -12,7 +12,7 @@ module.exports = ({ logger }) => {
       const gameEngine = new colyseus.Server({
         server,
         presence: new colyseus.RedisPresence({
-          url: 'redis://127.0.0.1:6379/0'
+          url: config.cache.redisPresenceUrl
         })
       })
 

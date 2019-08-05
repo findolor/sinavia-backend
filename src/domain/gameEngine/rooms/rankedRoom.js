@@ -7,6 +7,12 @@ const {
   postStatistic,
   getOneUser
 } = require('../../../interfaces/engineInterface/interface')
+const {
+  calculateResults
+} = require('./helper')
+
+// A placeholder variable for the empty option
+const emptyAnswer = 0
 
 class RankedState {
   constructor (
@@ -72,7 +78,7 @@ class RankedGame {
 
     switch (playerAnswer) {
       // Question unanswered
-      case 6:
+      case emptyAnswer:
         return null
       // Answer is correct
       case questionProps.correctAnswer:
@@ -127,54 +133,18 @@ class RankedGame {
 
   // Calculates the number of different answers and returns it
   getTotalResults () {
-    let playerOneCorrect = 0
-    let playerTwoCorrect = 0
-    let playerOneIncorrect = 0
-    let playerTwoIncorrect = 0
-    let playerOneUnanswered = 0
-    let playerTwoUnanswered = 0
+    const playerList = [
+      this.rankedState.playerProps[this.rankedState.playerOneId],
+      this.rankedState.playerProps[this.rankedState.playerTwoId]
+    ]
 
-    const playerOneAnswers = this.rankedState.playerProps[this.rankedState.playerOneId].answers
-    const playerTwoAnswers = this.rankedState.playerProps[this.rankedState.playerTwoId].answers
+    // We send playerList and get back the results
+    const resultList = calculateResults(playerList)
+    const results = {}
 
-    playerOneAnswers.forEach(element => {
-      switch (element.result) {
-        case null:
-          playerOneUnanswered++
-          return
-        case true:
-          playerOneCorrect++
-          return
-        case false:
-          playerOneIncorrect++
-      }
+    resultList.forEach((player, index) => {
+      results[index] = player
     })
-
-    playerTwoAnswers.forEach(element => {
-      switch (element.result) {
-        case null:
-          playerTwoUnanswered++
-          return
-        case true:
-          playerTwoCorrect++
-          return
-        case false:
-          playerTwoIncorrect++
-      }
-    })
-
-    const results = {
-      playerOne: {
-        correct: playerOneCorrect,
-        incorrect: playerOneIncorrect,
-        unanswered: playerOneUnanswered
-      },
-      playerTwo: {
-        correct: playerTwoCorrect,
-        incorrect: playerTwoIncorrect,
-        unanswered: playerTwoUnanswered
-      }
-    }
 
     return results
   }
@@ -243,31 +213,25 @@ class RankedGame {
 
     const results = this.getTotalResults()
 
-    // Statistic information for player one
-    const gameResultPlayerOne = {
-      examName: matchInformation.examName,
-      subjectName: matchInformation.subjectName,
-      courseName: matchInformation.courseName,
-      correctNumber: results.playerOne.correct,
-      incorrectNumber: results.playerOne.incorrect,
-      unansweredNumber: results.playerOne.unanswered,
-      timestamp: new Date().toISOString(),
-      userId: playerProps[this.getPlayerId(1)].databaseId
-    }
+    const resultsKeys = Object.keys(results)
 
-    // Statistic information for player two
-    const gameResultPlayerTwo = {
-      examName: matchInformation.examName,
-      subjectName: matchInformation.subjectName,
-      courseName: matchInformation.courseName,
-      correctNumber: results.playerTwo.correct,
-      incorrectNumber: results.playerTwo.incorrect,
-      unansweredNumber: results.playerTwo.unanswered,
-      timestamp: new Date().toISOString(),
-      userId: playerProps[this.getPlayerId(2)].databaseId
-    }
+    const playerList = []
 
-    await postMatchResults(gameResultPlayerOne, gameResultPlayerTwo)
+    resultsKeys.forEach(key => {
+      playerList.push({
+        examName: matchInformation.examName,
+        subjectName: matchInformation.subjectName,
+        courseName: matchInformation.courseName,
+        correctNumber: results[key].correct,
+        incorrectNumber: results[key].incorrect,
+        unansweredNumber: results[key].unanswered,
+        timestamp: new Date().toISOString(),
+        // parseInt is used for converting '0' to 0
+        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+      })
+    })
+
+    await postMatchResults(playerList)
   }
 
   resetRoom () {
@@ -320,15 +284,12 @@ async function getUser (id) {
 }
 
 // Saves the results to the database
-async function postMatchResults (gameResultPlayerOne, gameResultPlayerTwo) {
+function postMatchResults (playerList) {
   try {
-    // For player one
-    const dataOne = await postStatistic(gameResultPlayerOne)
-    console.log(dataOne)
-
-    // For player two
-    const dataTwo = await postStatistic(gameResultPlayerTwo)
-    console.log(dataTwo)
+    // We save the statistic to our database
+    playerList.forEach(async player => {
+      await postStatistic(player)
+    })
   } catch (error) {
     // TODO will remove these console.logs don't worry lol
     console.log(error, 'error')
