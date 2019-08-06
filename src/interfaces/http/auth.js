@@ -1,7 +1,7 @@
 const passport = require('passport')
 const { ExtractJwt, Strategy } = require('passport-jwt')
 /**
- * middleware to check the if auth vaid
+ * middleware to check the if auth valid
  */
 
 module.exports = ({ config, repository: { userRepository } }) => {

@@ -4,6 +4,7 @@ const { Router } = require('express')
 module.exports = ({
   postUseCase,
   logger,
+  auth,
   response: { Success, Fail }
 }) => {
   const router = Router()
@@ -56,6 +57,17 @@ module.exports = ({
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
+    })
+
+  // We use auth with a get request
+  // User sends the token with a get request to /token
+  // If the server authenticates the user, it sends a success response so that the user can login
+  router.use(auth.authenticate())
+
+  // If the token is not valid, user sends a second request (post req) to /token to get a valid token
+  router
+    .get('/', (req, res) => {
+      res.status(Status.OK).json(Success())
     })
 
   return router

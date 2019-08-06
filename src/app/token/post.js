@@ -32,7 +32,8 @@ module.exports = ({ userRepository, webToken }) => {
             name: userCredentials.name,
             lastname: userCredentials.lastname,
             email: userCredentials.email
-          })
+          }),
+          id: userCredentials.id
         })
       } catch (error) {
         reject(error)
