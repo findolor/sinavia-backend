@@ -48,6 +48,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/', controller('index'))
   apiRouter.use('/token', controller('token').router)
   apiRouter.use('/users', controller('user').router)
+  apiRouter.use('/friendships', controller('friendship').router)
 
   router.use(`/api/${config.version}`, apiRouter)
 
