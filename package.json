@@ -9,9 +9,9 @@
   },
   "scripts": {
     "gc": "git-cz",
-    "start": "node cluster.js",
+    "start": "NODE_PATH=. node index.js",
     "poststart": "node ./node_modules/pm2/bin/pm2 logs",
-    "start:dev": "nodemon cluster.js",
+    "start:dev": "NODE_PATH=. nodemon index.js",
     "start:cc": "codecrumbs -d src -e src/container.js",
     "start:docs": "docsify serve docs",
     "test:test": "standard --verbose | snazzy && npm run db:refresh-test && npm run test:covtest",
