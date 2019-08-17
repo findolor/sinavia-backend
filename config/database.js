@@ -6,7 +6,9 @@ require('dotenv-flow').config()
 // TODO fix SSL issue
 module.exports = {
   local: {
-    url: process.env.DATABASE_URL,
+    name: process.env.DATABASE_NAME,
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres'
@@ -18,7 +20,9 @@ module.exports = {
     } */
   },
   development: {
-    url: process.env.DATABASE_URL,
+    name: process.env.DATABASE_NAME,
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres',
@@ -30,7 +34,9 @@ module.exports = {
     }
   },
   test: {
-    url: process.env.DATABASE_URL,
+    name: process.env.DATABASE_NAME,
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres',
@@ -43,7 +49,9 @@ module.exports = {
     }
   },
   production: {
-    url: process.env.DATABASE_URL,
+    name: process.env.DATABASE_NAME,
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres',
