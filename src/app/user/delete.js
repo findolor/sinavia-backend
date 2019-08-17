@@ -7,10 +7,10 @@ module.exports = ({ userRepository }) => {
     return Promise
       .resolve()
       .then(() =>
-        userRepository.update({
-          isDeleted: 1
-        }, {
-          where: { id }
+        userRepository.destroy({
+          where: {
+            id: id
+          }
         })
       )
       .catch((error) => {

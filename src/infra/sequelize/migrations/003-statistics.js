@@ -32,13 +32,27 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      timestamp: {
+      gameResult: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true
+      },
+      earnedPoints: {
+        type: Sequelize.INTEGER,
+        allowNull: true
       },
       userId: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        defaultValue: new Date().toISOString()
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        defaultValue: new Date().toISOString()
       }
     })
   },

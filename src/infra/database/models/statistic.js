@@ -30,18 +30,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.NUMBER,
       allowNull: false
     },
-    timestamp: {
+    gameResult: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
+    },
+    earnedPoints: {
+      type: DataTypes.NUMBER,
+      allowNull: true
     },
     userId: {
       type: DataTypes.STRING,
       allowNull: false
     }
-    /* earnedPoints: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-      } */
   }, {
     freezeTableName: true,
     timestamps: false

@@ -1,6 +1,7 @@
 
 const { expect } = require('chai')
 const getUsecase = require('src/app/user/get')
+const Sequelize = require('sequelize')
 
 describe('App -> User Logic -> Get Request', () => {
   let useCase
@@ -16,7 +17,8 @@ describe('App -> User Logic -> Get Request', () => {
       }
 
       useCase = getUsecase({
-        userRepository: MockRepository
+        userRepository: MockRepository,
+        Sequelize
       })
     })
 
@@ -34,7 +36,8 @@ describe('App -> User Logic -> Get Request', () => {
       }
 
       useCase = getUsecase({
-        userRepository: MockRepository
+        userRepository: MockRepository,
+        Sequelize
       })
     })
 

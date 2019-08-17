@@ -12,7 +12,11 @@ const {
 } = require('./helper')
 
 // A placeholder variable for the empty option
-const emptyAnswer = 0
+const emptyAnswer = 6
+const FINISH_MATCH_POINT = 20
+const WIN_MATCH_POINT = 100
+const CORRECT_ANSWER_MULTIPLIER = 20
+const DRAW_MATCH_POINT = 50
 
 class RankedState {
   constructor (
@@ -44,7 +48,7 @@ class RankedGame {
       [], // question props
       [], // question list
       -1, // current question number
-      {}, // match information (level, exam, course, subject, )
+      {}, // match information (exam, course, subject, )
       '', // state information => which action is being proccessed
       {} // general player information like username, answers, ...
     )
@@ -208,6 +212,79 @@ class RankedGame {
     return optionsToRemove
   }
 
+  // This is called when one of the clients leaves the game
+  async saveUnfinishedMatchResults (leavingClientId) {
+    const matchInformation = this.getMatchInformation()
+    const playerProps = this.getPlayerProps()
+
+    // Result has two items. [0] is playerOne, [1] is playerTwo
+    const results = this.getTotalResults()
+
+    const resultsKeys = Object.keys(results)
+
+    const playerList = []
+
+    // We get the results and points as normal
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examName)
+
+    // We check if the leaving client is the first client
+    if (leavingClientId === this.rankedState.playerOneId) {
+      // We subtract finished match point
+      winLoseDrawAndPoints[0].points -= FINISH_MATCH_POINT
+      winLoseDrawAndPoints[1].points -= FINISH_MATCH_POINT
+      // If the client was winning prior to leaving
+      if (winLoseDrawAndPoints[0].status === 'win') {
+        // We subtract winning point
+        winLoseDrawAndPoints[0].points -= WIN_MATCH_POINT
+        // We mark the client as lost
+        winLoseDrawAndPoints[0].status = 'lose'
+        // We mark the other user as won
+        winLoseDrawAndPoints[1].status = 'win'
+        // We give the other client winning match point
+        winLoseDrawAndPoints[1].points += WIN_MATCH_POINT
+        // If it is a draw
+      } else if (winLoseDrawAndPoints[0].status === 'draw') {
+        // We subtract draw point
+        winLoseDrawAndPoints[0].points -= DRAW_MATCH_POINT
+        winLoseDrawAndPoints[0].status = 'lose'
+        winLoseDrawAndPoints[1].status = 'win'
+        winLoseDrawAndPoints[1].points += WIN_MATCH_POINT
+        winLoseDrawAndPoints[1].points -= DRAW_MATCH_POINT
+      }
+    } else {
+      if (winLoseDrawAndPoints[1].status === 'win') {
+        winLoseDrawAndPoints[1].points -= WIN_MATCH_POINT
+        winLoseDrawAndPoints[1].status = 'lose'
+        winLoseDrawAndPoints[0].status = 'win'
+        winLoseDrawAndPoints[0].points += WIN_MATCH_POINT
+      } else if (winLoseDrawAndPoints[1].status === 'draw') {
+        winLoseDrawAndPoints[1].points -= DRAW_MATCH_POINT
+        winLoseDrawAndPoints[1].status = 'lose'
+        winLoseDrawAndPoints[0].status = 'win'
+        winLoseDrawAndPoints[0].points += WIN_MATCH_POINT
+        winLoseDrawAndPoints[0].points -= DRAW_MATCH_POINT
+      }
+    }
+
+    resultsKeys.forEach(key => {
+      playerList.push({
+        examName: matchInformation.examName,
+        subjectName: matchInformation.subjectName,
+        courseName: matchInformation.courseName,
+        correctNumber: results[key].correct,
+        incorrectNumber: results[key].incorrect,
+        unansweredNumber: results[key].unanswered,
+        gameResult: winLoseDrawAndPoints[key].status,
+        earnedPoints: winLoseDrawAndPoints[key].points,
+        // parseInt is used for converting '0' to 0
+        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+      })
+    })
+
+    await postMatchResults(playerList)
+  }
+
+  // This is called when the game ended normally without any clients leaving
   async saveMatchResults () {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
@@ -218,6 +295,8 @@ class RankedGame {
 
     const playerList = []
 
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examName)
+
     resultsKeys.forEach(key => {
       playerList.push({
         examName: matchInformation.examName,
@@ -226,13 +305,67 @@ class RankedGame {
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
-        timestamp: new Date().toISOString(),
+        gameResult: winLoseDrawAndPoints[key].status,
+        earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
     })
 
     await postMatchResults(playerList)
+  }
+
+  // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
+  decideWinLoseDrawAndPoints (results, resultsKeys, examName) {
+    const winLoseDrawAndPoints = []
+    let net
+    const netList = []
+    let points
+    const pointsList = []
+
+    resultsKeys.forEach(key => {
+      points = results[key].correct * CORRECT_ANSWER_MULTIPLIER
+      if (examName !== 'LGS') {
+        net = results[key].correct - results[key].incorrect / 4
+      } else {
+        net = results[key].correct - results[key].incorrect / 3
+      }
+      // We calculate net for deciding who wins
+      netList.push(net)
+      pointsList.push(points)
+    })
+
+    // We push the results two times for two clients
+    if (netList[0] === netList[1]) {
+      winLoseDrawAndPoints.push({
+        status: 'draw',
+        points: pointsList[0] + FINISH_MATCH_POINT + DRAW_MATCH_POINT
+      })
+      winLoseDrawAndPoints.push({
+        status: 'draw',
+        points: pointsList[1] + FINISH_MATCH_POINT + DRAW_MATCH_POINT
+      })
+    } else if (netList[0] > netList[1]) {
+      winLoseDrawAndPoints.push({
+        status: 'win',
+        points: pointsList[0] + FINISH_MATCH_POINT + WIN_MATCH_POINT
+      })
+      winLoseDrawAndPoints.push({
+        status: 'lose',
+        points: pointsList[1] + FINISH_MATCH_POINT
+      })
+    } else {
+      winLoseDrawAndPoints.push({
+        status: 'lose',
+        points: pointsList[0] + FINISH_MATCH_POINT
+      })
+      winLoseDrawAndPoints.push({
+        status: 'win',
+        points: pointsList[1] + FINISH_MATCH_POINT + WIN_MATCH_POINT
+      })
+    }
+
+    return winLoseDrawAndPoints
   }
 
   resetRoom () {
@@ -304,13 +437,13 @@ class RankedRoom extends colyseus.Room {
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
     this.questionIdList = []
-    this.questionAmount = 0
+    this.questionAmount = 3
     this.isMatchFinished = false
+    this.leavingClientId = null
   }
 
   onInit (options) {
     // We get a random list of numbers for our question fetching
-    this.questionAmount = 1
     this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
 
     // We initialize our game here
@@ -327,12 +460,9 @@ class RankedRoom extends colyseus.Room {
       const EXAM_COURSE_SUBJECT_CHECK = (matchInformation.examName === options.examName) &&
                                         (matchInformation.courseName === options.courseName) &&
                                         (matchInformation.subjectName === options.subjectName)
-      const LEVEL_CHECK = matchInformation.matchLevel === options.userLevel
       if (ROOM_AVAILABILITY_CHECK) { // First we check if the room is available for joining
         if (EXAM_COURSE_SUBJECT_CHECK) { // Then we check if this is the same game with both players
-          if (LEVEL_CHECK) { // Then we check the user level
-            return true // User can join the game
-          } else { return false } // Failed level check
+          return true // User can join the game
         } else { return false } // Failed exam/course/subject check
       } else { return false } // Failed room availability check
     }
@@ -342,7 +472,6 @@ class RankedRoom extends colyseus.Room {
     // We don't do these steps again for a second player. Only for once
     if (this.clients.length !== 2) {
       const matchInformation = {
-        matchLevel: options.userLevel,
         examName: options.examName,
         courseName: options.courseName,
         subjectName: options.subjectName
@@ -446,7 +575,6 @@ class RankedRoom extends colyseus.Room {
       case 'replay':
         this.clients.forEach(element => {
           if (element.id !== client.id) {
-            console.log(element.id)
             this.send(element, {
               action: 'replay'
             })
@@ -478,27 +606,34 @@ class RankedRoom extends colyseus.Room {
     }
   }
 
-  onLeave (client, consented) {
+  async onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
       clientId: client.id,
       consented: consented
     })
 
+    // If the room is not empty
     if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
 
       this.send(lastClient, {
         action: 'client-leaving'
       })
+
+      // We save the leaving clients id to mark it as lost for later
+      this.leavingClientId = client.id
+
+      // If the match was still going on
+      if (!this.isMatchFinished) {
+        // We send the leaving clients id
+        // We do different stuff if the client has left before the match ends
+        await this.state.saveUnfinishedMatchResults(this.leavingClientId)
+      }
     }
   }
-  async onDispose () {
+  onDispose () {
     logger.info('Room disposed')
-
-    if (!this.isMatchFinished) {
-      await this.state.saveMatchResults()
-    }
   }
 }
 
@@ -507,4 +642,4 @@ colyseus.nosync(RankedState.prototype, 'questionProps')
 
 colyseus.serialize(colyseus.FossilDeltaSerializer)(RankedRoom)
 
-exports.randkedRoom = RankedRoom
+exports.rankedRoom = RankedRoom

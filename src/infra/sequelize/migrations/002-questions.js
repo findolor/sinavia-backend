@@ -27,6 +27,16 @@ module.exports = {
       correctAnswer: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        defaultValue: new Date().toISOString()
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        defaultValue: new Date().toISOString()
       }
     })
   },

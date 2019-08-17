@@ -11,9 +11,8 @@ module.exports = () => {
       lastname: 'Developer',
       email: 'testdev@gmail.com',
       password: password,
-      isDeleted: 0,
       city: 'Test City',
-      birthDate: (new Date()).toISOString(),
+      birthDate: new Date().toISOString(),
       profilePicture: 'Test Profile Picture',
       coverPicture: 'Test Cover Picture'
     },
@@ -24,11 +23,10 @@ module.exports = () => {
       lastname: '1',
       email: 'kullanici1@gmail.com',
       password: password,
-      isDeleted: 0,
       city: 'sehir',
-      birthDate: (new Date()).toISOString(),
+      birthDate: new Date().toISOString(),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'Test Cover Picture'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     },
     {
       id: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
@@ -37,11 +35,10 @@ module.exports = () => {
       lastname: '2',
       email: 'kullanici2@gmail.com',
       password: password,
-      isDeleted: 0,
       city: 'sehir',
-      birthDate: (new Date()).toISOString(),
+      birthDate: new Date().toISOString(),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'Test Cover Picture'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     }
   ]
 }

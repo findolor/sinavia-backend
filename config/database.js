@@ -39,14 +39,14 @@ module.exports = {
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
-    dialect: 'postgres',
-    ssl: process.env.DATABASE_SSL_ENABLED,
+    dialect: 'postgres'
+    /* ssl: process.env.DATABASE_SSL_ENABLED,
     dialectOptions: {
       ssl: {
         require: process.env.DATABASE_SSL_ENABLED,
         ssl: 'Amazon RDS'
       }
-    }
+    } */
   },
   production: {
     database: process.env.DATABASE_NAME,

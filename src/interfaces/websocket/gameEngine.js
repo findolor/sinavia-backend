@@ -5,6 +5,7 @@ const roomRegisterService = require('../../domain/gameEngine')
 
 module.exports = ({ logger, config }) => {
   const port = config.gameEnginePort
+
   return {
     start: (app) => new Promise((resolve) => {
       const server = http.createServer(app)

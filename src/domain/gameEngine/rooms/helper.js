@@ -12,6 +12,15 @@ const calculateResults = (playerList) => {
   playerList.forEach(player => {
     // We iterate through answers
     player.answers.forEach(answer => {
+      // If the user doesn't have any answers we just give him 0 answers
+      if (Object.keys(answer).length === 0) {
+        resultList.push({
+          correct: 0,
+          incorrect: 0,
+          unanswered: 0
+        })
+        return
+      }
       switch (answer.result) {
         case null:
           playerUnanswered++

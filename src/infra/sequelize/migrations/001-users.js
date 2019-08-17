@@ -42,10 +42,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      isDeleted: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
-      },
       birthDate: {
         type: Sequelize.STRING,
         allowNull: false

@@ -1,5 +1,7 @@
-const rankedRoom = require('./rankedRoom').randkedRoom
+const rankedRoom = require('./rankedRoom').rankedRoom
+const groupRoom = require('./groupRoom').groupRoom
 
 module.exports = {
-  rankedRoom
+  rankedRoom,
+  groupRoom
 }

@@ -14,8 +14,7 @@ module.exports = ({ userRepository, webToken }) => {
         const credentials = Token(body)
         const userCredentials = await userRepository.findOne({
           where: {
-            email: credentials.email,
-            isDeleted: 0
+            email: credentials.email
           }
         })
 

@@ -9,5 +9,13 @@ module.exports = (gameEngine) => { // TODO Remove console.log from here
       .on('leave', (room, client) => console.log(client.id, 'left', room.roomId))
   })
 
+  gameEngine.register('groupRoom', rooms.groupRoom).then((handler) => {
+    handler
+      .on('create', (room) => console.log('room created:', room.roomId))
+      .on('dispose', (room) => console.log('room disposed:', room.roomId))
+      .on('join', (room, client) => console.log(client.id, 'joined', room.roomId))
+      .on('leave', (room, client) => console.log(client.id, 'left', room.roomId))
+  })
+
   return gameEngine
 }

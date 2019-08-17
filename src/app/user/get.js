@@ -1,7 +1,9 @@
 /**
   * function for getter user.
   */
-module.exports = ({ userRepository }) => {
+module.exports = ({ userRepository, Sequelize }) => {
+  const Op = Sequelize.Op
+
   // code for getting all the items
   const all = () => {
     return Promise
@@ -24,7 +26,7 @@ module.exports = ({ userRepository }) => {
             id: id
           },
           attributes: [
-            'id', 'username', 'name', 'lastname', 'email', 'city', 'birthDate', 'profilePicture', 'coverPicture', 'isDeleted'
+            'id', 'username', 'name', 'lastname', 'email', 'city', 'birthDate', 'profilePicture', 'coverPicture'
           ]
         })
       })
@@ -49,9 +51,38 @@ module.exports = ({ userRepository }) => {
       })
   }
 
+  const getUserWithKeyword = ({ keyword, userId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const searchedUsers = userRepository.findAll({
+          where: {
+            [Op.and]: [
+              {
+                username: {
+                  [Op.iLike]: `%${keyword}%`
+                }
+              },
+              {
+                id: {
+                  [Op.ne]: userId
+                }
+              }
+            ]
+          }
+        })
+        return searchedUsers
+      })
+      .catch(error => {
+        console.log(error)
+        throw new Error(error)
+      })
+  }
+
   return {
     all,
     getOne,
-    getMultiple
+    getMultiple,
+    getUserWithKeyword
   }
 }

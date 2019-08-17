@@ -14,7 +14,6 @@ const User = t.struct({
   coverPicture: t.String,
   // userLevel: t.maybe(t.Object),
   password: t.maybe(t.String),
-  isDeleted: t.Number,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

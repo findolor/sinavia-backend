@@ -13,7 +13,6 @@ describe('App -> User Logic -> Put Request', () => {
     name: 'test',
     lastname: 'dev',
     email: 'test@gmail.com',
-    isDeleted: 0,
     city: 'siti',
     birthDate: '3123123123',
     profilePicture: 'dsdsds',

@@ -113,6 +113,20 @@ module.exports = ({
         })
     })
 
+  router
+    .get('/', (req, res) => {
+      getUseCase
+        .getMultiple({ idList: req.params.idList })
+        .then(data => {
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
   /**
    * @swagger
    * /users:

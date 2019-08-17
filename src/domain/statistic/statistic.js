@@ -10,9 +10,11 @@ const Statistic = t.struct({
   correctNumber: t.Number,
   incorrectNumber: t.Number,
   unansweredNumber: t.Number,
-  timestamp: t.String,
-  userId: t.String
-  // earnedPoints: t.Number
+  earnedPoints: t.maybe(t.Number),
+  gameResult: t.maybe(t.String),
+  userId: t.String,
+  createdAt: t.maybe(t.String),
+  updatedAt: t.maybe(t.String)
 })
 
 module.exports = compose(

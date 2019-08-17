@@ -19,7 +19,6 @@ describe('Routes: DELETE Users', () => {
           username: 'testus',
           email: 'testdev1@gmail.com',
           password: 'pass',
-          isDeleted: 0,
           city: 'siti',
           birthDate: '3123123123',
           profilePicture: 'dsdsds',
