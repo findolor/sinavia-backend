@@ -9,11 +9,7 @@
   },
   "scripts": {
     "gc": "git-cz",
-    "start": "NODE_PATH=. node index.js",
-    "poststart": "node ./node_modules/pm2/bin/pm2 logs",
-    "start:dev": "NODE_PATH=. nodemon index.js",
-    "start:cc": "codecrumbs -d src -e src/container.js",
-    "start:docs": "docsify serve docs",
+    "start": "NODE_PATH=. node -r dotenv-flow/config  index.js",
     "test:test": "standard --verbose | snazzy && npm run db:refresh-test && npm run test:covtest",
     "test:local": "standard --verbose | snazzy && npm run db:refresh-test && npm run test:covlocal",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
@@ -31,13 +27,7 @@
     "lint": "standard --verbose | snazzy",
     "lint:fix": "standard --fix",
     "lint:staged": "lint-staged",
-    "fresh-install": "rm -rf node_modules && npm cache clean --force && npm install",
-    "docker:script": "docker-compose run --rm web",
-    "docker:db:reset": "npm run docker:script npm run db:reset",
-    "docker:db:refresh": "npm run docker:script npm run db:refresh",
-    "docker:db:refresh-test": "npm run docker:script npm run db:refresh",
-    "docker:test": "npm run docker:script npm run test",
-    "docker:test:specs": "npm run docker:script npm run test:specs"
+    "fresh-install": "rm -rf node_modules && npm cache clean --force && npm install"
   },
   "husky": {
     "hooks": {
