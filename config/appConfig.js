@@ -10,5 +10,6 @@ module.exports = {
   authSecret: process.env.SECRET,
   authSession: {
     session: false
-  }
+  },
+  gameEnginePort: process.env.GAME_ENGINE_PORT
 }
