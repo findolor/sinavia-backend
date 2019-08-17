@@ -1,5 +1,5 @@
 require('dotenv-flow').config({
-  node_env: process.env.NODE_ENV || 'development'
+  node_env: process.env.NODE_ENV || 'local'
 })
 
 const fs = require('fs')
@@ -23,21 +23,45 @@ function loadAppConfig () {
 
 function loadCacheConfig () {
   if (fs.existsSync(path.join(__dirname, './cache.js'))) {
-    return require('./cache')[ENV]
+    return require('./cache')
   }
 
   throw new Error('Cache configuration is required')
 }
-const ENV = process.env.NODE_ENV || 'development'
 
+function loadAWSConfig () {
+  if (fs.existsSync(path.join(__dirname, './aws.js'))) {
+    return require('./aws')
+  }
+
+  throw new Error('AWS is configuration is required')
+}
+
+const ENV = process.env.NODE_ENV || 'development'
+console.log(ENV)
 const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()
+const awsConfig = loadAWSConfig()
 
 const config = Object.assign({
   env: ENV,
   db: dbConfig,
-  cache: cacheConfig
+  cache: cacheConfig,
+  aws: awsConfig
 }, appConfig)
+
+if (!config.db) {
+  throw new Error('db config file log not found')
+}
+if (!config.cache) {
+  throw new Error('cache config file log not found')
+}
+if (!config.port) {
+  throw new Error('app config file log not found')
+}
+if (!config.aws) {
+  throw new Error('aws config file log not found')
+}
 
 module.exports = config
