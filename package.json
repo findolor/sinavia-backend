@@ -12,7 +12,7 @@
     "start": "NODE_PATH=. node -r dotenv-flow/config  index.js",
     "start:dev": "NODE_PATH=. nodemon index.js",
     "deploy": "scripts/set_env_vars.sh && npm run start",
-    "upload-env-vars": "scripts/upload_env_vars.sh",
+    "upload-env-vars": "cross-env NODE_PATH=. scripts/upload_env_vars.sh",
     "test:test": "standard --verbose | snazzy && npm run db:refresh-test && npm run test:covtest",
     "test:local": "standard --verbose | snazzy && npm run db:refresh-test && npm run test:covlocal",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
