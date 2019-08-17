@@ -5,12 +5,15 @@ const path = require('path')
 const Sequelize = require('sequelize')
 
 module.exports = ({ config, basePath }) => {
-  console.log(config)
   const sequelize = new Sequelize(
-    config.db.url,
-    // we have to remove the depraction warning
-    // https://github.com/sequelize/sequelize/issues/8417
-    { ...config.db }
+    config.db.database,
+    config.db.username,
+    config.db.password,
+    {
+      port: config.db.port,
+      host: config.db.host,
+      dialect: 'postgres'
+    }
   )
 
   const db = {
