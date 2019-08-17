@@ -38,7 +38,7 @@ function loadAWSConfig () {
 }
 
 const ENV = process.env.NODE_ENV || 'development'
-console.log(ENV)
+
 const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()

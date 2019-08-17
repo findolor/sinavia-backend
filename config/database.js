@@ -6,7 +6,7 @@ require('dotenv-flow').config()
 // TODO fix SSL issue
 module.exports = {
   local: {
-    name: process.env.DATABASE_NAME,
+    database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
@@ -20,7 +20,7 @@ module.exports = {
     } */
   },
   development: {
-    name: process.env.DATABASE_NAME,
+    database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
@@ -34,7 +34,7 @@ module.exports = {
     }
   },
   test: {
-    name: process.env.DATABASE_NAME,
+    database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
@@ -49,7 +49,7 @@ module.exports = {
     }
   },
   production: {
-    name: process.env.DATABASE_NAME,
+    database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
