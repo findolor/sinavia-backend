@@ -1,7 +1,5 @@
-require('dotenv-flow').config()
-
 module.exports = {
-  local: {
-    redisPresenceUrl: process.env.REDIS_PRESENCE_URL
-  }
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  db: process.env.REDIS_DB
 }
