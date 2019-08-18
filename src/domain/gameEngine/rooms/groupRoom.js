@@ -14,6 +14,7 @@ const {
 // A placeholder variable for the empty option
 const emptyAnswer = 6
 
+// TODO add log to all events
 class GroupState {
   constructor (
     playerIdList,
@@ -223,7 +224,7 @@ class GroupGame {
 
   // TODO Add points logic like in ranked
   // This will not work now
-  async saveMatchResults () {
+  async saveMatchResults (groupRoomId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -246,6 +247,8 @@ class GroupGame {
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
     })
+
+    logger.info(`Group game ends roomId: ${groupRoomId}`)
 
     await postMatchResults(playerList)
   }
@@ -285,8 +288,6 @@ async function getQuestions (matchInformation, questionIdList) {
     )
     return questions
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -296,8 +297,6 @@ async function getUser (id) {
     const user = await getOneUser(id)
     return user
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -309,8 +308,6 @@ function postMatchResults (playerList) {
       await postStatistic(player)
     })
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -490,6 +487,17 @@ class GroupRoom extends colyseus.Room {
         this.broadcast({
           action: 'start-match'
         })
+
+        let logString = `Game starts with `
+
+        const playerIdList = this.state.getPlayerIdList()
+
+        playerIdList.forEach((playerId, index) => {
+          logString += `p${index + 1}: ${this.state.getPlayerProps()[playerId].databaseId} `
+        })
+
+        logger.info(logString + `roomId: ${this.roomId}`)
+
         return
       // The leader can choose from different number of question amounts.
       case 'set-question-number':

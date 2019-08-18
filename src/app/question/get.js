@@ -9,9 +9,6 @@ module.exports = ({ questionRepository }) => {
           }
         })
       })
-      .catch(error => {
-        throw new Error(error)
-      })
   }
 
   const getMultiple = ({ idList, matchInformation }) => {
@@ -27,9 +24,6 @@ module.exports = ({ questionRepository }) => {
           }
         })
         return questionList
-      })
-      .catch(error => {
-        throw new Error(error)
       })
   }
 

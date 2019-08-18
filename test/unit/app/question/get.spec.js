@@ -43,7 +43,7 @@ describe('App -> Question Logic -> Get Request', () => {
       try {
         await useCase.getOne({ id: 1 })
       } catch (e) {
-        error = e.message
+        error = e
       }
       expect(error).to.equal('Error')
     })

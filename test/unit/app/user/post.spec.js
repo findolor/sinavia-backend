@@ -62,7 +62,7 @@ describe('App -> User Logic -> Post Request', () => {
       try {
         await useCase.create({ body })
       } catch (e) {
-        error = e.message
+        error = e
       }
       expect(error).to.equal('Error')
     })

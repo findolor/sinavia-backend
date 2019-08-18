@@ -1,5 +1,4 @@
 /* eslint-env mocha */
-
 const { userRepository } = app.resolve('repository')
 
 describe('Routes: PUT Users', () => {

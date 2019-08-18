@@ -4,7 +4,7 @@ const { questionRepository } = app.resolve('repository')
 
 const {
   getOneQuestion
-} = require('../../../src/interfaces/engineInterface/interface')
+} = require('src/interfaces/engineInterface/interface')
 
 describe('Engine Interface: GET QuestionEntity', () => {
   beforeEach(done => {
@@ -44,7 +44,7 @@ describe('Engine Interface: GET QuestionEntity', () => {
       try {
         await getOneQuestion(2)
       } catch (error) {
-        expect(error.message).to.eql('Error: TypeError: Cannot destructure property `dataValues` of \'undefined\' or \'null\'.')
+        expect(error.message).to.eql(`TypeError: Cannot destructure property \`dataValues\` of 'undefined' or 'null'.`)
       }
     })
   })

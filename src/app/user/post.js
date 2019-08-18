@@ -19,7 +19,7 @@ module.exports = ({ userRepository }) => {
         return userRepository.create(user)
       })
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 

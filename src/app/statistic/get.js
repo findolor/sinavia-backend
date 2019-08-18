@@ -10,10 +10,6 @@ module.exports = ({ statisticRepository }) => {
         })
         return statistics
       })
-      .catch(error => {
-        console.log(error)
-        throw new Error(error)
-      })
   }
 
   return {

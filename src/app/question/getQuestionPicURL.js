@@ -7,11 +7,6 @@ module.exports = ({ config, s3service }) => {
         const questionBucket = config.aws.questionBucket
         return s3service.generatePresignedGetUrl(questionBucket, key)
       })
-      .catch(error => {
-        // TODO logger
-        console.log(error.message)
-        throw new Error(error)
-      })
   }
 
   return {

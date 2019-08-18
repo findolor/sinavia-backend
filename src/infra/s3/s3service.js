@@ -16,14 +16,21 @@ module.exports = ({ config, logger }) => {
   const generatePresignedGetUrl = (bucket, key) => {
     const signedUrlExpireSeconds = 60 * 5 // TODO consider this duration
 
-    const url = s3.getSignedUrl('getObject', {
-      Bucket: bucket,
-      Key: key,
-      Expires: signedUrlExpireSeconds
+    const urlPromise = new Promise(resolve => {
+      resolve(
+        s3.getSignedUrl('getObject', {
+          Bucket: bucket,
+          Key: key,
+          Expires: signedUrlExpireSeconds
+        })
+      )
     })
 
-    logger.info(`generated presigned url for ${key}`)
-    return url
+    return urlPromise.then(url => {
+      logger.info(`Generated presigned url for ${key}`)
+
+      return url
+    })
   }
 
   const getFile = ({ bucket, key }) => {
@@ -42,14 +49,21 @@ module.exports = ({ config, logger }) => {
   const generatePresignedUploadUrl = ({ bucket, key }) => {
     const signedUrlExpireSeconds = 60 * 5 // TODO consider this duration
 
-    const url = s3.getSignedUrl('putObject', {
-      Bucket: bucket,
-      Key: key,
-      Expires: signedUrlExpireSeconds
+    const urlPromise = new Promise(resolve => {
+      resolve(
+        s3.getSignedUrl('putObject', {
+          Bucket: bucket,
+          Key: key,
+          Expires: signedUrlExpireSeconds
+        })
+      )
     })
 
-    logger.info(`generated presigned s3 upload url for ${key}`)
-    return url
+    return urlPromise.then(url => {
+      logger.info(`Generated presigned s3 upload url for ${key}`)
+
+      return url
+    })
   }
 
   return {

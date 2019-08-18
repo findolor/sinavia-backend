@@ -9,9 +9,6 @@ module.exports = ({ statisticRepository }) => {
 
         return statisticRepository.create(statistic)
       })
-      .catch(error => {
-        throw new Error(error)
-      })
   }
 
   return {

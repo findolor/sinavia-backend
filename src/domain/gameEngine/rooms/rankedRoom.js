@@ -213,7 +213,7 @@ class RankedGame {
   }
 
   // This is called when one of the clients leaves the game
-  async saveUnfinishedMatchResults (leavingClientId) {
+  async saveUnfinishedMatchResults (leavingClientId, rankedRoomId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -233,34 +233,34 @@ class RankedGame {
       winLoseDrawAndPoints[0].points -= FINISH_MATCH_POINT
       winLoseDrawAndPoints[1].points -= FINISH_MATCH_POINT
       // If the client was winning prior to leaving
-      if (winLoseDrawAndPoints[0].status === 'win') {
+      if (winLoseDrawAndPoints[0].status === 'won') {
         // We subtract winning point
         winLoseDrawAndPoints[0].points -= WIN_MATCH_POINT
         // We mark the client as lost
-        winLoseDrawAndPoints[0].status = 'lose'
+        winLoseDrawAndPoints[0].status = 'lost'
         // We mark the other user as won
-        winLoseDrawAndPoints[1].status = 'win'
+        winLoseDrawAndPoints[1].status = 'won'
         // We give the other client winning match point
         winLoseDrawAndPoints[1].points += WIN_MATCH_POINT
         // If it is a draw
       } else if (winLoseDrawAndPoints[0].status === 'draw') {
         // We subtract draw point
         winLoseDrawAndPoints[0].points -= DRAW_MATCH_POINT
-        winLoseDrawAndPoints[0].status = 'lose'
-        winLoseDrawAndPoints[1].status = 'win'
+        winLoseDrawAndPoints[0].status = 'lost'
+        winLoseDrawAndPoints[1].status = 'won'
         winLoseDrawAndPoints[1].points += WIN_MATCH_POINT
         winLoseDrawAndPoints[1].points -= DRAW_MATCH_POINT
       }
     } else {
-      if (winLoseDrawAndPoints[1].status === 'win') {
+      if (winLoseDrawAndPoints[1].status === 'won') {
         winLoseDrawAndPoints[1].points -= WIN_MATCH_POINT
-        winLoseDrawAndPoints[1].status = 'lose'
-        winLoseDrawAndPoints[0].status = 'win'
+        winLoseDrawAndPoints[1].status = 'lost'
+        winLoseDrawAndPoints[0].status = 'won'
         winLoseDrawAndPoints[0].points += WIN_MATCH_POINT
       } else if (winLoseDrawAndPoints[1].status === 'draw') {
         winLoseDrawAndPoints[1].points -= DRAW_MATCH_POINT
-        winLoseDrawAndPoints[1].status = 'lose'
-        winLoseDrawAndPoints[0].status = 'win'
+        winLoseDrawAndPoints[1].status = 'lost'
+        winLoseDrawAndPoints[0].status = 'won'
         winLoseDrawAndPoints[0].points += WIN_MATCH_POINT
         winLoseDrawAndPoints[0].points -= DRAW_MATCH_POINT
       }
@@ -281,11 +281,13 @@ class RankedGame {
       })
     })
 
+    logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
+
     await postMatchResults(playerList)
   }
 
   // This is called when the game ended normally without any clients leaving
-  async saveMatchResults () {
+  async saveMatchResults (rankedRoomId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -311,6 +313,8 @@ class RankedGame {
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
     })
+
+    logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
 
     await postMatchResults(playerList)
   }
@@ -347,20 +351,20 @@ class RankedGame {
       })
     } else if (netList[0] > netList[1]) {
       winLoseDrawAndPoints.push({
-        status: 'win',
+        status: 'won',
         points: pointsList[0] + FINISH_MATCH_POINT + WIN_MATCH_POINT
       })
       winLoseDrawAndPoints.push({
-        status: 'lose',
+        status: 'lost',
         points: pointsList[1] + FINISH_MATCH_POINT
       })
     } else {
       winLoseDrawAndPoints.push({
-        status: 'lose',
+        status: 'lost',
         points: pointsList[0] + FINISH_MATCH_POINT
       })
       winLoseDrawAndPoints.push({
-        status: 'win',
+        status: 'won',
         points: pointsList[1] + FINISH_MATCH_POINT + WIN_MATCH_POINT
       })
     }
@@ -401,8 +405,6 @@ async function getQuestions (matchInformation, questionIdList) {
     )
     return questions
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -412,8 +414,6 @@ async function getUser (id) {
     const user = await getOneUser(id)
     return user
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -425,8 +425,6 @@ function postMatchResults (playerList) {
       await postStatistic(player)
     })
   } catch (error) {
-    // TODO will remove these console.logs don't worry lol
-    console.log(error, 'error')
   }
 }
 
@@ -504,6 +502,7 @@ class RankedRoom extends colyseus.Room {
       this.lock()
       // We send the clients player information
       this.broadcast(this.state.getPlayerProps())
+      logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
     }
   }
 
@@ -534,7 +533,7 @@ class RankedRoom extends colyseus.Room {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults()
+              await this.state.saveMatchResults(this.roomId)
             }, 8000)
             return
           }
@@ -612,7 +611,7 @@ class RankedRoom extends colyseus.Room {
       clientId: client.id,
       consented: consented
     })
-
+    // TODO add errors on all of these events
     // If the room is not empty
     if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
@@ -628,7 +627,7 @@ class RankedRoom extends colyseus.Room {
       if (!this.isMatchFinished) {
         // We send the leaving clients id
         // We do different stuff if the client has left before the match ends
-        await this.state.saveUnfinishedMatchResults(this.leavingClientId)
+        await this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId)
       }
     }
   }

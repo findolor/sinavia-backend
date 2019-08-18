@@ -21,9 +21,6 @@ module.exports = ({ friendsMatchRepository, Sequelize }) => {
         })
         return matches
       })
-      .catch(error => {
-        throw new Error(error)
-      })
   }
 
   return {

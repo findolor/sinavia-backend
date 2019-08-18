@@ -34,7 +34,7 @@ describe('App -> User Logic -> Put Request', () => {
     })
 
     it('should have called delete method of userRepository', async () => {
-      await useCase.update({ id: 1, body })
+      await useCase.updateUser({ id: 1, body })
       // eslint-disable-next-line
       expect(method).to.have.been.called
     })
@@ -55,7 +55,7 @@ describe('App -> User Logic -> Put Request', () => {
     it('should display error on rejection', async () => {
       let error
       try {
-        await useCase.update({ id: 1, body })
+        await useCase.updateUser({ id: 1, body })
       } catch (e) {
         error = e
       }

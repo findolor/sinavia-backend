@@ -1,4 +1,3 @@
-
 const container = require('src/container') // we have to get the DI
 const { getUser, postUser, putUser, removeUser } = require('src/app/user')
 const Sequelize = require('sequelize')

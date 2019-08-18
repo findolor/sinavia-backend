@@ -14,7 +14,7 @@ module.exports = ({ userRepository }) => {
         })
       )
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 

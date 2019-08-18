@@ -1,82 +1,69 @@
 /**
-  * function for getter user.
-  */
+ * function for getter user.
+ */
 module.exports = ({ userRepository, Sequelize }) => {
   const Op = Sequelize.Op
 
   // code for getting all the items
   const all = () => {
-    return Promise
-      .resolve()
-      .then(() =>
+    return Promise.resolve().then(() =>
       // TODO Add what attributes to get from the database. Right now it returns every attribute so this is obviously wrong.
-        userRepository.findAll()
-      )
-      .catch(error => {
-        throw new Error(error)
-      })
+      userRepository.findAll()
+    )
   }
 
   const getOne = ({ id }) => {
-    return Promise
-      .resolve()
-      .then(() => {
-        return userRepository.findOne({
-          where: {
-            id: id
-          },
-          attributes: [
-            'id', 'username', 'name', 'lastname', 'email', 'city', 'birthDate', 'profilePicture', 'coverPicture'
-          ]
-        })
+    return Promise.resolve().then(() => {
+      return userRepository.findOne({
+        where: {
+          id: id
+        },
+        attributes: [
+          'id',
+          'username',
+          'name',
+          'lastname',
+          'email',
+          'city',
+          'birthDate',
+          'profilePicture',
+          'coverPicture'
+        ]
       })
-      .catch(error => {
-        throw new Error(error)
-      })
+    })
   }
 
   const getMultiple = ({ idList }) => {
-    return Promise
-      .resolve()
-      .then(() => {
-        const userList = userRepository.findAll({
-          where: {
-            id: idList
-          }
-        })
-        return userList
+    return Promise.resolve().then(() => {
+      const userList = userRepository.findAll({
+        where: {
+          id: idList
+        }
       })
-      .catch(error => {
-        throw new Error(error)
-      })
+      return userList
+    })
   }
 
   const getUserWithKeyword = ({ keyword, userId }) => {
-    return Promise
-      .resolve()
-      .then(() => {
-        const searchedUsers = userRepository.findAll({
-          where: {
-            [Op.and]: [
-              {
-                username: {
-                  [Op.iLike]: `%${keyword}%`
-                }
-              },
-              {
-                id: {
-                  [Op.ne]: userId
-                }
+    return Promise.resolve().then(() => {
+      const searchedUsers = userRepository.findAll({
+        where: {
+          [Op.and]: [
+            {
+              username: {
+                [Op.iLike]: `%${keyword}%`
               }
-            ]
-          }
-        })
-        return searchedUsers
+            },
+            {
+              id: {
+                [Op.ne]: userId
+              }
+            }
+          ]
+        }
       })
-      .catch(error => {
-        console.log(error)
-        throw new Error(error)
-      })
+      return searchedUsers
+    })
   }
 
   return {

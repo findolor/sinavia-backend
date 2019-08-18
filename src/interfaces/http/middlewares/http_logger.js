@@ -1,6 +1,7 @@
 const morgan = require('morgan')
 
 module.exports = (logger) => {
+  // TODO use winston
   return morgan('common', {
     stream: {
       write: (message) => {

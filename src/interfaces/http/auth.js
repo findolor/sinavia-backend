@@ -15,7 +15,7 @@ module.exports = ({ config, repository: { userRepository } }) => {
       .then((user) => {
         done(null, user)
       })
-      .catch((error) => done(error, null))
+      .catch((error) => /* TODO log */ done(error, null))
   })
 
   passport.use(strategy)

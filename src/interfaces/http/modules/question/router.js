@@ -9,7 +9,7 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  // router.use(auth.authenticate())
+  router.use(auth.authenticate())
   /**
    * @swagger
    * /question:
@@ -35,9 +35,9 @@ module.exports = ({
    *       401:
    *         $ref: '#/responses/Unauthorized'
    */
-  router.get('/:key', (req, res) => {
+  router.get('/', (req, res) => {
     getQPicURLUseCase
-      .getQPicURL({ key: req.params.key })
+      .getQPicURL({ key: req.query.key })
       .then(data => {
         res.status(Status.OK).json(Success(data))
       })

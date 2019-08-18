@@ -47,7 +47,7 @@ module.exports = ({
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
-          logger.error(error) // we still need to log every error for debugging
+          logger.error(error.stack) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
@@ -107,7 +107,7 @@ module.exports = ({
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
-          logger.error(error) // we still need to log every error for debugging
+          logger.error(error.stack) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
@@ -121,7 +121,7 @@ module.exports = ({
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
-          logger.error(error) // we still need to log every error for debugging
+          logger.error(error.stack) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
@@ -164,12 +164,12 @@ module.exports = ({
   router
     .put('/:id', (req, res) => {
       putUseCase
-        .update({ id: req.params.id, body: req.body })
+        .updateUser({ id: req.params.id, body: req.body })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
-          logger.error(error) // we still need to log every error for debugging
+          logger.error(error.stack) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
@@ -208,6 +208,7 @@ module.exports = ({
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
+          // TODO check error format
           logger.error(error) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))

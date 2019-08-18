@@ -21,9 +21,6 @@ module.exports = ({ friendshipRepository, Sequelize }) => {
         })
         return friendship
       })
-      .catch(error => {
-        throw new Error(error)
-      })
   }
 
   const getFriends = ({ userId }) => {
@@ -45,9 +42,6 @@ module.exports = ({ friendshipRepository, Sequelize }) => {
           }
         })
         return friends
-      })
-      .catch(error => {
-        throw new Error(error)
       })
   }
 

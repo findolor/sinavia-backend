@@ -46,7 +46,7 @@ describe('App -> User Logic -> Get Request', () => {
       try {
         await useCase.getOne(1)
       } catch (e) {
-        error = e.message
+        error = e
       }
       expect(error).to.equal('Error')
     })
