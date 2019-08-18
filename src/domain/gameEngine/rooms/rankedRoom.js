@@ -384,9 +384,9 @@ class RankedGame {
 
 // Gets random numbers for given range and lenght
 function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
-  let arr = []
+  const arr = []
   while (arr.length < uniqueItemNumber) {
-    let r = Math.floor(Math.random() * topNumber) + 1
+    const r = Math.floor(Math.random() * topNumber) + 1
     if (arr.indexOf(r) === -1) arr.push(r)
   }
   return arr
@@ -632,6 +632,7 @@ class RankedRoom extends colyseus.Room {
       }
     }
   }
+
   onDispose () {
     logger.info('Room disposed')
   }

@@ -268,9 +268,9 @@ class GroupGame {
 
 // Gets random numbers for given range and lenght
 function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
-  let arr = []
+  const arr = []
   while (arr.length < uniqueItemNumber) {
-    let r = Math.floor(Math.random() * topNumber) + 1
+    const r = Math.floor(Math.random() * topNumber) + 1
     if (arr.indexOf(r) === -1) arr.push(r)
   }
   return arr
@@ -496,6 +496,7 @@ class GroupRoom extends colyseus.Room {
         this.questionAmount = data.questionAmount
     }
   }
+
   // TODO implement a different logic
   onLeave (client, consented) {
     logger.info({
@@ -562,6 +563,7 @@ class GroupRoom extends colyseus.Room {
       })
     }
   }
+
   async onDispose () {
     logger.info('Room disposed')
     // Because there are no winners and losers in this game mode, it doesn't matter if we save the match results right before the room closes

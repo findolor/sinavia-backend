@@ -10,7 +10,6 @@ module.exports = () => {
     lastname: 'Developer',
     email: 'testdev@gmail.com',
     password: password,
-    isDeleted: 0,
     city: 'Test City',
     birthDate: (new Date()).toISOString(),
     profilePicture: 'Test Profile Picture',

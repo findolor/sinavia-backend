@@ -12,6 +12,7 @@ const jwt = require('./infra/jwt')
 const response = require('./infra/support/response')
 const date = require('./infra/support/date')
 const repository = require('./infra/repositories')
+const s3 = require('./infra/s3')
 
 const container = createContainer()
 
@@ -29,7 +30,8 @@ container
     response: asFunction(response).singleton(),
     date: asFunction(date).singleton(),
     config: asValue(config),
-    repository: asFunction(repository).singleton()
+    repository: asFunction(repository).singleton(),
+    s3service: asFunction(s3).singleton()
   })
 
 module.exports = container
