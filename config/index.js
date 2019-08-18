@@ -64,4 +64,6 @@ if (!config.aws) {
   throw new Error('aws config file log not found')
 }
 
+console.log(config)
+
 module.exports = config
