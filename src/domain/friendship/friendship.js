@@ -7,8 +7,8 @@ const Friendship = t.struct({
   userId: t.String,
   friendId: t.String,
   friendshipStatus: t.maybe(t.String),
-  createdAt: t.maybe(t.String),
-  updatedAt: t.maybe(t.String)
+  createdAt: t.maybe(t.Date),
+  updatedAt: t.maybe(t.Date)
 })
 
 module.exports = compose(

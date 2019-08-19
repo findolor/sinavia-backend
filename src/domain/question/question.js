@@ -9,8 +9,8 @@ const Question = t.struct({
   subjectName: t.String,
   questionLink: t.String,
   correctAnswer: t.Number,
-  createdAt: t.maybe(t.String),
-  updatedAt: t.maybe(t.String)
+  createdAt: t.maybe(t.Date),
+  updatedAt: t.maybe(t.Date)
 })
 
 module.exports = compose(

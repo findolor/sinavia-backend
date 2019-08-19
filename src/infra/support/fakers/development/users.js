@@ -12,7 +12,7 @@ module.exports = () => {
       email: 'testdev@gmail.com',
       password: password,
       city: 'Test City',
-      birthDate: (new Date()).toISOString(),
+      birthDate: (new Date()),
       profilePicture: 'Test Profile Picture',
       coverPicture: 'Test Cover Picture'
     },
@@ -24,7 +24,7 @@ module.exports = () => {
       email: 'kullanici1@gmail.com',
       password: password,
       city: 'sehir',
-      birthDate: (new Date()).toISOString(),
+      birthDate: (new Date()),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'Test Cover Picture'
     },
@@ -36,7 +36,7 @@ module.exports = () => {
       email: 'kullanici2@gmail.com',
       password: password,
       city: 'sehir',
-      birthDate: (new Date()).toISOString(),
+      birthDate: (new Date()),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'Test Cover Picture'
     }

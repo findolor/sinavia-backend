@@ -12,7 +12,7 @@ module.exports = () => {
       email: 'testdev@gmail.com',
       password: password,
       city: 'Test City',
-      birthDate: new Date().toISOString(),
+      birthDate: new Date(),
       profilePicture: 'Test Profile Picture',
       coverPicture: 'Test Cover Picture'
     },
@@ -24,7 +24,7 @@ module.exports = () => {
       email: 'kullanici1@gmail.com',
       password: password,
       city: 'sehir',
-      birthDate: new Date().toISOString(),
+      birthDate: new Date(),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     },
@@ -36,7 +36,7 @@ module.exports = () => {
       email: 'kullanici2@gmail.com',
       password: password,
       city: 'sehir',
-      birthDate: new Date().toISOString(),
+      birthDate: new Date(),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     }
