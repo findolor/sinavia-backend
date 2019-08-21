@@ -13,6 +13,7 @@ const response = require('./infra/support/response')
 const date = require('./infra/support/date')
 const repository = require('./infra/repositories')
 const s3 = require('./infra/s3')
+const fcm = require('./infra/pushNotifications')
 
 const container = createContainer()
 
@@ -31,7 +32,8 @@ container
     date: asFunction(date).singleton(),
     config: asValue(config),
     repository: asFunction(repository).singleton(),
-    s3service: asFunction(s3).singleton()
+    s3service: asFunction(s3).singleton(),
+    fcmService: asFunction(fcm).singleton()
   })
 
 module.exports = container

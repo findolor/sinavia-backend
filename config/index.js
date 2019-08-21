@@ -5,6 +5,8 @@ require('dotenv-flow').config({
 const fs = require('fs')
 const path = require('path')
 
+const admin = require('firebase-admin')
+
 function loadDbConfig () {
   if (fs.existsSync(path.join(__dirname, './database.js'))) {
     return require('./database')[ENV]
@@ -14,8 +16,8 @@ function loadDbConfig () {
 }
 
 function loadAppConfig () {
-  if (fs.existsSync(path.join(__dirname, './appConfig.js'))) {
-    return require('./appConfig')
+  if (fs.existsSync(path.join(__dirname, './app.js'))) {
+    return require('./app')
   }
 
   throw new Error('Application configuration is required')
@@ -34,7 +36,15 @@ function loadAWSConfig () {
     return require('./aws')
   }
 
-  throw new Error('AWS is configuration is required')
+  throw new Error('AWS configuration is required')
+}
+
+function loadFCMConfig () {
+  if (fs.existsSync(path.join(__dirname, './fcm.js'))) {
+    return require('./fcm')[ENV]
+  }
+
+  throw new Error('FCM configuration is required')
 }
 
 const ENV = process.env.NODE_ENV || 'development'
@@ -43,12 +53,21 @@ const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()
 const awsConfig = loadAWSConfig()
+const fcmConfig = loadFCMConfig()
+
+admin.initializeApp({
+  credential: admin.credential.cert(fcmConfig.serviceAccount),
+  databaseURL: fcmConfig.databaseURL
+})
+
+fcmConfig.firebaseAdmin = admin
 
 const config = Object.assign({
   env: ENV,
   db: dbConfig,
   cache: cacheConfig,
-  aws: awsConfig
+  aws: awsConfig,
+  fcm: fcmConfig
 }, appConfig)
 
 if (!config.db) {
@@ -62,6 +81,9 @@ if (!config.port) {
 }
 if (!config.aws) {
   throw new Error('aws config file log not found')
+}
+if (!config.fcm) {
+  throw new Error('fcm config file log not found')
 }
 
 console.log(config)

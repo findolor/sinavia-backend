@@ -34,6 +34,20 @@ before_script:
   - sed -ri 's/^AWS_REGION=/AWS_REGION=\$AWS_REGION/' .env.test
   - sed -ri 's/^AWS_ACCESS_KEY_ID=/AWS_ACCESS_KEY_ID=\$AWS_ACCESS_KEY_ID/' .env.test
   - sed -ri 's/^AWS_ACCESS_SECRET_KEY=/AWS_ACCESS_SECRET_KEY=\$AWS_ACCESS_SECRET_KEY/' .env.test
+  # FCM CONFIG
+  - JSON_STRING=$( jq -n \
+                    --arg ty "$TYPE" \
+                    --arg pi "$PROJECT_ID" \
+                    --arg pki "$PRIVATE_KEY_ID" \
+                    --arg pk "$PRIVATE_KEY" \
+                    --arg ce "$CLIENT_EMAIL" \
+                    --arg ci "$CLIENT_ID" \
+                    --arg au "$AUTH_URI" \
+                    --arg tu "$TOKEN_URI" \
+                    --arg apxcu "$AUTH_PROVIDER_X509_CERT_URL" \
+                    --arg cxcu "$CLIENT_X509_CERT_URL" \
+                    '{type: $ty, project_id: $pi, private_key_id: $pki, private_key: $pk, client_email: $ce, client_id: $ci, auth_uri: $au, token_uri: $tu, auth_provider_x509_cert_url: $apxcu, client_x509_cert_url: $cxcu}' )
+  - echo $JSON_STRING > fcmCredentials.test.json
   - npm run db:reset
 
 script:

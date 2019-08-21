@@ -12,6 +12,7 @@ const User = t.struct({
   birthDate: t.String,
   profilePicture: t.String,
   coverPicture: t.String,
+  fcmToken: t.maybe(t.String),
   // userLevel: t.maybe(t.Object),
   password: t.maybe(t.String),
   createdAt: t.maybe(t.Date),

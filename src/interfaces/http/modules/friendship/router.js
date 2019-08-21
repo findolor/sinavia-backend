@@ -6,6 +6,7 @@ module.exports = ({
   postUseCase,
   putUseCase,
   deleteUseCase,
+  getUserUseCase,
   logger,
   auth,
   response: { Success, Fail }
@@ -32,15 +33,19 @@ module.exports = ({
   // A user sends a post request to add another user as a friend
   router
     .post('/', (req, res) => {
-      postUseCase
-        .create({ body: req.body })
+      getUserUseCase
+        .getOne({ id: req.body.friendId })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
-        })
-        .catch((error) => {
-          logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+          postUseCase
+            .create({ body: req.body, requestingUserData: data })
+            .then(data => {
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
     })
 

@@ -46,6 +46,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      fcmToken: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       /* userLevel: {
         type: Sequelize.JSON,
         allowNull: false

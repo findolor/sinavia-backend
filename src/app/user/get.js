@@ -27,7 +27,8 @@ module.exports = ({ userRepository, Sequelize }) => {
           'city',
           'birthDate',
           'profilePicture',
-          'coverPicture'
+          'coverPicture',
+          'fcmToken'
         ]
       })
     })

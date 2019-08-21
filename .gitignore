@@ -18,3 +18,5 @@ redis-data
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+fcmCredentials.*.json

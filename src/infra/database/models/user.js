@@ -45,6 +45,10 @@ module.exports = function (sequelize, DataTypes) {
     birthDate: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    fcmToken: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
     /* userLevel: {
       type: DataTypes.JSON,
