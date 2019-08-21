@@ -8,7 +8,7 @@ module.exports = ({ friendshipRepository, fcmService }) => {
 
       const returnedFriendship = friendshipRepository.create(friendship)
 
-      fcmService.sendOneNotification(
+      fcmService.sendNotification(
         requestingUserData.fcmToken,
         {
           type: 'friendRequest',
