@@ -6,14 +6,22 @@ if (!fs.existsSync(`logs`)) {
 }
 
 module.exports = ({ config }) => {
+  var transports = [
+    new winston.transports.File(
+      Object.assign(config.logging, {
+        filename: `logs/${config.env}.log`
+      })
+    )
+  ]
+  if (config.env !== 'production') {
+    transports.push(new winston.transports.Console())
+  }
   // eslint-disable-next-line new-cap
   return new winston.createLogger({
-    transports: [
-      new winston.transports.Console(),
-      new winston.transports.File(Object.assign(
-        config.logging, {
-          filename: `logs/${config.env}.log`
-        }))
-    ]
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    ),
+    transports: transports
   })
 }
