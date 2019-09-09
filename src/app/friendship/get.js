@@ -1,7 +1,7 @@
 module.exports = ({ friendshipRepository, Sequelize }) => {
   const Op = Sequelize.Op
 
-  const getFriendship = ({ userId, opponentId }) => {
+  const getFriendship = ({ userId, friendId }) => {
     return Promise
       .resolve()
       .then(() => {
@@ -10,10 +10,10 @@ module.exports = ({ friendshipRepository, Sequelize }) => {
             [Op.or]: [
               {
                 userId: userId,
-                friendId: opponentId
+                friendId: friendId
               },
               {
-                userId: opponentId,
+                userId: friendId,
                 friendId: userId
               }
             ]

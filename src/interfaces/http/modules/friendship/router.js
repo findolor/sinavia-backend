@@ -20,7 +20,7 @@ module.exports = ({
   router
     .get('/', (req, res) => {
       getUseCase
-        .getFriendship({ userId: req.query.userId, opponentId: req.query.opponentId })
+        .getFriendship({ userId: req.query.userId, friendId: req.query.opponentId })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })
@@ -34,32 +34,51 @@ module.exports = ({
   // A user sends a post request to add another user as a friend
   router
     .post('/', (req, res) => {
-      getUserUseCase
-        .getOne({ id: req.body.friendId })
-        .then(userData => {
-          postUseCase
-            .create({ body: req.body })
-            .then(data => {
-              fcmService.sendNotificationDataMessage(
-                userData.fcmToken,
-                {
-                  title: 'Arkadaş İsteği!',
-                  body: `${req.body.username} seni arkadaş olarak ekledi.`
-                },
-                {
-                  type: 'friendRequest',
-                  userId: req.body.userId,
-                  title: 'Arkadaş İsteği!',
-                  body: `${req.body.username} seni arkadaş olarak ekledi.`
-                }
-              )
-              res.status(Status.OK).json(Success(data))
+      getUseCase
+        .getFriendship({ userId: req.body.friendId, friendId: req.body.userId })
+        .then(data => {
+          // If there is already a request send by the other user we don't make another request
+          if (Object.keys(data).length !== 0) {
+            res.status(Status.BAD_REQUEST).json(Fail('Requested user has already requested a friendship'))
+            return
+          }
+          getUserUseCase
+            .getOne({ id: req.body.friendId })
+            .then(userData => {
+              postUseCase
+                .create({ body: req.body })
+                .then(data => {
+                  fcmService.sendNotificationDataMessage(
+                    userData.fcmToken,
+                    {
+                      title: 'Arkadaş İsteği!',
+                      body: `${req.body.username} seni arkadaş olarak ekledi.`
+                    },
+                    {
+                      type: 'friendRequest',
+                      userId: req.body.userId,
+                      title: 'Arkadaş İsteği!',
+                      body: `${req.body.username} seni arkadaş olarak ekledi.`
+                    }
+                  )
+                  res.status(Status.OK).json(Success(data))
+                })
+                .catch((error) => {
+                  logger.error(error.stack)
+                  res.status(Status.BAD_REQUEST).json(
+                    Fail(error.message))
+                })
             })
-            .catch((error) => {
-              logger.error(error.stack) // we still need to log every error for debugging
+            .catch(error => {
+              logger.error(error.stack)
               res.status(Status.BAD_REQUEST).json(
                 Fail(error.message))
             })
+        })
+        .catch(error => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
         })
     })
 
