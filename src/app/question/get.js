@@ -27,8 +27,23 @@ module.exports = ({ questionRepository }) => {
       })
   }
 
+  const getBatchById = ({ idList }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const questionList = questionRepository.findAll({
+          where: {
+            id: idList
+          },
+          attributes: { exclude: ['correctAnswer'] }
+        })
+        return questionList
+      })
+  }
+
   return {
     getOne,
-    getMultiple
+    getMultiple,
+    getBatchById
   }
 }

@@ -54,6 +54,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/friendsMatches', controller('friendsMatch').router)
   apiRouter.use('/questions', controller('question').router)
   apiRouter.use('/friendGames', controller('friendGame').router)
+  apiRouter.use('/favouriteQuestions', controller('favouriteQuestion').router)
 
   router.use(`/api/${config.version}`, apiRouter)
 
