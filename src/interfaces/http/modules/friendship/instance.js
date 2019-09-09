@@ -13,14 +13,15 @@ module.exports = () => {
   const getUseCase = getFriend({ friendshipRepository, Sequelize })
   const postUseCase = postFriend({ friendshipRepository, fcmService })
   const getUserUseCase = getUser({ userRepository, Sequelize })
-  const putUseCase = putFriend({ friendshipRepository })
-  const deleteUseCase = deleteFriend({ friendshipRepository })
+  const putUseCase = putFriend({ friendshipRepository, fcmService })
+  const deleteUseCase = deleteFriend({ friendshipRepository, fcmService })
 
   return {
     getUseCase,
     postUseCase,
     putUseCase,
     deleteUseCase,
-    getUserUseCase
+    getUserUseCase,
+    fcmService
   }
 }

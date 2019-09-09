@@ -116,7 +116,7 @@ module.exports = ({
   router
     .get('/', (req, res) => {
       getUseCase
-        .getMultiple({ idList: req.params.idList })
+        .getMultiple({ idList: req.query.idList })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })

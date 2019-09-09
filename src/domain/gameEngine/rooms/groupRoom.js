@@ -288,15 +288,18 @@ async function getQuestions (matchInformation, questionIdList) {
     )
     return questions
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
+    logger.error(error.stack)
   }
 }
 
 // Gets the user information
-async function getUser (id) {
+function getUser (id) {
   try {
-    const user = await getOneUser(id)
-    return user
+    return getOneUser(id)
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get user')
+    logger.error(error.stack)
   }
 }
 
@@ -308,6 +311,8 @@ function postMatchResults (playerList) {
       await postStatistic(player)
     })
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
+    logger.error(error.stack)
   }
 }
 
@@ -318,9 +323,10 @@ class GroupRoom extends colyseus.Room {
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
     this.questionIdList = []
-    this.questionAmount = 5
+    this.questionAmount = 3
     this.isMatchFinished = false
     this.isMatchStarted = false
+    this.joinedPlayerNum = 0
   }
 
   onInit (options) {
@@ -353,7 +359,8 @@ class GroupRoom extends colyseus.Room {
 
   async onJoin (client, options) {
     // We don't do these steps again for a second player. Only for once
-    if (this.clients.length !== 2) {
+    if (this.joinedPlayerNum === 0) {
+      this.joinedPlayerNum++
       const matchInformation = {
         examName: options.examName,
         courseName: options.courseName,
@@ -371,12 +378,14 @@ class GroupRoom extends colyseus.Room {
     this.state.addPlayer(client.id, userInformation, options.databaseId)
 
     // We send the clients player information
-    this.broadcast({
-      action: 'player-props',
-      playerProps: this.state.getPlayerProps()
-    })
+    setTimeout(() => {
+      this.broadcast({
+        action: 'player-props',
+        playerProps: this.state.getPlayerProps()
+      })
+    }, 500)
 
-    if (this.clients.length === this.maxClients) {
+    if (this._maxClientsReached) {
       // If we have reached the maxClients, we lock the room for unexpected things
       this.lock()
     }
@@ -391,12 +400,14 @@ class GroupRoom extends colyseus.Room {
         if (++this.readyPlayerCount === this.clients.length) {
           // When players get the 'question' action they start the round and play.
           // This delay will be longer due to pre-match player showcases.
-          setTimeout(() => {
+          /* setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
-          }, 3000)
+          }, 3000) */
+          that.state.nextQuestion()
+          that.state.changeStateInformation('question')
         }
-        return
+        break
       // 'finished' action is sent after a player answers a question.
       case 'finished':
         if (++this.finishedPlayerCount === this.clients.length) {
@@ -410,8 +421,8 @@ class GroupRoom extends colyseus.Room {
               this.isMatchFinished = true
               // We save the results after the match is finished
               await this.state.saveMatchResults()
-            }, 8000)
-            return
+            }, 5000)
+            break
           }
           // If both players are finished, we reset the round for them and start another round.
           this.finishedPlayerCount = 0
@@ -420,13 +431,13 @@ class GroupRoom extends colyseus.Room {
           setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
-          }, 8000)
+          }, 5000)
         }
-        return
+        break
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
         this.state.setPlayerAnswerResults(client.id, data.button)
-        return
+        break
       case 'remove-options-joker':
         let optionsToRemove
 
@@ -437,7 +448,7 @@ class GroupRoom extends colyseus.Room {
           action: 'remove-options-joker',
           optionsToRemove: optionsToRemove
         })
-        return
+        break
       case 'second-chance-joker':
         const questionAnswer = this.state.getQuestionAnswer()
 
@@ -446,7 +457,7 @@ class GroupRoom extends colyseus.Room {
           action: 'second-chance-joker',
           questionAnswer: questionAnswer
         })
-        return
+        break
       // Users presses ready to mark them as ready
       // Can be pressed again to mark as not ready
       case 'ready-status':
@@ -466,7 +477,7 @@ class GroupRoom extends colyseus.Room {
             playerProps: props
           })
         }
-        return
+        break
       // The leader presses start
       case 'start-match':
         this.isMatchStarted = true
@@ -498,10 +509,11 @@ class GroupRoom extends colyseus.Room {
 
         logger.info(logString + `roomId: ${this.roomId}`)
 
-        return
+        break
       // The leader can choose from different number of question amounts.
       case 'set-question-number':
         this.questionAmount = data.questionAmount
+        break
     }
   }
 

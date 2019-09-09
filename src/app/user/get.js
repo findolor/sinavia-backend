@@ -39,7 +39,8 @@ module.exports = ({ userRepository, Sequelize }) => {
       const userList = userRepository.findAll({
         where: {
           id: idList
-        }
+        },
+        attributes: { exclude: ['password'] }
       })
       return userList
     })
@@ -61,7 +62,8 @@ module.exports = ({ userRepository, Sequelize }) => {
               }
             }
           ]
-        }
+        },
+        attributes: { exclude: ['password'] }
       })
       return searchedUsers
     })

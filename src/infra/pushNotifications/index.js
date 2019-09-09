@@ -2,8 +2,11 @@ const fcmService = require('./firebaseCloudMessaging')
 
 module.exports = ({ config, logger }) => {
   return {
-    sendNotification: (registrationToken, payload) => {
-      return fcmService({ config, logger }).sendNotification(registrationToken, payload)
+    sendDataMessage: (registrationToken, data) => {
+      return fcmService({ config, logger }).sendDataMessage(registrationToken, data)
+    },
+    sendNotificationDataMessage: (registrationToken, notification, data) => {
+      return fcmService({ config, logger }).sendNotificationDataMessage(registrationToken, notification, data)
     }
   }
 }

@@ -86,6 +86,4 @@ if (!config.fcm) {
   throw new Error('fcm config file log not found')
 }
 
-console.log(config)
-
 module.exports = config

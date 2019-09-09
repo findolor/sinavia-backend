@@ -24,12 +24,13 @@ const calculateResults = (playerList) => {
       switch (answer.result) {
         case null:
           playerUnanswered++
-          return
+          break
         case true:
           playerCorrect++
-          return
+          break
         case false:
           playerIncorrect++
+          break
       }
     })
     // We push the results to the result list

@@ -39,6 +39,18 @@ module.exports = () => {
       birthDate: new Date(),
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+    },
+    {
+      id: 'b46c9693-c17d-498a-adf6-bd618c23f4b3',
+      username: 'Kullanici3',
+      name: 'kullanici',
+      lastname: '3',
+      email: 'kullanici3@gmail.com',
+      password: password,
+      city: 'sehir',
+      birthDate: new Date(),
+      profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     }
   ]
 }

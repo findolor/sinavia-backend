@@ -45,8 +45,23 @@ module.exports = ({ friendshipRepository, Sequelize }) => {
       })
   }
 
+  const getFriendRequests = ({ userId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const requestedFriends = friendshipRepository.findAll({
+          where: {
+            friendId: userId,
+            friendshipStatus: 'requested'
+          }
+        })
+        return requestedFriends
+      })
+  }
+
   return {
     getFriendship,
-    getFriends
+    getFriends,
+    getFriendRequests
   }
 }

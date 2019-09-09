@@ -14,7 +14,12 @@ module.exports = ({ config }) => {
     )
   ]
   if (config.env !== 'production') {
-    transports.push(new winston.transports.Console())
+    transports.push(new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    }))
   }
   // eslint-disable-next-line new-cap
   return new winston.createLogger({

@@ -9,11 +9,19 @@ describe('App -> User Logic -> Get Request', () => {
     name: 'Test',
     lastname: 'Developer'
   }]
+  const mockDataList = [{
+    name: 'Test',
+    lastname: 'Developer'
+  }, {
+    name: 'Test',
+    lastname: 'Developer'
+  }]
 
   describe('Success path', () => {
     beforeEach(() => {
       const MockRepository = {
-        findOne: () => mockData
+        findOne: () => mockData,
+        findAll: () => mockDataList
       }
 
       useCase = getUsecase({
@@ -26,13 +34,24 @@ describe('App -> User Logic -> Get Request', () => {
       const user = await useCase.getOne(1)
       expect(user).to.equal(mockData)
     })
+
+    it('Should display multiple records on success', async () => {
+      const users = await useCase.getMultiple([1, 2])
+      expect(users).to.equal(mockDataList)
+    })
+
+    it('Should display one record with given keyword on success', async () => {
+      const users = await useCase.getUserWithKeyword('test', 1)
+      expect(users).to.equal(mockDataList)
+    })
   })
 
   describe('Fail path', () => {
     beforeEach(() => {
       const MockRepository = {
         // eslint-disable-next-line prefer-promise-reject-errors
-        findOne: () => Promise.reject('Error')
+        findOne: () => Promise.reject(new Error('Error')),
+        findAll: () => Promise.reject(new Error('Error'))
       }
 
       useCase = getUsecase({
@@ -48,7 +67,21 @@ describe('App -> User Logic -> Get Request', () => {
       } catch (e) {
         error = e
       }
-      expect(error).to.equal('Error')
+      expect(error.message).to.equal('Error')
+
+      try {
+        await useCase.getMultiple([1, 2])
+      } catch (e) {
+        error = e
+      }
+      expect(error.message).to.equal('Error')
+
+      try {
+        await useCase.getMultiple('test', [1, 2])
+      } catch (e) {
+        error = e
+      }
+      expect(error.message).to.equal('Error')
     })
   })
 })

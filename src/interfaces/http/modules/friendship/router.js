@@ -9,6 +9,7 @@ module.exports = ({
   getUserUseCase,
   logger,
   auth,
+  fcmService,
   response: { Success, Fail }
 }) => {
   const router = Router()
@@ -35,10 +36,23 @@ module.exports = ({
     .post('/', (req, res) => {
       getUserUseCase
         .getOne({ id: req.body.friendId })
-        .then(data => {
+        .then(userData => {
           postUseCase
-            .create({ body: req.body, requestingUserData: data })
+            .create({ body: req.body })
             .then(data => {
+              fcmService.sendNotificationDataMessage(
+                userData.fcmToken,
+                {
+                  title: 'Arkadaş İsteği!',
+                  body: `${req.body.username} seni arkadaş olarak ekledi.`
+                },
+                {
+                  type: 'friendRequest',
+                  userId: req.body.userId,
+                  title: 'Arkadaş İsteği!',
+                  body: `${req.body.username} seni arkadaş olarak ekledi.`
+                }
+              )
               res.status(Status.OK).json(Success(data))
             })
             .catch((error) => {
@@ -55,7 +69,36 @@ module.exports = ({
       getUseCase
         .getFriends({ userId: req.params.id })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
+          const returnList = []
+
+          data.forEach(friendship => {
+            if (friendship.userId === req.params.id) returnList.push(friendship.friendId)
+            else returnList.push(friendship.userId)
+          })
+
+          res.status(Status.OK).json(Success(returnList))
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  // Returns requested user friendship requests
+  router
+    .get('/requested/:id', (req, res) => {
+      getUseCase
+        .getFriendRequests({ userId: req.params.id })
+        .then(data => {
+          const returnList = []
+
+          data.forEach(friendship => {
+            if (friendship.userId === req.params.id) returnList.push(friendship.friendId)
+            else returnList.push(friendship.userId)
+          })
+
+          res.status(Status.OK).json(Success(returnList))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
@@ -67,30 +110,55 @@ module.exports = ({
   // When a user accepts the friend request we update the friendship status here
   router
     .put('/', (req, res) => {
-      putUseCase
-        .updateFriendship({ body: req.body })
-        .then(data => {
-          res.status(Status.OK).json(Success(data))
-        })
-        .catch((error) => {
-          logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+      getUserUseCase
+        .getOne({ id: req.body.userId })
+        .then(userData => {
+          putUseCase
+            .updateFriendship({ body: req.body })
+            .then(data => {
+              fcmService.sendDataMessage(
+                userData.fcmToken,
+                {
+                  type: 'friendApproved',
+                  title: 'Arkadaş İsteği!',
+                  body: `${req.body.username} arkadaş isteğini kabul etti.`,
+                  userId: req.body.friendId
+                }
+              )
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
     })
 
   // If a user removes another user from friends the record is destroyed
   router
-    .delete('/:id', (req, res) => {
-      deleteUseCase
-        .deleteFriendship({ userId: req.params.id })
-        .then(data => {
-          res.status(Status.OK).json(Success(data))
-        })
-        .catch((error) => {
-          logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+    .delete('/', (req, res) => {
+      const isClientUser = JSON.parse(req.query.isClientUser)
+      getUserUseCase
+        .getOne({ id: isClientUser === true ? req.query.friendId : req.query.userId })
+        .then(userData => {
+          deleteUseCase
+            .deleteFriendship({ userId: req.query.userId, friendId: req.query.friendId })
+            .then(data => {
+              fcmService.sendDataMessage(
+                userData.fcmToken,
+                {
+                  type: 'friendDeleted',
+                  userId: isClientUser === true ? req.query.userId : req.query.friendId
+                }
+              )
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
     })
 

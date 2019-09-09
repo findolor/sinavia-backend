@@ -1,9 +1,10 @@
 module.exports = ({ friendshipRepository }) => {
-  const deleteFriendship = ({ userId }) => {
+  const deleteFriendship = ({ userId, friendId }) => {
     return Promise.resolve().then(() => {
       return friendshipRepository.destroy({
         where: {
-          userId: userId
+          userId: userId,
+          friendId: friendId
         }
       })
     })

@@ -60,7 +60,8 @@ class RankedGame {
       username: userInformation.username,
       answers: [],
       databaseId: databaseId,
-      profilePicture: userInformation.profilePicture
+      profilePicture: userInformation.profilePicture,
+      coverPicture: userInformation.coverPicture
     }
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
@@ -213,7 +214,7 @@ class RankedGame {
   }
 
   // This is called when one of the clients leaves the game
-  async saveUnfinishedMatchResults (leavingClientId, rankedRoomId) {
+  saveUnfinishedMatchResults (leavingClientId, rankedRoomId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -283,11 +284,11 @@ class RankedGame {
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
 
-    await postMatchResults(playerList)
+    postMatchResults(playerList)
   }
 
   // This is called when the game ended normally without any clients leaving
-  async saveMatchResults (rankedRoomId) {
+  saveMatchResults (rankedRoomId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -316,7 +317,7 @@ class RankedGame {
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
 
-    await postMatchResults(playerList)
+    postMatchResults(playerList)
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
@@ -397,23 +398,25 @@ function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
 }
 
 // Gets questions by providing it with random indexes
-async function getQuestions (matchInformation, questionIdList) {
+function getQuestions (matchInformation, questionIdList) {
   try {
-    const questions = await getMultipleQuestions(
+    return getMultipleQuestions(
       questionIdList,
       matchInformation
     )
-    return questions
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
+    logger.error(error.stack)
   }
 }
 
 // Gets the user information
-async function getUser (id) {
+function getUser (id) {
   try {
-    const user = await getOneUser(id)
-    return user
+    return getOneUser(id)
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get user')
+    logger.error(error.stack)
   }
 }
 
@@ -425,6 +428,8 @@ function postMatchResults (playerList) {
       await postStatistic(player)
     })
   } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
+    logger.error(error.stack)
   }
 }
 
@@ -438,17 +443,24 @@ class RankedRoom extends colyseus.Room {
     this.questionAmount = 3
     this.isMatchFinished = false
     this.leavingClientId = null
-  }
-
-  onInit (options) {
-    // We get a random list of numbers for our question fetching
-    this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
-
-    // We initialize our game here
-    this.setState(new RankedGame())
+    this.joinedPlayerNum = 0
+    this.fetchedUserInfoNumber = 0
+    /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
+      if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        // If we have reached the maxClients, we lock the room for unexpected things
+          this.lock()
+          // We send the clients player information
+          setTimeout(() => {
+            this.broadcast(this.state.getPlayerProps())
+          }, 500)
+          logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+          this.fetchedUserInfoInterval.clear()
+        }
+    }, 2000) */
   }
 
   // If this room is full new users will join another room
+  // TODO DEPRECATED IN 0.10.8
   requestJoin (options, isNew) {
     if (isNew) {
       return (options.create && isNew) || this.clients.length > 0
@@ -466,9 +478,15 @@ class RankedRoom extends colyseus.Room {
     }
   }
 
-  async onJoin (client, options) {
-    // We don't do these steps again for a second player. Only for once
-    if (this.clients.length !== 2) {
+  onInit (options) {
+    try {
+      // console.log(options)
+    // We initialize our game here
+      this.setState(new RankedGame())
+
+      // We get a random list of numbers for our question fetching
+      this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
+
       const matchInformation = {
         examName: options.examName,
         courseName: options.courseName,
@@ -476,124 +494,10 @@ class RankedRoom extends colyseus.Room {
       }
 
       // Fetching questions from database
-      const questionProps = await getQuestions(
+      getQuestions(
         matchInformation,
         this.questionIdList
-      )
-      const questionList = []
-
-      // Getting only the question links
-      questionProps.forEach(element => {
-        questionList.push(element.questionLink)
-      })
-      // Setting general match related info
-      this.state.setQuestions(questionProps, questionList)
-      this.state.setMatchInformation(matchInformation)
-    }
-
-    // Getting user information from database
-    const userInformation = await getUser(options.databaseId)
-
-    // Finally adding the player to our room state
-    this.state.addPlayer(client.id, userInformation, options.databaseId)
-
-    if (this.clients.length === this.maxClients) {
-      // If we have reached the maxClients, we lock the room for unexpected things
-      this.lock()
-      // We send the clients player information
-      this.broadcast(this.state.getPlayerProps())
-      logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
-    }
-  }
-
-  // TODO Move the actions into their own functions
-  async onMessage (client, data) {
-    const that = this
-    switch (data.action) {
-      // Players send 'ready' action to server for letting it know that they are ready for the game
-      case 'ready':
-        if (++this.readyPlayerCount === 2) {
-          // When players get the 'question' action they start the round and play.
-          // This delay will be longer due to pre-match player showcases.
-          setTimeout(() => {
-            that.state.nextQuestion()
-            that.state.changeStateInformation('question')
-          }, 3000)
-        }
-        return
-      // 'finished' action is sent after a player answers a question.
-      case 'finished':
-        if (++this.finishedPlayerCount === 2) {
-          // We check if this is the last question
-          // We extract one because questionNumber started from -1
-          if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('show-results')
-            // Like always there is a delay to show the answers
-            setTimeout(async () => {
-              this.state.changeStateInformation('match-finished')
-              this.isMatchFinished = true
-              // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId)
-            }, 8000)
-            return
-          }
-          // If both players are finished, we reset the round for them and start another round.
-          this.finishedPlayerCount = 0
-          this.state.changeStateInformation('show-results')
-          // Delay for showing the results
-          setTimeout(() => {
-            that.state.nextQuestion()
-            that.state.changeStateInformation('question')
-          }, 8000)
-        }
-        return
-      // 'button-press' action is sent when a player presses a button
-      case 'button-press':
-        this.state.setPlayerAnswerResults(client.id, data.button)
-        return
-      case 'remove-options-joker':
-        let optionsToRemove
-
-        // If we have a disabled button before hand, we send it. Otherwise we don't
-        if (data.disabled === false) { optionsToRemove = this.state.removeOptionsJokerPressed() } else { optionsToRemove = this.state.removeOptionsJokerPressed(data.disabled) }
-
-        this.send(client, {
-          action: 'remove-options-joker',
-          optionsToRemove: optionsToRemove
-        })
-        return
-      case 'second-chance-joker':
-        const questionAnswer = this.state.getQuestionAnswer()
-
-        // We send the question answer to client for checking if it choose the correct option
-        this.send(client, {
-          action: 'second-chance-joker',
-          questionAnswer: questionAnswer
-        })
-        return
-      case 'replay':
-        this.clients.forEach(element => {
-          if (element.id !== client.id) {
-            this.send(element, {
-              action: 'replay'
-            })
-          }
-        })
-        return
-      case 'reset-room':
-        this.state.resetRoom()
-
-        this.questionAmount = 1
-        this.readyPlayerCount = 0
-        this.finishedPlayerCount = 0
-        this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
-        this.isMatchFinished = false
-
-        // Fetching questions from database
-        const questionProps = await getQuestions(
-          this.state.getMatchInformation(),
-          this.questionIdList
-        )
+      ).then(questionProps => {
         const questionList = []
 
         // Getting only the question links
@@ -602,38 +506,181 @@ class RankedRoom extends colyseus.Room {
         })
         // Setting general match related info
         this.state.setQuestions(questionProps, questionList)
+        this.state.setMatchInformation(matchInformation)
+      }).catch(error => {
+        logger.error(error.stack)
+      })
+    } catch (error) {
+      logger.error(error.stack)
     }
   }
 
-  async onLeave (client, consented) {
-    logger.info({
-      message: 'Client leaving',
-      clientId: client.id,
-      consented: consented
-    })
-    // TODO add errors on all of these events
-    // If the room is not empty
-    if (this.clients.length !== 0) {
-      const lastClient = this.clients[0]
+  onJoin (client, options) {
+    try {
+      // if(options === undefined) return
+    // Getting user information from database
+      getUser(options.databaseId).then(userInformation => {
+        this.fetchedUserInfoNumber++
+        // Finally adding the player to our room state
+        this.state.addPlayer(client.id, userInformation, options.databaseId)
 
-      this.send(lastClient, {
-        action: 'client-leaving'
+        if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        // If we have reached the maxClients, we lock the room for unexpected things
+          this.lock()
+          // We send the clients player information
+          this.clock.setTimeout(() => {
+            this.broadcast(this.state.getPlayerProps())
+          }, 500)
+          logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+        }
+      }).catch(error => {
+        logger.error(error.stack)
       })
+    } catch (error) {
+      logger.error(error.stack)
+    }
+  }
 
-      // We save the leaving clients id to mark it as lost for later
-      this.leavingClientId = client.id
+  // TODO Move the actions into their own functions
+  onMessage (client, data) {
+    try {
+      const that = this
+      switch (data.action) {
+      // Players send 'ready' action to server for letting it know that they are ready for the game
+        case 'ready':
+          if (++this.readyPlayerCount === 2) {
+          // When players get the 'question' action they start the round and play.
+          // This delay will be longer due to pre-match player showcases.
+          /* setTimeout(() => {
+            that.state.nextQuestion()
+            that.state.changeStateInformation('question')
+          }, 3000) */
+            that.state.nextQuestion()
+            that.state.changeStateInformation('question')
+          }
+          break
+          // 'finished' action is sent after a player answers a question.
+        case 'finished':
+          if (++this.finishedPlayerCount === 2) {
+          // We check if this is the last question
+          // We extract one because questionNumber started from -1
+            if (this.state.getQuestionNumber() === this.questionAmount - 1) {
+              this.state.changeStateInformation('show-results')
+              // Like always there is a delay to show the answers
+              this.clock.setTimeout(() => {
+                this.state.changeStateInformation('match-finished')
+                this.isMatchFinished = true
+                // We save the results after the match is finished
+                this.state.saveMatchResults(this.roomId)
+              }, 5000)
+              break
+            }
+            // If both players are finished, we reset the round for them and start another round.
+            this.finishedPlayerCount = 0
+            this.state.changeStateInformation('show-results')
+            // Delay for showing the results
+            this.clock.setTimeout(() => {
+              that.state.nextQuestion()
+              that.state.changeStateInformation('question')
+            }, 5000)
+          }
+          break
+          // 'button-press' action is sent when a player presses a button
+        case 'button-press':
+          this.state.setPlayerAnswerResults(client.id, data.button)
+          break
+        case 'remove-options-joker':
+          let optionsToRemove
 
-      // If the match was still going on
-      if (!this.isMatchFinished) {
-        // We send the leaving clients id
-        // We do different stuff if the client has left before the match ends
-        await this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId)
+          // If we have a disabled button before hand, we send it. Otherwise we don't
+          if (data.disabled === false) { optionsToRemove = this.state.removeOptionsJokerPressed() } else { optionsToRemove = this.state.removeOptionsJokerPressed(data.disabled) }
+
+          this.send(client, {
+            action: 'remove-options-joker',
+            optionsToRemove: optionsToRemove
+          })
+          break
+        case 'second-chance-joker':
+          const questionAnswer = this.state.getQuestionAnswer()
+
+          // We send the question answer to client for checking if it choose the correct option
+          this.send(client, {
+            action: 'second-chance-joker',
+            questionAnswer: questionAnswer
+          })
+          break
+        case 'replay':
+          this.clients.forEach(element => {
+            if (element.id !== client.id) {
+              this.send(element, {
+                action: 'replay'
+              })
+            }
+          })
+          break
+        case 'reset-room':
+          this.state.resetRoom()
+
+          this.questionAmount = 1
+          this.readyPlayerCount = 0
+          this.finishedPlayerCount = 0
+          this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
+          this.isMatchFinished = false
+
+          // Fetching questions from database
+          getQuestions(
+            this.state.getMatchInformation(),
+            this.questionIdList
+          ).then(questionProps => {
+            const questionList = []
+
+            // Getting only the question links
+            questionProps.forEach(element => {
+              questionList.push(element.questionLink)
+            })
+            // Setting general match related info
+            this.state.setQuestions(questionProps, questionList)
+          })
+          break
       }
+    } catch (error) {
+      logger.error(error.stack)
+    }
+  }
+
+  onLeave (client, consented) {
+    try {
+      logger.info({
+        message: 'Client leaving',
+        clientId: client.id,
+        consented: consented
+      })
+      // TODO add errors on all of these events
+      // If the room is not empty
+      if (this.clients.length !== 0) {
+        const lastClient = this.clients[0]
+
+        this.send(lastClient, {
+          action: 'client-leaving'
+        })
+
+        // We save the leaving clients id to mark it as lost for later
+        this.leavingClientId = client.id
+
+        // If the match was still going on
+        if (!this.isMatchFinished) {
+          // We send the leaving clients id
+          // We do different stuff if the client has left before the match ends
+          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId)
+        }
+      }
+    } catch (error) {
+      logger.error(error.stack)
     }
   }
 
   onDispose () {
-    logger.info('Room disposed')
+
   }
 }
 

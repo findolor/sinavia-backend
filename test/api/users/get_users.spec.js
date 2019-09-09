@@ -8,9 +8,11 @@ describe('Routes: GET UserEntity', () => {
   const signIn = app.resolve('jwt').signin()
   let token
   let userId
+  let userIdList
 
   beforeEach(done => {
     // we need to add user before we can request our token
+    userIdList = []
     userRepository
       .destroy({ where: {} })
       .then(() =>
@@ -27,14 +29,29 @@ describe('Routes: GET UserEntity', () => {
         })
       )
       .then(user => {
-        userId = user.id
-        token = signIn({
-          id: user.id,
-          name: user.name,
-          lastname: user.lastname,
-          email: user.email
+        userIdList.push(user.id)
+        userRepository.create({
+          name: 'Test2',
+          lastname: 'Dev2',
+          username: 'testus2',
+          email: 'testdev2@gmail.com',
+          password: 'pass',
+          city: 'siti',
+          birthDate: '3123123123',
+          profilePicture: 'dsdsds',
+          coverPicture: 'cddcdcdc'
         })
-        done()
+          .then(user => {
+            userId = user.id
+            userIdList.push(user.id)
+            token = signIn({
+              id: user.id,
+              name: user.name,
+              lastname: user.lastname,
+              email: user.email
+            })
+            done()
+          })
       })
   })
 
@@ -46,11 +63,11 @@ describe('Routes: GET UserEntity', () => {
         .expect(200)
         .end((err, res) => {
           expect(res.body.data).to.eql({
-            name: 'Test',
-            lastname: 'Dev',
-            username: 'testus',
-            email: 'testdev1@gmail.com',
             id: userId,
+            name: 'Test2',
+            lastname: 'Dev2',
+            username: 'testus2',
+            email: 'testdev2@gmail.com',
             city: 'siti',
             birthDate: '3123123123',
             profilePicture: 'dsdsds',
@@ -66,6 +83,22 @@ describe('Routes: GET UserEntity', () => {
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equals('Unauthorized')
+          done(err)
+        })
+    })
+  })
+
+  describe('Should return two users', () => {
+    it('should return two users', done => {
+      request
+        .get(`${BASE_URI}/users`)
+        .query({ idList: userIdList })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+        .end((err, res) => {
+          expect(Object.keys(res.body.data).length).to.eql(2)
+          expect(Object.keys(res.body.data[0]).length).to.eql(9)
+          expect(Object.keys(res.body.data[1]).length).to.eql(9)
           done(err)
         })
     })

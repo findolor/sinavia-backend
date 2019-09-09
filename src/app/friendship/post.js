@@ -1,24 +1,15 @@
 const { Friendship } = require('src/domain/friendship')
 
-module.exports = ({ friendshipRepository, fcmService }) => {
-  const create = ({ body, requestingUserData }) => {
+module.exports = ({ friendshipRepository }) => {
+  const create = ({ body }) => {
     return Promise.resolve().then(() => {
-      const entity = Object.assign({}, body)
+      const entity = Object.assign({}, {
+        userId: body.userId,
+        friendId: body.friendId
+      })
       const friendship = Friendship(entity)
 
-      const returnedFriendship = friendshipRepository.create(friendship)
-
-      fcmService.sendNotification(
-        requestingUserData.fcmToken,
-        {
-          type: 'friendRequest',
-          title: 'Arkadaş İsteği!',
-          body: `${requestingUserData.username} seni arkadaş olarak ekledi.`,
-          userId: requestingUserData.id
-        }
-      )
-
-      return returnedFriendship
+      return friendshipRepository.create(friendship)
     })
   }
 

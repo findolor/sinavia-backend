@@ -2,16 +2,26 @@ const { Friendship } = require('src/domain/friendship')
 
 module.exports = ({ friendshipRepository }) => {
   const updateFriendship = ({ body }) => {
-    return Promise.resolve().then(() => {
-      // TODO Change only the friendshipStatus here
-      const entity = Object.assign({}, body)
-      const friendship = Friendship(entity)
+    return new Promise(async (resolve, reject) => {
+      try {
+        const entity = Object.assign({}, {
+          userId: body.userId,
+          friendId: body.friendId,
+          friendshipStatus: body.friendshipStatus
+        })
+        const friendship = Friendship(entity)
 
-      return friendshipRepository.update(friendship, {
-        where: {
-          userId: body.userId
-        }
-      })
+        await friendshipRepository.update(friendship, {
+          where: {
+            userId: body.userId,
+            friendId: body.friendId
+          }
+        })
+
+        resolve(friendship)
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 

@@ -1,16 +1,25 @@
-module.exports = ({ config, logger }) => {
-  const sendNotification = (registrationToken, data) => {
+module.exports = ({ config }) => {
+  const sendDataMessage = (registrationToken, data) => {
     const message = {
       data,
       token: registrationToken
     }
 
-    return config.fcm.firebaseAdmin.messaging().send(message).then(response => {
-      return response
-    })
+    return config.fcm.firebaseAdmin.messaging().send(message)
+  }
+
+  const sendNotificationDataMessage = (registrationToken, notification, data) => {
+    const message = {
+      notification,
+      data,
+      token: registrationToken
+    }
+
+    return config.fcm.firebaseAdmin.messaging().send(message)
   }
 
   return {
-    sendNotification
+    sendDataMessage,
+    sendNotificationDataMessage
   }
 }
