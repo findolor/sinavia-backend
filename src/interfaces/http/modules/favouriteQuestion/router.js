@@ -4,6 +4,7 @@ const { Router } = require('express')
 module.exports = ({
   getFavouriteQuestionUseCase,
   postFavouriteQuestionUseCase,
+  deleteFavouriteQuestionUseCase,
   getQuestionUseCase,
   logger,
   auth,
@@ -46,7 +47,22 @@ module.exports = ({
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
-          logger.error(error.stack) // we still need to log every error for debugging
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  // Deletes a favourite question from db
+  router
+    .delete('/', (req, res) => {
+      deleteFavouriteQuestionUseCase
+        .deleteOne({ userId: req.query.userId, questionId: req.query.questionId })
+        .then(data => {
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })

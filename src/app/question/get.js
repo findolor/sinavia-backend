@@ -34,8 +34,7 @@ module.exports = ({ questionRepository }) => {
         const questionList = questionRepository.findAll({
           where: {
             id: idList
-          },
-          attributes: { exclude: ['correctAnswer'] }
+          }
         })
         return questionList
       })

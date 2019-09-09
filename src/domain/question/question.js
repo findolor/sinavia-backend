@@ -8,7 +8,7 @@ const Question = t.struct({
   courseName: t.String,
   subjectName: t.String,
   questionLink: t.String,
-  correctAnswer: t.maybe(t.Number),
+  correctAnswer: t.Number,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

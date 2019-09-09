@@ -1,5 +1,5 @@
 const container = require('src/container') // we have to get the DI
-const { getFavouriteQuestion, postFavouriteQuestion } = require('src/app/favouriteQuestion')
+const { getFavouriteQuestion, postFavouriteQuestion, deleteFavouriteQuestion } = require('src/app/favouriteQuestion')
 const { getQuestion } = require('src/app/question')
 
 module.exports = () => {
@@ -10,11 +10,13 @@ module.exports = () => {
 
   const getFavouriteQuestionUseCase = getFavouriteQuestion({ favouriteQuestionRepository })
   const postFavouriteQuestionUseCase = postFavouriteQuestion({ favouriteQuestionRepository })
+  const deleteFavouriteQuestionUseCase = deleteFavouriteQuestion({ favouriteQuestionRepository })
   const getQuestionUseCase = getQuestion({ questionRepository })
 
   return {
     getFavouriteQuestionUseCase,
     postFavouriteQuestionUseCase,
+    deleteFavouriteQuestionUseCase,
     getQuestionUseCase
   }
 }
