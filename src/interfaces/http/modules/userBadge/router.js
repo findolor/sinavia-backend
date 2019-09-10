@@ -2,9 +2,8 @@ const Status = require('http-status')
 const { Router } = require('express')
 
 module.exports = ({
-  getFavouriteQuestionUseCase,
-  postFavouriteQuestionUseCase,
-  deleteFavouriteQuestionUseCase,
+  getUserBadgeUseCase,
+  postUserBadgeUseCase,
   logger,
   auth,
   response: { Success, Fail }
@@ -13,10 +12,10 @@ module.exports = ({
 
   router.use(auth.authenticate())
 
-  // Gets all the faved questions from db
+  // Gets the user badges from db
   router
     .get('/:userId', (req, res) => {
-      getFavouriteQuestionUseCase
+      getUserBadgeUseCase
         .getBatch({ userId: req.params.userId })
         .then(data => {
           res.status(Status.OK).json(Success(data))
@@ -28,26 +27,12 @@ module.exports = ({
         })
     })
 
-  // Posts a faved question to db
+  // Posts a won user badge to
+  // TODO Think if we need this endpoint in our api
   router
     .post('/', (req, res) => {
-      postFavouriteQuestionUseCase
+      postUserBadgeUseCase
         .create({ body: req.body })
-        .then(data => {
-          res.status(Status.OK).json(Success(data))
-        })
-        .catch((error) => {
-          logger.error(error.stack)
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
-        })
-    })
-
-  // Deletes a favourite question from db
-  router
-    .delete('/', (req, res) => {
-      deleteFavouriteQuestionUseCase
-        .deleteOne({ userId: req.query.userId, questionId: req.query.questionId })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })
