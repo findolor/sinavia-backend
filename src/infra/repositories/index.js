@@ -13,6 +13,19 @@ module.exports = ({ database }) => {
   const friendsMatchModel = database.models.friendsMatches
   const favouriteQuestionModel = database.models.favouriteQuestions
 
+  // USER has many statistics 1-N
+  // STATISTIC belongs to one user 1-1
+  userModel.hasMany(statisticModel)
+  statisticModel.belongsTo(userModel)
+
+  // FAVOURITE_QUESTION belongs to one user and question 1-1
+  // USER has many questions M-N
+  // QUESTION has many users M-N
+  userModel.belongsToMany(questionModel, { through: favouriteQuestionModel })
+  questionModel.belongsToMany(userModel, { through: favouriteQuestionModel })
+  favouriteQuestionModel.belongsTo(userModel)
+  favouriteQuestionModel.belongsTo(questionModel)
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),

@@ -5,10 +5,11 @@ const { getQuestion } = require('src/app/question')
 module.exports = () => {
   const {
     repository: { favouriteQuestionRepository },
-    repository: { questionRepository }
+    repository: { questionRepository },
+    database
   } = container.cradle
 
-  const getFavouriteQuestionUseCase = getFavouriteQuestion({ favouriteQuestionRepository })
+  const getFavouriteQuestionUseCase = getFavouriteQuestion({ favouriteQuestionRepository, database })
   const postFavouriteQuestionUseCase = postFavouriteQuestion({ favouriteQuestionRepository })
   const deleteFavouriteQuestionUseCase = deleteFavouriteQuestion({ favouriteQuestionRepository })
   const getQuestionUseCase = getQuestion({ questionRepository })

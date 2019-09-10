@@ -16,12 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     freezeTableName: true,
-    timestamps: false,
-    classMethods: {
-      associate () {
-        // TODO Maybe add some associations here?
-      }
-    }
+    timestamps: false
   })
 
   return FavouriteQuestion

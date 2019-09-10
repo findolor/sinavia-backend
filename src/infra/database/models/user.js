@@ -1,6 +1,6 @@
 const { encryptPassword } = require('../../encryption')
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('users', {
     id: {
       type: DataTypes.UUID,
@@ -50,10 +50,6 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: true
     }
-    /* userLevel: {
-      type: DataTypes.JSON,
-      allowNull: false
-    } */
   }, {
     hooks: {
       beforeCreate: user => {

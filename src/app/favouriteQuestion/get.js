@@ -1,4 +1,4 @@
-module.exports = ({ favouriteQuestionRepository }) => {
+module.exports = ({ favouriteQuestionRepository, database }) => {
   const getBatch = ({ userId }) => {
     return Promise
       .resolve()
@@ -6,7 +6,8 @@ module.exports = ({ favouriteQuestionRepository }) => {
         const favouriteQuestions = favouriteQuestionRepository.findAll({
           where: {
             userId: userId
-          }
+          },
+          include: [database.models.questions]
         })
         return favouriteQuestions
       })

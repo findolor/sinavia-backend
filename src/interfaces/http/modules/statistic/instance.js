@@ -4,9 +4,11 @@ const { getStatistic } = require('src/app/statistic')
 module.exports = () => {
   const { repository: {
     statisticRepository
-  } } = container.cradle
+  },
+  database
+  } = container.cradle
 
-  const getUseCase = getStatistic({ statisticRepository })
+  const getUseCase = getStatistic({ statisticRepository, database })
 
   return {
     getUseCase

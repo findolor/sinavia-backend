@@ -9,12 +9,20 @@ module.exports = {
         allowNull: false
       },
       winnerId: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       loserId: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       isMatchDraw: {
         type: Sequelize.BOOLEAN,

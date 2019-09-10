@@ -9,12 +9,20 @@ module.exports = {
         allowNull: false
       },
       userId: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       friendId: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       // TODO See if you can make it enum
       friendshipStatus: {

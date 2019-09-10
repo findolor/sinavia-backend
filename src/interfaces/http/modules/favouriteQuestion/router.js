@@ -20,16 +20,7 @@ module.exports = ({
       getFavouriteQuestionUseCase
         .getBatch({ userId: req.params.userId })
         .then(data => {
-          const idList = []
-          data.forEach(favouriteQuestion => {
-            idList.push(favouriteQuestion.questionId)
-          })
-
-          getQuestionUseCase
-            .getBatchById({ idList: idList })
-            .then(data => {
-              res.status(Status.OK).json(Success(data))
-            })
+          res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging

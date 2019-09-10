@@ -50,10 +50,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
-      /* userLevel: {
-        type: Sequelize.JSON,
-        allowNull: false
-      }, */
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
