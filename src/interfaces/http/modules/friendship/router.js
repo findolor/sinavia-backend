@@ -20,7 +20,7 @@ module.exports = ({
   router
     .get('/', (req, res) => {
       getUseCase
-        .getFriendship({ userId: req.query.userId, friendId: req.query.opponentId })
+        .getFriendship({ userId: req.query.userId, friendId: req.query.friendId })
         .then(data => {
           res.status(Status.OK).json(Success(data))
         })

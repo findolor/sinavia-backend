@@ -1,16 +1,8 @@
 /**
  * function for getter user.
  */
-module.exports = ({ userRepository, Sequelize }) => {
+module.exports = ({ userRepository, Sequelize, database }) => {
   const Op = Sequelize.Op
-
-  // code for getting all the items
-  const all = () => {
-    return Promise.resolve().then(() =>
-      // TODO Add what attributes to get from the database. Right now it returns every attribute so this is obviously wrong.
-      userRepository.findAll()
-    )
-  }
 
   const getOne = ({ id }) => {
     return Promise.resolve().then(() => {
@@ -18,17 +10,38 @@ module.exports = ({ userRepository, Sequelize }) => {
         where: {
           id: id
         },
-        attributes: [
-          'id',
-          'username',
-          'name',
-          'lastname',
-          'email',
-          'city',
-          'birthDate',
-          'profilePicture',
-          'coverPicture',
-          'fcmToken'
+        attributes: { exclude: ['password'] }
+      })
+    })
+  }
+
+  const getOpponentFullInformation = ({ userId }) => {
+    return Promise.resolve().then(() => {
+      return userRepository.findOne({
+        where: {
+          id: userId
+        },
+        attributes: { exclude: ['password'] },
+        include: [
+          {
+            model: database.models.friendships,
+            as: 'user'
+          },
+          {
+            model: database.models.friendships,
+            as: 'friend'
+          },
+          {
+            model: database.models.statistics
+          },
+          {
+            model: database.models.friendsMatches,
+            as: 'winner'
+          },
+          {
+            model: database.models.friendsMatches,
+            as: 'loser'
+          }
         ]
       })
     })
@@ -70,9 +83,9 @@ module.exports = ({ userRepository, Sequelize }) => {
   }
 
   return {
-    all,
     getOne,
     getMultiple,
-    getUserWithKeyword
+    getUserWithKeyword,
+    getOpponentFullInformation
   }
 }

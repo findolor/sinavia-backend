@@ -9,7 +9,7 @@ const joinOptions = {
   courseName: 'Matematik',
   subjectName: 'Sayilar',
   // kullanici1 users table id
-  databaseId: '4973ef67-cc68-4702-8082-f9ea6b69a463'
+  databaseId: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc'
 }
 
 client.onOpen.add(() => {

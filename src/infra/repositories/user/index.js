@@ -6,7 +6,7 @@ module.exports = ({ model }) => {
     model.findAll(...args).then((entity) =>
       entity.map((data) => {
         const { dataValues } = data
-        return toEntity(dataValues)
+        return dataValues
       })
     )
 
@@ -24,7 +24,7 @@ module.exports = ({ model }) => {
 
   const findOne = (...args) =>
     model.findOne(...args)
-      .then(({ dataValues }) => toEntity(dataValues))
+      .then((dataValues) => dataValues)
       .catch((error) => { throw new Error(error) })
 
   const validatePassword = (endcodedPassword) => (password) =>

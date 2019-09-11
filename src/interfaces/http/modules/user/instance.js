@@ -5,9 +5,9 @@ const Sequelize = require('sequelize')
 module.exports = () => {
   const { repository: {
     userRepository
-  } } = container.cradle
+  }, database } = container.cradle
 
-  const getUseCase = getUser({ userRepository, Sequelize })
+  const getUseCase = getUser({ userRepository, Sequelize, database })
   const postUseCase = postUser({ userRepository })
   const putUseCase = putUser({ userRepository })
   const deleteUseCase = removeUser({ userRepository })

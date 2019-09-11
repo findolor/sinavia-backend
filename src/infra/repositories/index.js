@@ -29,7 +29,7 @@ module.exports = ({ database }) => {
 
   // USER has many statistics 1-N
   // STATISTIC belongs to one user 1-1
-  userModel.hasMany(statisticModel)
+  userModel.hasMany(statisticModel, { foreignKey: 'userId' })
   statisticModel.belongsTo(userModel)
 
   // FAVOURITE_QUESTION belongs to one user and question 1-1
@@ -47,6 +47,22 @@ module.exports = ({ database }) => {
   badgeModel.belongsToMany(userModel, { through: userBadgeModel })
   userBadgeModel.belongsTo(userModel)
   userBadgeModel.belongsTo(badgeModel)
+
+  // FRIENDSHIP belongs to users
+  // USER has many other USERs as friends
+  /* userModel.belongsToMany(userModel, { through: friendshipModel, as: 'user', foreignKey: 'userId' })
+  userModel.belongsToMany(userModel, { through: friendshipModel, as: 'friend', foreignKey: 'friendId' }) */
+  userModel.hasMany(friendshipModel, { as: 'user', foreignKey: 'userId' })
+  userModel.hasMany(friendshipModel, { as: 'friend', foreignKey: 'friendId' })
+  friendshipModel.belongsTo(userModel, { as: 'user' })
+  friendshipModel.belongsTo(userModel, { as: 'friend' })
+
+  // FRIENDS_MATCH belongs to users
+  // USER has many matches with other USERS
+  userModel.hasMany(friendsMatchModel, { as: 'winner', foreignKey: 'winnerId' })
+  userModel.hasMany(friendsMatchModel, { as: 'loser', foreignKey: 'loserId' })
+  friendsMatchModel.belongsTo(userModel, { as: 'winner' })
+  friendsMatchModel.belongsTo(userModel, { as: 'loser' })
 
   return {
     userRepository: User({ model: userModel }),
