@@ -8,9 +8,9 @@ const UserScore = require('./userScore')
 const Badge = require('./badge')
 const UserBadge = require('./userBadge')
 const Joker = require('./joker')
-const ExamName = require('./examName')
-const CourseName = require('./courseName')
-const SubjectName = require('./subjectName')
+const ExamEntity = require('./examEntity')
+const CourseEntity = require('./courseEntity')
+const SubjectEntity = require('./subjectEntity')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -23,14 +23,14 @@ module.exports = ({ database }) => {
   const badgeModel = database.models.badges
   const userBadgeModel = database.models.userBadges
   const jokerModel = database.models.jokers
-  const examNameModel = database.models.examNames
-  const courseNameModel = database.models.courseNames
-  const subjectNameModel = database.models.subjectNames
+  const examEntityModel = database.models.examEntities
+  const courseEntityModel = database.models.courseEntities
+  const subjectEntityModel = database.models.subjectEntities
 
-  // USER has many statistics 1-N
+  // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
   userModel.hasMany(statisticModel, { foreignKey: 'userId' })
-  statisticModel.belongsTo(userModel)
+  statisticModel.belongsTo(userModel, { foreignKey: 'userId' })
 
   // FAVOURITE_QUESTION belongs to one user and question 1-1
   // USER has many questions M-N
@@ -64,6 +64,16 @@ module.exports = ({ database }) => {
   friendsMatchModel.belongsTo(userModel, { as: 'winner' })
   friendsMatchModel.belongsTo(userModel, { as: 'loser' })
 
+  // EXAM has many COURSEs
+  // COURSEs belongs to EXAM
+  examEntityModel.hasMany(courseEntityModel, { foreignKey: 'examId' })
+  courseEntityModel.belongsTo(examEntityModel, { foreignKey: 'examId' })
+
+  // COURSE has many SUBJECTs
+  // SUBJECTs belongs to COURSE
+  courseEntityModel.hasMany(subjectEntityModel, { foreignKey: 'courseId' })
+  subjectEntityModel.belongsTo(courseEntityModel, { foreignKey: 'courseId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -75,8 +85,8 @@ module.exports = ({ database }) => {
     badgeRepository: Badge({ model: badgeModel }),
     userBadgeRepository: UserBadge({ model: userBadgeModel }),
     jokerRepository: Joker({ model: jokerModel }),
-    examNameRepository: ExamName({ model: examNameModel }),
-    courseNameRepository: CourseName({ model: courseNameModel }),
-    subjectNameRepository: SubjectName({ model: subjectNameModel })
+    examEntityRepository: ExamEntity({ model: examEntityModel }),
+    courseEntityRepository: CourseEntity({ model: courseEntityModel }),
+    subjectEntityRepository: SubjectEntity({ model: subjectEntityModel })
   }
 }
