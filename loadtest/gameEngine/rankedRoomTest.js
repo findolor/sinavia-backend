@@ -5,9 +5,9 @@ const client = new Colyseus.Client('http://localhost:5000')
 
 const joinOptions = {
   create: true,
-  examName: 'LGS',
-  courseName: 'Matematik',
-  subjectName: 'Sayilar',
+  examId: 1,
+  courseId: 1,
+  subjectId: 1,
   // kullanici1 users table id
   databaseId: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc'
 }

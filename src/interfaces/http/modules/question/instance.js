@@ -1,18 +1,22 @@
 const container = require('src/container') // we have to get the DI
-const { getQPicURL } = require('src/app/question')
+const { getQPicURL, getQuestion } = require('src/app/question')
 
 module.exports = () => {
   const {
+    repository: { questionRepository },
     config,
-    s3service
+    s3service,
+    database
   } = container.cradle
 
   const getQPicURLUseCase = getQPicURL({
     config,
     s3service
   })
+  const getQuestionUseCase = getQuestion({ questionRepository, database })
 
   return {
-    getQPicURLUseCase
+    getQPicURLUseCase,
+    getQuestionUseCase
   }
 }

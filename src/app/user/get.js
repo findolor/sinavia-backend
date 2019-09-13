@@ -31,6 +31,7 @@ module.exports = ({ userRepository, Sequelize, database }) => {
             model: database.models.friendships,
             as: 'friend'
           },
+          // TODO Move win/lose/draw numbers to scores so we wont have to fetch all of them
           {
             model: database.models.statistics
           },

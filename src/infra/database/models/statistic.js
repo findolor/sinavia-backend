@@ -6,16 +6,16 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false
     },
-    examName: {
-      type: DataTypes.STRING,
+    examId: {
+      type: DataTypes.NUMBER,
       allowNull: false
     },
-    courseName: {
-      type: DataTypes.STRING,
+    courseId: {
+      type: DataTypes.NUMBER,
       allowNull: false
     },
-    subjectName: {
-      type: DataTypes.STRING,
+    subjectId: {
+      type: DataTypes.NUMBER,
       allowNull: false
     },
     correctNumber: {

@@ -74,6 +74,36 @@ module.exports = ({ database }) => {
   courseEntityModel.hasMany(subjectEntityModel, { foreignKey: 'courseId' })
   subjectEntityModel.belongsTo(courseEntityModel, { foreignKey: 'courseId' })
 
+  // EXAM has many QUESTIONs
+  // QUESTION belongs to EXAM
+  examEntityModel.hasMany(questionModel, { foreignKey: 'examId' })
+  questionModel.belongsTo(examEntityModel, { foreignKey: 'examId' })
+
+  // COURSE has many QUESTIONs
+  // QUESTION belongs to COURSE
+  courseEntityModel.hasMany(questionModel, { foreignKey: 'courseId' })
+  questionModel.belongsTo(courseEntityModel, { foreignKey: 'courseId' })
+
+  // SUBJECT has many QUESTIONs
+  // QUESTION belongs to SUBJECT
+  subjectEntityModel.hasMany(questionModel, { foreignKey: 'subjectId' })
+  questionModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
+
+  // EXAM has many STATISTICs
+  // STATISTIC belongs to EXAM
+  examEntityModel.hasMany(statisticModel, { foreignKey: 'examId' })
+  statisticModel.belongsTo(examEntityModel, { foreignKey: 'examId' })
+
+  // COURSE has many STATISTICs
+  // STATISTIC belongs to COURSE
+  courseEntityModel.hasMany(statisticModel, { foreignKey: 'courseId' })
+  statisticModel.belongsTo(courseEntityModel, { foreignKey: 'courseId' })
+
+  // SUBJECT has many STATISTICs
+  // STATISTIC belongs to SUBJECT
+  subjectEntityModel.hasMany(statisticModel, { foreignKey: 'subjectId' })
+  statisticModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),

@@ -8,17 +8,29 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
-      examName: {
-        type: Sequelize.STRING,
-        allowNull: false
+      examId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'examEntities',
+          key: 'id'
+        }
       },
-      courseName: {
-        type: Sequelize.STRING,
-        allowNull: false
+      courseId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'courseEntities',
+          key: 'id'
+        }
       },
-      subjectName: {
-        type: Sequelize.STRING,
-        allowNull: false
+      subjectId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'subjectEntities',
+          key: 'id'
+        }
       },
       questionLink: {
         type: Sequelize.STRING,

@@ -4,9 +4,9 @@ const { cleanData } = require('../helper')
 
 const Question = t.struct({
   id: t.maybe(t.Number),
-  examName: t.String,
-  courseName: t.String,
-  subjectName: t.String,
+  examId: t.Number,
+  courseId: t.Number,
+  subjectId: t.Number,
   questionLink: t.String,
   correctAnswer: t.Number,
   createdAt: t.maybe(t.Date),

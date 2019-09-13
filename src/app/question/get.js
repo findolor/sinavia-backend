@@ -1,4 +1,4 @@
-module.exports = ({ questionRepository }) => {
+module.exports = ({ questionRepository, database }) => {
   const getOne = ({ id }) => {
     return Promise
       .resolve()
@@ -11,17 +11,30 @@ module.exports = ({ questionRepository }) => {
       })
   }
 
-  const getMultiple = ({ idList, matchInformation }) => {
+  const getMultiple = ({ examId, courseId, subjectId, questionAmount }) => {
     return Promise
       .resolve()
       .then(() => {
         const questionList = questionRepository.findAll({
           where: {
-            id: idList,
-            examName: matchInformation.examName,
-            subjectName: matchInformation.subjectName,
-            courseName: matchInformation.courseName
-          }
+            examId: examId,
+            courseId: courseId,
+            subjectId: subjectId
+          },
+          /* // TODO Think about fetching this in one different query
+          include: [
+            {
+              model: database.models.examEntities
+            },
+            {
+              model: database.models.courseEntities
+            },
+            {
+              model: database.models.subjectEntities
+            }
+          ], */
+          order: database.sequelize.random(),
+          limit: questionAmount
         })
         return questionList
       })

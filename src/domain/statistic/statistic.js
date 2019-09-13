@@ -4,9 +4,9 @@ const { cleanData } = require('../helper')
 
 const Statistic = t.struct({
   id: t.maybe(t.Number),
-  examName: t.String,
-  courseName: t.String,
-  subjectName: t.String,
+  examId: t.Number,
+  courseId: t.Number,
+  subjectId: t.Number,
   correctNumber: t.Number,
   incorrectNumber: t.Number,
   unansweredNumber: t.Number,

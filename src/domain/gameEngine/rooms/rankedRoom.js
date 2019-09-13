@@ -6,6 +6,7 @@ const {
   getMultipleQuestions,
   postStatistic,
   getOneUser
+  // getMatchInformation
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -166,7 +167,7 @@ class RankedGame {
     // We check if the user has a disabled button. We don't include it if we have one
     alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
 
-    const examName = this.rankedState.matchInformation.examName
+    const examId = this.rankedState.matchInformation.examId
     const questionAnswer = this.getQuestionAnswer()
 
     const optionsToRemove = []
@@ -176,7 +177,7 @@ class RankedGame {
     let firstRandomOption = -1
 
     // This code piece is for 4 options
-    if (examName === 'LGS') {
+    if (examId === 1) {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
         // Random number shouldn't be equal to the answer and the other choosen number
@@ -230,7 +231,7 @@ class RankedGame {
     const playerList = []
 
     // We get the results and points as normal
-    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examName)
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
 
     // We check if the leaving client is the first client
     if (leavingClientId === this.rankedState.playerOneId) {
@@ -273,9 +274,9 @@ class RankedGame {
 
     resultsKeys.forEach(key => {
       playerList.push({
-        examName: matchInformation.examName,
-        subjectName: matchInformation.subjectName,
-        courseName: matchInformation.courseName,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
@@ -302,13 +303,13 @@ class RankedGame {
 
     const playerList = []
 
-    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examName)
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
 
     resultsKeys.forEach(key => {
       playerList.push({
-        examName: matchInformation.examName,
-        subjectName: matchInformation.subjectName,
-        courseName: matchInformation.courseName,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
@@ -325,7 +326,7 @@ class RankedGame {
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
-  decideWinLoseDrawAndPoints (results, resultsKeys, examName) {
+  decideWinLoseDrawAndPoints (results, resultsKeys, examId) {
     const winLoseDrawAndPoints = []
     let net
     const netList = []
@@ -334,7 +335,7 @@ class RankedGame {
 
     resultsKeys.forEach(key => {
       points = results[key].correct * CORRECT_ANSWER_MULTIPLIER
-      if (examName !== 'LGS') {
+      if (examId !== 1) {
         net = results[key].correct - results[key].incorrect / 4
       } else {
         net = results[key].correct - results[key].incorrect / 3
@@ -391,22 +392,19 @@ class RankedGame {
   }
 }
 
-// Gets random numbers for given range and lenght
-function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
-  const arr = []
-  while (arr.length < uniqueItemNumber) {
-    const r = Math.floor(Math.random() * topNumber) + 1
-    if (arr.indexOf(r) === -1) arr.push(r)
-  }
-  return arr
-}
-
-// Gets questions by providing it with random indexes
-function getQuestions (matchInformation, questionIdList) {
+// Gets questions based on given question amount
+function getQuestions (
+  examId,
+  courseId,
+  subjectId,
+  questionAmount
+) {
   try {
     return getMultipleQuestions(
-      questionIdList,
-      matchInformation
+      examId,
+      courseId,
+      subjectId,
+      questionAmount
     )
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot get questions')
@@ -436,6 +434,15 @@ function postMatchResults (playerList) {
     logger.error(error.stack)
   }
 }
+
+/* function getMatchContent (examId) {
+  try {
+    return getMatchInformation(examId)
+  } catch(error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get match information')
+    logger.error(error.stack)
+  }
+} */
 
 class RankedRoom extends colyseus.Room {
   constructor () {
@@ -471,9 +478,9 @@ class RankedRoom extends colyseus.Room {
     } else {
       const matchInformation = this.state.getMatchInformation()
       const ROOM_AVAILABILITY_CHECK = (options.create && isNew) || this.clients.length > 0
-      const EXAM_COURSE_SUBJECT_CHECK = (matchInformation.examName === options.examName) &&
-                                        (matchInformation.courseName === options.courseName) &&
-                                        (matchInformation.subjectName === options.subjectName)
+      const EXAM_COURSE_SUBJECT_CHECK = (matchInformation.examId === options.examId) &&
+                                        (matchInformation.courseId === options.courseId) &&
+                                        (matchInformation.subjectId === options.subjectId)
       if (ROOM_AVAILABILITY_CHECK) { // First we check if the room is available for joining
         if (EXAM_COURSE_SUBJECT_CHECK) { // Then we check if this is the same game with both players
           return true // User can join the game
@@ -484,22 +491,22 @@ class RankedRoom extends colyseus.Room {
 
   onInit (options) {
     try {
-    // We initialize our game here
+      console.log(options)
+      // We initialize our game here
       this.setState(new RankedGame())
 
-      // We get a random list of numbers for our question fetching
-      this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
-
       const matchInformation = {
-        examName: options.examName,
-        courseName: options.courseName,
-        subjectName: options.subjectName
+        examId: options.examId,
+        courseId: options.courseId,
+        subjectId: options.subjectId
       }
 
       // Fetching questions from database
       getQuestions(
-        matchInformation,
-        this.questionIdList
+        options.examId,
+        options.courseId,
+        options.subjectId,
+        this.questionAmount
       ).then(questionProps => {
         const questionList = []
 
@@ -631,16 +638,16 @@ class RankedRoom extends colyseus.Room {
         case 'reset-room':
           this.state.resetRoom()
 
-          this.questionAmount = 1
           this.readyPlayerCount = 0
           this.finishedPlayerCount = 0
-          this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
           this.isMatchFinished = false
 
           // Fetching questions from database
           getQuestions(
-            this.state.getMatchInformation(),
-            this.questionIdList
+            this.state.getMatchInformation().examId,
+            this.state.getMatchInformation().courseId,
+            this.state.getMatchInformation().subjectId,
+            this.questionAmount
           ).then(questionProps => {
             const questionList = []
 
