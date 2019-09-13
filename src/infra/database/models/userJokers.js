@@ -1,21 +1,21 @@
 module.exports = (sequelize, DataTypes) => {
-  const Badge = sequelize.define('badges', {
+  const UserJoker = sequelize.define('userJokers', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false
     },
-    name: {
+    userId: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: {
-      type: DataTypes.STRING,
+    jokerId: {
+      type: DataTypes.NUMBER,
       allowNull: false
     },
-    imageLink: {
-      type: DataTypes.STRING,
+    amount: {
+      type: DataTypes.NUMBER,
       allowNull: false
     }
   }, {
@@ -23,5 +23,5 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   })
 
-  return Badge
+  return UserJoker
 }

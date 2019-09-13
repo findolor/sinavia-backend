@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const UserBadges = sequelize.define('userBadges', {
+  const UserBadge = sequelize.define('userBadges', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
@@ -19,5 +19,5 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   })
 
-  return UserBadges
+  return UserBadge
 }

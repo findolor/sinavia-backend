@@ -11,6 +11,7 @@ const Joker = require('./joker')
 const ExamEntity = require('./examEntity')
 const CourseEntity = require('./courseEntity')
 const SubjectEntity = require('./subjectEntity')
+const UserJoker = require('./userJoker')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -26,6 +27,7 @@ module.exports = ({ database }) => {
   const examEntityModel = database.models.examEntities
   const courseEntityModel = database.models.courseEntities
   const subjectEntityModel = database.models.subjectEntities
+  const userJokerModel = database.models.userJokers
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -109,6 +111,16 @@ module.exports = ({ database }) => {
   userModel.hasMany(userScoreModel, { foreignKey: 'userId' })
   userScoreModel.belongsTo(userModel, { foreignKey: 'userId' })
 
+  // USER has many USER_JOKERs
+  // USER_JOKER belongs to USER
+  userModel.hasMany(userJokerModel, { foreignKey: 'userId' })
+  userJokerModel.belongsTo(userModel, { foreignKey: 'userId' })
+
+  // JOKER has many USER_JOKERs
+  // USER_JOKER belongs to JOKER
+  jokerModel.hasMany(userJokerModel, { foreignKey: 'jokerId' })
+  userJokerModel.belongsTo(jokerModel, { foreignKey: 'jokerId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -122,6 +134,7 @@ module.exports = ({ database }) => {
     jokerRepository: Joker({ model: jokerModel }),
     examEntityRepository: ExamEntity({ model: examEntityModel }),
     courseEntityRepository: CourseEntity({ model: courseEntityModel }),
-    subjectEntityRepository: SubjectEntity({ model: subjectEntityModel })
+    subjectEntityRepository: SubjectEntity({ model: subjectEntityModel }),
+    userJokerRepository: UserJoker({ model: userJokerModel })
   }
 }
