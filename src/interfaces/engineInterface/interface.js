@@ -13,22 +13,35 @@ exports.getMultipleQuestions = async (examId, courseId, subjectId, questionAmoun
   })
 }
 
-exports.postStatistic = async (gameResults) => {
+exports.postStatistic = (gameResults) => {
   return engineInterface().postStatisticUseCase.createStat({ gameResults: gameResults })
 }
 
-exports.getMultipleUsers = async (idList) => {
+exports.getMultipleUsers = (idList) => {
   return engineInterface().getUserUseCase.getMultiple({ idList: idList })
 }
 
-exports.getOneUser = async (id) => {
+exports.getOneUser = (id) => {
   return engineInterface().getUserUseCase.getOne({ id: id })
 }
 
-exports.postFriendGameMatchResult = async (gameInformation) => {
+exports.postFriendGameMatchResult = (gameInformation) => {
   return engineInterface().postFriendsMatchUseCase.create({ gameInformation: gameInformation })
 }
 
-exports.getMatchInformation = async (examId) => {
-  return engineInterface().getExamEntityUseCase.getFullExamInformation({ examId: examId })
+exports.getUserScore = (userId, examId, courseId, subjectId) => {
+  return engineInterface().getUserScoreUseCase.getOne({
+    userId: userId,
+    examId: examId,
+    courseId: courseId,
+    subjectId: subjectId
+  })
+}
+
+exports.postUserScore = (userScoreEntity) => {
+  return engineInterface().postUserScoreUseCase.createUserScore({ userScoreEntity: userScoreEntity })
+}
+
+exports.putUserScore = (userScoreEntity) => {
+  return engineInterface().putUserScoreUseCase.updateUserScore({ userScoreEntity: userScoreEntity })
 }

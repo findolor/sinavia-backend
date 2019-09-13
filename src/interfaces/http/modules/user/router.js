@@ -124,9 +124,12 @@ module.exports = ({
         // Friend matches
         .then(data => {
           const FRIENDSHIPS = []
-          const STATISTICS_WON = []
-          const STATISTICS_DRAW = []
-          const STATISTICS_LOST = []
+          const STATISTICS = {
+            winCount: 0,
+            loseCount: 0,
+            drawCount: 0,
+            totalPoints: 0
+          }
           const FRIENDMATCHES_WINNER = []
           const FRIENDMATCHES_LOSER = []
           const FRIENDMATCHES_DRAW = []
@@ -147,18 +150,11 @@ module.exports = ({
             }
             FRIENDSHIPS.push(friendship.dataValues)
           })
-          data.dataValues.statistics.forEach(statistic => {
-            switch (statistic.dataValues.gameResult) {
-              case 'won':
-                STATISTICS_WON.push(statistic.dataValues)
-                break
-              case 'lost':
-                STATISTICS_LOST.push(statistic.dataValues)
-                break
-              case 'draw':
-                STATISTICS_DRAW.push(statistic.dataValues)
-                break
-            }
+          data.dataValues.userScores.forEach(userScore => {
+            STATISTICS.winCount += userScore.dataValues.totalWin
+            STATISTICS.loseCount += userScore.dataValues.totalLose
+            STATISTICS.drawCount += userScore.dataValues.totalDraw
+            STATISTICS.totalPoints += userScore.dataValues.totalPoints
           })
           data.dataValues.winner.forEach(win => {
             if (win.dataValues.isMatchDraw) FRIENDMATCHES_DRAW.push(win.dataValues)
@@ -173,9 +169,7 @@ module.exports = ({
             isRequesting: isRequesting,
             isRequested: isRequested,
             friendships: FRIENDSHIPS,
-            wins: STATISTICS_WON,
-            defeats: STATISTICS_LOST,
-            draws: STATISTICS_DRAW,
+            statistics: STATISTICS,
             friendGameWins: FRIENDMATCHES_WINNER,
             friendGameDefeats: FRIENDMATCHES_LOSER,
             friendGameDraws: FRIENDMATCHES_DRAW

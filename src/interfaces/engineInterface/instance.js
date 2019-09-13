@@ -3,7 +3,7 @@ const { getQuestion } = require('src/app/question')
 const { getUser } = require('src/app/user')
 const { postStatistic } = require('src/app/statistic')
 const { postFriendsMatch } = require('src/app/friendsMatch')
-const { getExamEntity } = require('src/app/examEntity')
+const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -22,7 +22,7 @@ module.exports = () => {
       friendsMatchRepository
     },
     repository: {
-      examEntityRepository
+      userScoreRepository
     }
   } = container.cradle
 
@@ -30,13 +30,17 @@ module.exports = () => {
   const postStatisticUseCase = postStatistic({ statisticRepository })
   const getUserUseCase = getUser({ userRepository, Sequelize })
   const postFriendsMatchUseCase = postFriendsMatch({ friendsMatchRepository })
-  const getExamEntityUseCase = getExamEntity({ examEntityRepository, database })
+  const getUserScoreUseCase = getUserScore({ userScoreRepository })
+  const postUserScoreUseCase = postUserScore({ userScoreRepository })
+  const putUserScoreUseCase = putUserScore({ userScoreRepository })
 
   return {
     getQuestionUseCase,
     postStatisticUseCase,
     getUserUseCase,
     postFriendsMatchUseCase,
-    getExamEntityUseCase
+    getUserScoreUseCase,
+    postUserScoreUseCase,
+    putUserScoreUseCase
   }
 }

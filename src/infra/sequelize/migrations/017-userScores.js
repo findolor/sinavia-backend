@@ -18,17 +18,41 @@ module.exports = {
       },
       examId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'examEntities',
+          key: 'id'
+        }
       },
       courseId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'courseEntities',
+          key: 'id'
+        }
       },
       subjectId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'subjectEntities',
+          key: 'id'
+        }
       },
       totalPoints: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      totalWin: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      totalLose: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      totalDraw: {
         type: Sequelize.INTEGER,
         allowNull: false
       },

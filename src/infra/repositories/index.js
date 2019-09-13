@@ -104,6 +104,11 @@ module.exports = ({ database }) => {
   subjectEntityModel.hasMany(statisticModel, { foreignKey: 'subjectId' })
   statisticModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
 
+  // USER has many USER_SCOREs
+  // USER_SCORE belongs to USER
+  userModel.hasMany(userScoreModel, { foreignKey: 'userId' })
+  userScoreModel.belongsTo(userModel, { foreignKey: 'userId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),

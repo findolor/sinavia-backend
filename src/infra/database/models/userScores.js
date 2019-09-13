@@ -25,6 +25,18 @@ module.exports = (sequelize, DataTypes) => {
     totalPoints: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    totalWin: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    totalLose: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    totalDraw: {
+      type: DataTypes.NUMBER,
+      allowNull: false
     }
   }, {
     freezeTableName: true,

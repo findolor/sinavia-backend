@@ -5,8 +5,10 @@ const logger = log({ config })
 const {
   getMultipleQuestions,
   postStatistic,
-  getOneUser
-  // getMatchInformation
+  getOneUser,
+  getUserScore,
+  postUserScore,
+  putUserScore
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -219,7 +221,7 @@ class RankedGame {
   }
 
   // This is called when one of the clients leaves the game
-  saveUnfinishedMatchResults (leavingClientId, rankedRoomId) {
+  saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -273,6 +275,8 @@ class RankedGame {
     }
 
     resultsKeys.forEach(key => {
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
       playerList.push({
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
@@ -285,6 +289,8 @@ class RankedGame {
         // parseInt is used for converting '0' to 0
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
+
+      this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -293,7 +299,7 @@ class RankedGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  saveMatchResults (rankedRoomId) {
+  saveMatchResults (rankedRoomId, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -306,6 +312,8 @@ class RankedGame {
     const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
 
     resultsKeys.forEach(key => {
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
       playerList.push({
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
@@ -316,13 +324,58 @@ class RankedGame {
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
+
+      this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
 
     postMatchResults(playerList)
+  }
+
+  decideUserScores (userScores, winLoseDrawAndPoints, matchInformation, key, userId, databaseId) {
+    if (userScores[userId].shouldUpdate) {
+      userScores[userId].userScore.totalPoints = userScores[userId].userScore.totalPoints + winLoseDrawAndPoints[key].points
+      switch (winLoseDrawAndPoints[key].status) {
+        case 'won':
+          userScores[userId].userScore.totalWin++
+          break
+        case 'lost':
+          userScores[userId].userScore.totalLose++
+          break
+        case 'draw':
+          userScores[userId].userScore.totalDraw++
+          break
+      }
+      updateUserScore(userScores[userId].userScore)
+    } else {
+      let win = 0
+      let lose = 0
+      let draw = 0
+      switch (winLoseDrawAndPoints[key].status) {
+        case 'won':
+          win = 1
+          break
+        case 'lost':
+          lose = 1
+          break
+        case 'draw':
+          draw = 1
+          break
+      }
+      createUserScore({
+        userId: databaseId,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
+        totalPoints: winLoseDrawAndPoints[key].points,
+        totalWin: win,
+        totalLose: lose,
+        totalDraw: draw
+      })
+    }
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
@@ -426,8 +479,8 @@ function getUser (id) {
 function postMatchResults (playerList) {
   try {
     // We save the statistic to our database
-    playerList.forEach(async player => {
-      await postStatistic(player)
+    playerList.forEach(player => {
+      postStatistic(player)
     })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
@@ -435,14 +488,42 @@ function postMatchResults (playerList) {
   }
 }
 
-/* function getMatchContent (examId) {
+function fetchUserScore (
+  userId,
+  examId,
+  courseId,
+  subjectId
+) {
   try {
-    return getMatchInformation(examId)
-  } catch(error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get match information')
+    return getUserScore(
+      userId,
+      examId,
+      courseId,
+      subjectId
+    )
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
     logger.error(error.stack)
   }
-} */
+}
+
+function createUserScore (userScoreEntity) {
+  try {
+    return postUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserScore (userScoreEntity) {
+  try {
+    return putUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+    logger.error(error.stack)
+  }
+}
 
 class RankedRoom extends colyseus.Room {
   constructor () {
@@ -456,6 +537,7 @@ class RankedRoom extends colyseus.Room {
     this.leavingClientId = null
     this.joinedPlayerNum = 0
     this.fetchedUserInfoNumber = 0
+    this.userScores = {}
     /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
         // If we have reached the maxClients, we lock the room for unexpected things
@@ -491,7 +573,6 @@ class RankedRoom extends colyseus.Room {
 
   onInit (options) {
     try {
-      console.log(options)
       // We initialize our game here
       this.setState(new RankedGame())
 
@@ -527,8 +608,29 @@ class RankedRoom extends colyseus.Room {
 
   onJoin (client, options) {
     try {
-      // if(options === undefined) return
-    // Getting user information from database
+      // We get the user score from database
+      // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+      // When the game ends we save it to db accordingly
+      fetchUserScore(
+        options.databaseId,
+        options.examId,
+        options.courseId,
+        options.subjectId
+      ).then(userScore => {
+        if (userScore === null) {
+          this.userScores[client.id] = {
+            shouldUpdate: false,
+            userScore: userScore
+          }
+        } else {
+          this.userScores[client.id] = {
+            shouldUpdate: true,
+            userScore: userScore
+          }
+        }
+      })
+
+      // Getting user information from database
       getUser(options.databaseId).then(userInformation => {
         this.fetchedUserInfoNumber++
         // Finally adding the player to our room state
@@ -588,7 +690,7 @@ class RankedRoom extends colyseus.Room {
                 this.state.changeStateInformation('match-finished')
                 this.isMatchFinished = true
                 // We save the results after the match is finished
-                this.state.saveMatchResults(this.roomId)
+                this.state.saveMatchResults(this.roomId, this.userScores)
               }, 5000)
               break
             }
@@ -688,7 +790,7 @@ class RankedRoom extends colyseus.Room {
         if (!this.isMatchFinished) {
           // We send the leaving clients id
           // We do different stuff if the client has left before the match ends
-          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId)
+          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores)
         }
       }
     } catch (error) {
