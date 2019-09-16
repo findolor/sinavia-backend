@@ -10,7 +10,8 @@ const {
   postUserScore,
   putUserScore,
   getUserJoker,
-  putUserJoker
+  putUserJoker,
+  deleteUserJoker
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -386,11 +387,14 @@ class RankedGame {
     if (userJokers[userId] !== null) {
       userJokers[userId].forEach(userJoker => {
         if (userJoker.isUsed) {
-          updateUserJoker({
-            userId: databaseId,
-            jokerId: userJoker.id,
-            amount: userJoker.amount
-          })
+          if (userJoker.amount === 0) destroyUserJoker(databaseId, userJoker.id)
+          else {
+            updateUserJoker({
+              userId: databaseId,
+              jokerId: userJoker.id,
+              amount: userJoker.amount
+            })
+          }
         }
       })
     }
@@ -548,6 +552,15 @@ function fetchUserJoker (userId) {
     return getUserJoker(userId)
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function destroyUserJoker (userId, jokerId) {
+  try {
+    return deleteUserJoker(userId, jokerId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot delete userJoker')
     logger.error(error.stack)
   }
 }
