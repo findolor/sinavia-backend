@@ -4,7 +4,7 @@ const { getUser } = require('src/app/user')
 const { postStatistic } = require('src/app/statistic')
 const { postFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
-const { getUserJoker, deleteUserJoker, putUserJoker } = require('src/app/userJoker')
+const { getUserJoker, putUserJoker } = require('src/app/userJoker')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -38,7 +38,6 @@ module.exports = () => {
   const postUserScoreUseCase = postUserScore({ userScoreRepository })
   const putUserScoreUseCase = putUserScore({ userScoreRepository })
   const getUserJokerUseCase = getUserJoker({ userJokerRepository, database })
-  const deleteUserJokerUseCase = deleteUserJoker({ userJokerRepository })
   const putUserJokerUseCase = putUserJoker({ userJokerRepository })
 
   return {
@@ -50,7 +49,6 @@ module.exports = () => {
     postUserScoreUseCase,
     putUserScoreUseCase,
     getUserJokerUseCase,
-    putUserJokerUseCase,
-    deleteUserJokerUseCase
+    putUserJokerUseCase
   }
 }
