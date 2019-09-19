@@ -45,11 +45,12 @@ module.exports = ({
           getUserUseCase
             .getOne({ id: req.body.friendId })
             .then(userData => {
+              const { dataValues } = userData
               postUseCase
                 .create({ body: req.body })
                 .then(data => {
                   fcmService.sendNotificationDataMessage(
-                    userData.fcmToken,
+                    dataValues.fcmToken,
                     {
                       title: 'Arkadaş İsteği!',
                       body: `${req.body.username} seni arkadaş olarak ekledi.`
@@ -132,11 +133,12 @@ module.exports = ({
       getUserUseCase
         .getOne({ id: req.body.userId })
         .then(userData => {
+          const { dataValues } = userData
           putUseCase
             .updateFriendship({ body: req.body })
             .then(data => {
               fcmService.sendDataMessage(
-                userData.fcmToken,
+                dataValues.fcmToken,
                 {
                   type: 'friendApproved',
                   title: 'Arkadaş İsteği!',
@@ -178,6 +180,20 @@ module.exports = ({
               res.status(Status.BAD_REQUEST).json(
                 Fail(error.message))
             })
+        })
+    })
+
+  router
+    .delete('/reject/', (req, res) => {
+      deleteUseCase
+        .deleteFriendship({ userId: req.query.userId, friendId: req.query.friendId })
+        .then(data => {
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
         })
     })
 
