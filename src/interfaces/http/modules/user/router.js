@@ -138,15 +138,19 @@ module.exports = ({
           let isRequested = false
           data.dataValues.user.forEach(friendship => {
             if (friendship.dataValues.friendId === req.query.clientId) {
-              if (friendship.dataValues.friendshipStatus === 'approved') isFriend = true
-              else isRequesting = true
+              if (friendship.dataValues.friendshipStatus === 'approved') {
+                isFriend = true
+                isRequesting = true
+              } else isRequesting = true
             }
             FRIENDSHIPS.push(friendship.dataValues)
           })
           data.dataValues.friend.forEach(friendship => {
             if (friendship.dataValues.userId === req.query.clientId) {
-              if (friendship.dataValues.friendshipStatus === 'approved') isFriend = true
-              else isRequested = true
+              if (friendship.dataValues.friendshipStatus === 'approved') {
+                isFriend = true
+                isRequested = true
+              } else isRequested = true
             }
             FRIENDSHIPS.push(friendship.dataValues)
           })

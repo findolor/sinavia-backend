@@ -1,54 +1,34 @@
 module.exports = () => {
   return [
     {
-      name: 'LGS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'LGS'
     },
     {
-      name: 'YKS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'YKS'
     },
     {
-      name: 'KPSS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'KPSS'
     },
     {
-      name: 'ALES',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'ALES'
     },
     {
-      name: 'DGS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'DGS'
     },
     {
-      name: 'YDS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'YDS'
     },
     {
-      name: 'TUS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'TUS'
     },
     {
-      name: 'DUS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'DUS'
     },
     {
-      name: 'EUS',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'EUS'
     },
     {
-      name: 'EHLİYET',
-      description: 'EXAM_DESCRIPTION',
-      imageLink: 'EXAM_LINK'
+      name: 'EHLİYET'
     }
   ]
 }

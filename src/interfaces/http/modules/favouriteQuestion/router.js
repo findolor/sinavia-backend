@@ -11,7 +11,7 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  router.use(auth.authenticate())
+  // router.use(auth.authenticate())
 
   // Gets all the faved questions from db
   router
@@ -34,7 +34,16 @@ module.exports = ({
       postFavouriteQuestionUseCase
         .create({ body: req.body })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
+          getFavouriteQuestionUseCase
+            .getOne({ userId: data.userId, questionId: data.questionId })
+            .then(data => {
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch((error) => {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
         .catch((error) => {
           logger.error(error.stack)

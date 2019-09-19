@@ -12,6 +12,25 @@ module.exports = ({ examEntityRepository, database }) => {
       })
   }
 
+  const getAll = () => {
+    return Promise
+      .resolve()
+      .then(() => {
+        return examEntityRepository.findAll({
+          include: [
+            {
+              model: database.models.courseEntities,
+              include: [
+                {
+                  model: database.models.subjectEntities
+                }
+              ]
+            }
+          ]
+        })
+      })
+  }
+
   const getFullExamInformation = ({ examId }) => {
     return Promise
       .resolve()
@@ -37,6 +56,7 @@ module.exports = ({ examEntityRepository, database }) => {
 
   return {
     getOne,
+    getAll,
     getFullExamInformation
   }
 }
