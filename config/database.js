@@ -11,13 +11,15 @@ module.exports = {
     port: process.env.DATABASE_PORT,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
-    dialect: 'postgres'
-    /* ssl: process.env.DATABASE_SSL_ENABLED,
+    dialect: 'postgres',
+    timezone: process.env.TIMEZONE,
+    // ssl: process.env.DATABASE_SSL_ENABLED,
     dialectOptions: {
-      ssl: {
+      /* ssl: {
         require: process.env.DATABASE_SSL_ENABLED
-      }
-    } */
+      } */
+      useUTC: false
+    }
   },
   development: {
     database: process.env.DATABASE_NAME,

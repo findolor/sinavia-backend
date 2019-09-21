@@ -1,4 +1,5 @@
 const moment = require('moment')
+moment.locale('tr')
 
 module.exports = ({ config }) => {
   const currentDate = moment().tz(config.timezone)
@@ -6,6 +7,7 @@ module.exports = ({ config }) => {
   const addHour = (duration) => currentDate.add(duration, 'hours')
 
   return {
-    addHour
+    addHour,
+    moment
   }
 }

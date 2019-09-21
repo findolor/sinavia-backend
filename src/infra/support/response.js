@@ -1,11 +1,13 @@
 const { assoc } = require('ramda')
+const moment = require('./date')
 
 module.exports = ({ config }) => {
+  const momentVar = moment({ config })
   const defaultResponse = (success = true) => {
     return {
       success,
       version: config.version,
-      date: new Date()
+      date: momentVar.moment().utc(true).toDate()
     }
   }
 
