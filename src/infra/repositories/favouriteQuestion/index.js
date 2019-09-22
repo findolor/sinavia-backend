@@ -2,7 +2,9 @@ const { toEntity } = require('./transform')
 
 module.exports = ({ model }) => {
   const create = (...args) =>
-    model.create(...args).then(({ dataValues }) => toEntity(dataValues))
+    model.create(...args).then(({ dataValues }) => {
+      return dataValues
+    })
 
   const update = (...args) =>
     model.update(...args)
@@ -15,7 +17,9 @@ module.exports = ({ model }) => {
 
   const findOne = (...args) =>
     model.findOne(...args)
-      .then(({ dataValues }) => toEntity(dataValues))
+      .then(({ dataValues }) => {
+        return dataValues
+      })
       .catch((error) => { throw new Error(error) })
 
   const findAll = (...args) =>

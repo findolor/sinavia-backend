@@ -9,14 +9,6 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    imageLink: {
-      type: DataTypes.STRING,
-      allowNull: false
     }
   }, {
     freezeTableName: true,

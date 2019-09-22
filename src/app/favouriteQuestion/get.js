@@ -13,7 +13,22 @@ module.exports = ({ favouriteQuestionRepository, database }) => {
       })
   }
 
+  const getOne = ({ userId, questionId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        return favouriteQuestionRepository.findOne({
+          where: {
+            userId: userId,
+            questionId: questionId
+          },
+          include: [database.models.questions]
+        })
+      })
+  }
+
   return {
-    getBatch
+    getBatch,
+    getOne
   }
 }

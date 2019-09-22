@@ -5,7 +5,6 @@ const { cleanData } = require('../helper')
 const CourseEntity = t.struct({
   id: t.maybe(t.Number),
   name: t.String,
-  description: t.String,
   imageLink: t.String,
   examId: t.Number,
   createdAt: t.maybe(t.Date),

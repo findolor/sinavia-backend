@@ -8,7 +8,10 @@ const {
   getOneUser,
   getUserScore,
   postUserScore,
-  putUserScore
+  putUserScore,
+  getUserJoker,
+  putUserJoker,
+  deleteUserJoker
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -221,7 +224,7 @@ class RankedGame {
   }
 
   // This is called when one of the clients leaves the game
-  saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores) {
+  saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -291,6 +294,7 @@ class RankedGame {
       })
 
       this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -299,7 +303,7 @@ class RankedGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  saveMatchResults (rankedRoomId, userScores) {
+  saveMatchResults (rankedRoomId, userScores, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -328,6 +332,7 @@ class RankedGame {
       })
 
       this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -374,6 +379,23 @@ class RankedGame {
         totalWin: win,
         totalLose: lose,
         totalDraw: draw
+      })
+    }
+  }
+
+  decideUserJokers (userJokers, userId, databaseId) {
+    if (userJokers[userId] !== null) {
+      userJokers[userId].forEach(userJoker => {
+        if (userJoker.isUsed) {
+          if (userJoker.amount === 0) destroyUserJoker(databaseId, userJoker.id)
+          else {
+            updateUserJoker({
+              userId: databaseId,
+              jokerId: userJoker.id,
+              amount: userJoker.amount
+            })
+          }
+        }
       })
     }
   }
@@ -525,6 +547,33 @@ function updateUserScore (userScoreEntity) {
   }
 }
 
+function fetchUserJoker (userId) {
+  try {
+    return getUserJoker(userId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function destroyUserJoker (userId, jokerId) {
+  try {
+    return deleteUserJoker(userId, jokerId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot delete userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserJoker (userJokerEntity) {
+  try {
+    return putUserJoker(userJokerEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+    logger.error(error.stack)
+  }
+}
+
 class RankedRoom extends colyseus.Room {
   constructor () {
     super()
@@ -538,6 +587,7 @@ class RankedRoom extends colyseus.Room {
     this.joinedPlayerNum = 0
     this.fetchedUserInfoNumber = 0
     this.userScores = {}
+    this.userJokers = {}
     /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
         // If we have reached the maxClients, we lock the room for unexpected things
@@ -630,6 +680,24 @@ class RankedRoom extends colyseus.Room {
         }
       })
 
+      // We get user jokers from database
+      // Later on we send all the joker names and ids to the client
+      // If the client doesnt have a joker it will be blacked out
+      // TODO Send the joker names to our client
+      // SEND THIS WHEN THE APP OPENS
+      fetchUserJoker(options.databaseId).then(userJokers => {
+        this.userJokers[client.id] = []
+        if (Object.keys(userJokers).length !== 0) {
+          userJokers.forEach(userJoker => {
+            this.userJokers[client.id].push({
+              isUsed: false,
+              amount: userJoker.amount,
+              id: userJoker.jokerId
+            })
+          })
+        } else this.userJokers[client.id] = null
+      })
+
       // Getting user information from database
       getUser(options.databaseId).then(userInformation => {
         this.fetchedUserInfoNumber++
@@ -690,7 +758,7 @@ class RankedRoom extends colyseus.Room {
                 this.state.changeStateInformation('match-finished')
                 this.isMatchFinished = true
                 // We save the results after the match is finished
-                this.state.saveMatchResults(this.roomId, this.userScores)
+                this.state.saveMatchResults(this.roomId, this.userScores, this.userJokers)
               }, 5000)
               break
             }
@@ -709,6 +777,12 @@ class RankedRoom extends colyseus.Room {
           this.state.setPlayerAnswerResults(client.id, data.button)
           break
         case 'remove-options-joker':
+          // We mark the joker as used
+          if (this.userJokers[client.id] !== null) {
+            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.id][index].amount--
+          }
           let optionsToRemove
 
           // If we have a disabled button before hand, we send it. Otherwise we don't
@@ -720,6 +794,13 @@ class RankedRoom extends colyseus.Room {
           })
           break
         case 'second-chance-joker':
+          // We mark the joker as used
+          if (this.userJokers[client.id] !== null) {
+            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.id][index].amount--
+          }
+
           const questionAnswer = this.state.getQuestionAnswer()
 
           // We send the question answer to client for checking if it choose the correct option
@@ -727,6 +808,14 @@ class RankedRoom extends colyseus.Room {
             action: 'second-chance-joker',
             questionAnswer: questionAnswer
           })
+          break
+        case 'see-opponent-answer-joker':
+          // We mark the joker as used
+          if (this.userJokers[client.id] !== null) {
+            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.id][index].amount--
+          }
           break
         case 'replay':
           this.clients.forEach(element => {
@@ -790,7 +879,7 @@ class RankedRoom extends colyseus.Room {
         if (!this.isMatchFinished) {
           // We send the leaving clients id
           // We do different stuff if the client has left before the match ends
-          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores)
+          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers)
         }
       }
     } catch (error) {

@@ -10,14 +10,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    imageLink: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     courseId: {
       type: DataTypes.NUMBER,
       allowNull: false

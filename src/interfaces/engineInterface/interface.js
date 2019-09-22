@@ -45,3 +45,15 @@ exports.postUserScore = (userScoreEntity) => {
 exports.putUserScore = (userScoreEntity) => {
   return engineInterface().putUserScoreUseCase.updateUserScore({ userScoreEntity: userScoreEntity })
 }
+
+exports.getUserJoker = (userId) => {
+  return engineInterface().getUserJokerUseCase.getJokers({ userId: userId })
+}
+
+exports.putUserJoker = (userJokerEntity) => {
+  return engineInterface().putUserJokerUseCase.updateUserJoker({ userJokerEntity: userJokerEntity })
+}
+
+exports.deleteUserJoker = (userId, jokerId) => {
+  return engineInterface().deleteUserJokerUseCase.deleteUserJoker({ userId: userId, jokerId: jokerId })
+}

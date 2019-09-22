@@ -4,6 +4,7 @@ const { getUser } = require('src/app/user')
 const { postStatistic } = require('src/app/statistic')
 const { postFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
+const { getUserJoker, putUserJoker, deleteUserJoker } = require('src/app/userJoker')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -23,6 +24,9 @@ module.exports = () => {
     },
     repository: {
       userScoreRepository
+    },
+    repository: {
+      userJokerRepository
     }
   } = container.cradle
 
@@ -33,6 +37,9 @@ module.exports = () => {
   const getUserScoreUseCase = getUserScore({ userScoreRepository })
   const postUserScoreUseCase = postUserScore({ userScoreRepository })
   const putUserScoreUseCase = putUserScore({ userScoreRepository })
+  const getUserJokerUseCase = getUserJoker({ userJokerRepository, database })
+  const putUserJokerUseCase = putUserJoker({ userJokerRepository })
+  const deleteUserJokerUseCase = deleteUserJoker({ userJokerRepository })
 
   return {
     getQuestionUseCase,
@@ -41,6 +48,9 @@ module.exports = () => {
     postFriendsMatchUseCase,
     getUserScoreUseCase,
     postUserScoreUseCase,
-    putUserScoreUseCase
+    putUserScoreUseCase,
+    getUserJokerUseCase,
+    putUserJokerUseCase,
+    deleteUserJokerUseCase
   }
 }

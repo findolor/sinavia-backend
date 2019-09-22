@@ -12,14 +12,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      imageLink: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       courseId: {
         type: Sequelize.INTEGER,
         allowNull: false,

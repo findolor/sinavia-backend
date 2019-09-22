@@ -9,8 +9,7 @@ module.exports = ({ userJokerRepository, database }) => {
           },
           include: [
             {
-              model: database.models.jokers,
-              attributes: { exclude: ['price'] }
+              model: database.models.jokers
             }
           ]
         })
