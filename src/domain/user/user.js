@@ -10,8 +10,10 @@ const User = t.struct({
   email: t.String,
   city: t.String,
   birthDate: t.String,
+  // TODO MAKE PICTURES DEFAULT FOR EVERY USER
   profilePicture: t.String,
   coverPicture: t.String,
+  totalPoints: t.maybe(t.Number),
   fcmToken: t.maybe(t.String),
   // userLevel: t.maybe(t.Object),
   password: t.maybe(t.String),

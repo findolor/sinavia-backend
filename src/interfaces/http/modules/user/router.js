@@ -127,8 +127,7 @@ module.exports = ({
           const STATISTICS = {
             winCount: 0,
             loseCount: 0,
-            drawCount: 0,
-            totalPoints: 0
+            drawCount: 0
           }
           const FRIENDMATCHES_WINNER = []
           const FRIENDMATCHES_LOSER = []
@@ -158,7 +157,6 @@ module.exports = ({
             STATISTICS.winCount += userScore.dataValues.totalWin
             STATISTICS.loseCount += userScore.dataValues.totalLose
             STATISTICS.drawCount += userScore.dataValues.totalDraw
-            STATISTICS.totalPoints += userScore.dataValues.totalPoints
           })
           data.dataValues.winner.forEach(win => {
             if (win.dataValues.isMatchDraw) FRIENDMATCHES_DRAW.push(win.dataValues)

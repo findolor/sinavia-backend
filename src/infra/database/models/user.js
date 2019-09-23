@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    totalPoints: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false

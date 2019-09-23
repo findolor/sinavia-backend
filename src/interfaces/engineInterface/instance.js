@@ -1,6 +1,6 @@
 const container = require('src/container') // we have to get the DI
 const { getQuestion } = require('src/app/question')
-const { getUser } = require('src/app/user')
+const { getUser, putUser } = require('src/app/user')
 const { postStatistic } = require('src/app/statistic')
 const { postFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
@@ -40,6 +40,7 @@ module.exports = () => {
   const getUserJokerUseCase = getUserJoker({ userJokerRepository, database })
   const putUserJokerUseCase = putUserJoker({ userJokerRepository })
   const deleteUserJokerUseCase = deleteUserJoker({ userJokerRepository })
+  const putUserUseCase = putUser({ userRepository })
 
   return {
     getQuestionUseCase,
@@ -51,6 +52,7 @@ module.exports = () => {
     putUserScoreUseCase,
     getUserJokerUseCase,
     putUserJokerUseCase,
-    deleteUserJokerUseCase
+    deleteUserJokerUseCase,
+    putUserUseCase
   }
 }

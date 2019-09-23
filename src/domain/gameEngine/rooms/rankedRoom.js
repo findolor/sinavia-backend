@@ -11,7 +11,8 @@ const {
   putUserScore,
   getUserJoker,
   putUserJoker,
-  deleteUserJoker
+  deleteUserJoker,
+  updateUserTotalPoints
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -224,7 +225,7 @@ class RankedGame {
   }
 
   // This is called when one of the clients leaves the game
-  saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores, userJokers) {
+  saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores, userJokers, userInformations) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -238,11 +239,12 @@ class RankedGame {
     // We get the results and points as normal
     const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
 
+    // We subtract finished match point
+    winLoseDrawAndPoints[0].points -= FINISH_MATCH_POINT
+    winLoseDrawAndPoints[1].points -= FINISH_MATCH_POINT
+
     // We check if the leaving client is the first client
     if (leavingClientId === this.rankedState.playerOneId) {
-      // We subtract finished match point
-      winLoseDrawAndPoints[0].points -= FINISH_MATCH_POINT
-      winLoseDrawAndPoints[1].points -= FINISH_MATCH_POINT
       // If the client was winning prior to leaving
       if (winLoseDrawAndPoints[0].status === 'won') {
         // We subtract winning point
@@ -295,6 +297,7 @@ class RankedGame {
 
       this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -303,7 +306,7 @@ class RankedGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  saveMatchResults (rankedRoomId, userScores, userJokers) {
+  saveMatchResults (rankedRoomId, userScores, userJokers, userInformations) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -333,6 +336,7 @@ class RankedGame {
 
       this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -398,6 +402,12 @@ class RankedGame {
         }
       })
     }
+  }
+
+  decideUserInformationTotalPoints (userInformation, earnedPoints) {
+    if (earnedPoints === 0) return
+    userInformation.totalPoints += earnedPoints
+    updateUserPoints(userInformation)
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
@@ -574,6 +584,15 @@ function updateUserJoker (userJokerEntity) {
   }
 }
 
+function updateUserPoints (userEntity) {
+  try {
+    return updateUserTotalPoints(userEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put user')
+    logger.error(error.stack)
+  }
+}
+
 class RankedRoom extends colyseus.Room {
   constructor () {
     super()
@@ -588,6 +607,7 @@ class RankedRoom extends colyseus.Room {
     this.fetchedUserInfoNumber = 0
     this.userScores = {}
     this.userJokers = {}
+    this.userInformations = {}
     /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
         // If we have reached the maxClients, we lock the room for unexpected things
@@ -700,6 +720,9 @@ class RankedRoom extends colyseus.Room {
 
       // Getting user information from database
       getUser(options.databaseId).then(userInformation => {
+        const { dataValues } = userInformation
+        userInformation = dataValues
+        this.userInformations[client.id] = userInformation
         this.fetchedUserInfoNumber++
         // Finally adding the player to our room state
         this.state.addPlayer(client.id, userInformation, options.databaseId)
@@ -758,7 +781,7 @@ class RankedRoom extends colyseus.Room {
                 this.state.changeStateInformation('match-finished')
                 this.isMatchFinished = true
                 // We save the results after the match is finished
-                this.state.saveMatchResults(this.roomId, this.userScores, this.userJokers)
+                this.state.saveMatchResults(this.roomId, this.userScores, this.userJokers, this.userInformations)
               }, 5000)
               break
             }
@@ -879,7 +902,7 @@ class RankedRoom extends colyseus.Room {
         if (!this.isMatchFinished) {
           // We send the leaving clients id
           // We do different stuff if the client has left before the match ends
-          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers)
+          this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers, this.userInformations)
         }
       }
     } catch (error) {

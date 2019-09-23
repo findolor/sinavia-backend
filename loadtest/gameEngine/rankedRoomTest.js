@@ -49,7 +49,7 @@ client.onOpen.add(() => {
 function answerQuestion (room) {
   room.send({
     action: 'button-press',
-    button: 1
+    button: joinOptions.examId === 1 ? Math.floor(Math.random() * 5) + 1 : Math.floor(Math.random() * 4) + 1
   })
 
   setTimeout(() => {

@@ -38,6 +38,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      totalPoints: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false
