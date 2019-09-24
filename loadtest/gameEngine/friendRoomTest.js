@@ -9,17 +9,18 @@ const playerOneId = 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc'
 const selectedPlayer = parseInt(process.argv[2], 10)
 
 const joinOptions = {
-  create: true,
+  create: selectedPlayer === 0,
   examId: 1,
   courseId: 1,
   subjectId: 1,
+  roomCode: 'CODE',
   // kullanici1 users table id
   databaseId: selectedPlayer === 0 ? playerZeroId : playerOneId
 }
 
 client.onOpen.add(() => {
   // Joins a room or creates one with given options
-  const room = client.join('rankedRoom', joinOptions)
+  const room = client.join('friendRoom', joinOptions)
   console.log(`Successfully joined room: ${room}`)
   console.log(`Player id: ${selectedPlayer === 0 ? playerZeroId : playerOneId}`)
 
@@ -32,8 +33,8 @@ client.onOpen.add(() => {
 
   // Game state coming from server
   room.onStateChange.add(state => {
-    const rankedState = state.rankedState
-    switch (state.rankedState.stateInformation) {
+    const friendState = state.friendState
+    switch (state.friendState.stateInformation) {
       case 'question':
         // Answering the question 2 seconds later
         setTimeout(() => {
@@ -41,8 +42,8 @@ client.onOpen.add(() => {
         }, 1500)
         break
       case 'match-finished':
-        console.log(`Player One answers: ${rankedState.playerProps[rankedState.playerOneId].answers}`)
-        console.log(`Player Two answers: ${rankedState.playerProps[rankedState.playerTwoId].answers}`)
+        console.log(`Player One answers: ${friendState.playerProps[friendState.playerOneId].answers}`)
+        console.log(`Player Two answers: ${friendState.playerProps[friendState.playerTwoId].answers}`)
         process.exit()
     }
   })

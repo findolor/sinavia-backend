@@ -599,7 +599,6 @@ class RankedRoom extends colyseus.Room {
     this.maxClients = 2
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionIdList = []
     this.questionAmount = 3
     this.isMatchFinished = false
     this.leavingClientId = null

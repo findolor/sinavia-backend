@@ -6,7 +6,10 @@ const {
   getMultipleQuestions,
   postStatistic,
   getOneUser,
-  postFriendGameMatchResult
+  postFriendGameMatchResult,
+  getUserJoker,
+  deleteUserJoker,
+  putUserJoker
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -159,7 +162,7 @@ class FriendGame {
     // We check if the user has a disabled button. We don't include it if we have one
     alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
 
-    const examName = this.friendState.matchInformation.examName
+    const examId = this.friendState.matchInformation.examId
     const questionAnswer = this.getQuestionAnswer()
 
     const optionsToRemove = []
@@ -169,7 +172,7 @@ class FriendGame {
     let firstRandomOption = -1
 
     // This code piece is for 4 options
-    if (examName === 'LGS') {
+    if (examId === 1) {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
         // Random number shouldn't be equal to the answer and the other choosen number
@@ -211,7 +214,7 @@ class FriendGame {
   }
 
   // This is called when one of the clients leaves the game
-  async saveUnfinishedMatchResults (leavingClientId, friendRoomId) {
+  async saveUnfinishedMatchResults (leavingClientId, friendRoomId, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -224,7 +227,7 @@ class FriendGame {
     const friendMatchInformation = {}
 
     // We get the results as normal
-    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examName)
+    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examId)
 
     // We check if the leaving client is the first client
     if (leavingClientId === this.friendState.playerOneId) {
@@ -250,10 +253,12 @@ class FriendGame {
     }
 
     resultsKeys.forEach(key => {
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
       playerList.push({
-        examName: matchInformation.examName,
-        subjectName: matchInformation.subjectName,
-        courseName: matchInformation.courseName,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
@@ -261,6 +266,8 @@ class FriendGame {
         // parseInt is used for converting '0' to 0
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
+
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
     })
 
     switch (winLoseDraw[0].status) {
@@ -288,7 +295,7 @@ class FriendGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  async saveMatchResults (friendRoomId) {
+  async saveMatchResults (friendRoomId, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -299,13 +306,15 @@ class FriendGame {
     const playerList = []
     const friendMatchInformation = {}
 
-    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examName)
+    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examId)
 
     resultsKeys.forEach(key => {
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
       playerList.push({
-        examName: matchInformation.examName,
-        subjectName: matchInformation.subjectName,
-        courseName: matchInformation.courseName,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
@@ -313,6 +322,8 @@ class FriendGame {
         // parseInt is used for converting '0' to 0
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
+
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
     })
 
     switch (winLoseDraw[0].status) {
@@ -339,14 +350,32 @@ class FriendGame {
     await postFriendMatchResults(friendMatchInformation)
   }
 
+  decideUserJokers (userJokers, userId, databaseId) {
+    console.log(userJokers[userId])
+    if (userJokers[userId] !== null) {
+      userJokers[userId].forEach(userJoker => {
+        if (userJoker.isUsed) {
+          if (userJoker.amount === 0) destroyUserJoker(databaseId, userJoker.id)
+          else {
+            updateUserJoker({
+              userId: databaseId,
+              jokerId: userJoker.id,
+              amount: userJoker.amount
+            })
+          }
+        }
+      })
+    }
+  }
+
   // This is used for deciding if the users had draw, one of them wins and the other loses
-  decideWinLoseDraw (results, resultsKeys, examName) {
+  decideWinLoseDraw (results, resultsKeys, examId) {
     const winLoseDraw = []
     let net
     const netList = []
 
     resultsKeys.forEach(key => {
-      if (examName !== 'LGS') {
+      if (examId !== 1) {
         net = results[key].correct - results[key].incorrect / 4
       } else {
         net = results[key].correct - results[key].incorrect / 3
@@ -406,12 +435,19 @@ function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
   return arr
 }
 
-// Gets questions by providing it with random indexes
-function getQuestions (matchInformation, questionIdList) {
+// Gets questions based on given question amount
+function getQuestions (
+  examId,
+  courseId,
+  subjectId,
+  questionAmount
+) {
   try {
     return getMultipleQuestions(
-      questionIdList,
-      matchInformation
+      examId,
+      courseId,
+      subjectId,
+      questionAmount
     )
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot get questions')
@@ -433,8 +469,8 @@ function getUser (id) {
 function postMatchResults (playerList) {
   try {
     // We save the statistic to our database
-    playerList.forEach(async player => {
-      await postStatistic(player)
+    playerList.forEach(player => {
+      postStatistic(player)
     })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
@@ -452,24 +488,77 @@ function postFriendMatchResults (friendMatchInformation) {
   }
 }
 
+function fetchUserJoker (userId) {
+  try {
+    return getUserJoker(userId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function destroyUserJoker (userId, jokerId) {
+  try {
+    return deleteUserJoker(userId, jokerId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot delete userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserJoker (userJokerEntity) {
+  try {
+    return putUserJoker(userJokerEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+    logger.error(error.stack)
+  }
+}
+
 class FriendRoom extends colyseus.Room {
   constructor () {
     super()
     this.maxClients = 2
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionIdList = []
     this.questionAmount = 3
     this.isMatchFinished = false
     this.leavingClientId = null
+    this.joinedPlayerNum = 0
+    this.fetchedUserInfoNumber = 0
+    this.userJokers = {}
   }
 
   onInit (options) {
-    // We get a random list of numbers for our question fetching
-    this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
-
     // We initialize our game here
     this.setState(new FriendGame())
+
+    const matchInformation = {
+      examId: options.examId,
+      courseId: options.courseId,
+      subjectId: options.subjectId,
+      roomCode: options.roomCode
+    }
+
+    // Fetching questions from database
+    getQuestions(
+      options.examId,
+      options.courseId,
+      options.subjectId,
+      this.questionAmount
+    ).then(questionProps => {
+      const questionList = []
+
+      // Getting only the question links
+      questionProps.forEach(element => {
+        questionList.push(element.questionLink)
+      })
+      // Setting general match related info
+      this.state.setQuestions(questionProps, questionList)
+      this.state.setMatchInformation(matchInformation)
+    }).catch(error => {
+      logger.error(error.stack)
+    })
   }
 
   // If this room is full new users will join another room
@@ -490,45 +579,45 @@ class FriendRoom extends colyseus.Room {
     }
   }
 
-  async onJoin (client, options) {
-    // We don't do these steps again for a second player. Only for once
-    if (this.clients.length !== 2) {
-      const matchInformation = {
-        examName: options.examName,
-        courseName: options.courseName,
-        subjectName: options.subjectName,
-        roomCode: options.roomCode
-      }
-
-      // Fetching questions from database
-      const questionProps = await getQuestions(
-        matchInformation,
-        this.questionIdList
-      )
-      const questionList = []
-
-      // Getting only the question links
-      questionProps.forEach(element => {
-        questionList.push(element.questionLink)
-      })
-      // Setting general match related info
-      this.state.setQuestions(questionProps, questionList)
-      this.state.setMatchInformation(matchInformation)
-    }
+  onJoin (client, options) {
+    // We get user jokers from database
+    // Later on we send all the joker names and ids to the client
+    // If the client doesnt have a joker it will be blacked out
+    // TODO Send the joker names to our client
+    // SEND THIS WHEN THE APP OPENS
+    fetchUserJoker(options.databaseId).then(userJokers => {
+      this.userJokers[client.id] = []
+      if (Object.keys(userJokers).length !== 0) {
+        userJokers.forEach(userJoker => {
+          this.userJokers[client.id].push({
+            isUsed: false,
+            amount: userJoker.amount,
+            id: userJoker.jokerId
+          })
+        })
+      } else this.userJokers[client.id] = null
+    })
 
     // Getting user information from database
-    const userInformation = await getUser(options.databaseId)
+    getUser(options.databaseId).then(userInformation => {
+      const { dataValues } = userInformation
+      userInformation = dataValues
+      this.fetchedUserInfoNumber++
+      // Finally adding the player to our room state
+      this.state.addPlayer(client.id, userInformation, options.databaseId)
 
-    // Finally adding the player to our room state
-    this.state.addPlayer(client.id, userInformation, options.databaseId)
-
-    if (this.clients.length === this.maxClients) {
-      // If we have reached the maxClients, we lock the room for unexpected things
-      this.lock()
-      // We send the clients player information
-      this.broadcast(this.state.getPlayerProps())
-      logger.info(`Friend game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
-    }
+      if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        // If we have reached the maxClients, we lock the room for unexpected things
+        this.lock()
+        // We send the clients player information
+        this.clock.setTimeout(() => {
+          this.broadcast(this.state.getPlayerProps())
+        }, 500)
+        logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+      }
+    }).catch(error => {
+      logger.error(error.stack)
+    })
   }
 
   // TODO Move the actions into their own functions
@@ -560,7 +649,7 @@ class FriendRoom extends colyseus.Room {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId)
+              await this.state.saveMatchResults(this.roomId, this.userJokers)
             }, 5000)
             break
           }
@@ -579,6 +668,13 @@ class FriendRoom extends colyseus.Room {
         this.state.setPlayerAnswerResults(client.id, data.button)
         break
       case 'remove-options-joker':
+        // We mark the joker as used
+        if (this.userJokers[client.id] !== null) {
+          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.id][index].amount--
+        }
+
         let optionsToRemove
 
         // If we have a disabled button before hand, we send it. Otherwise we don't
@@ -590,6 +686,13 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'second-chance-joker':
+        // We mark the joker as used
+        if (this.userJokers[client.id] !== null) {
+          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.id][index].amount--
+        }
+
         const questionAnswer = this.state.getQuestionAnswer()
 
         // We send the question answer to client for checking if it choose the correct option
@@ -597,6 +700,14 @@ class FriendRoom extends colyseus.Room {
           action: 'second-chance-joker',
           questionAnswer: questionAnswer
         })
+        break
+      case 'see-opponent-answer-joker':
+        // We mark the joker as used
+        if (this.userJokers[client.id] !== null) {
+          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.id][index].amount--
+        }
         break
       case 'replay':
         this.clients.forEach(element => {
@@ -608,6 +719,7 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'reset-room':
+        // TODO USE THE NEW FUNCTIONS
         this.state.resetRoom()
 
         this.questionAmount = 1
@@ -655,7 +767,7 @@ class FriendRoom extends colyseus.Room {
       if (!this.isMatchFinished) {
         // We send the leaving clients id
         // We do different stuff if the client has left before the match ends
-        await this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId)
+        await this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers)
       }
     }
   }

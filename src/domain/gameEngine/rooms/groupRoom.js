@@ -5,7 +5,10 @@ const logger = log({ config })
 const {
   getMultipleQuestions,
   postStatistic,
-  getOneUser
+  getOneUser,
+  getUserJoker,
+  putUserJoker,
+  deleteUserJoker
 } = require('../../../interfaces/engineInterface/interface')
 const {
   calculateResults
@@ -171,7 +174,7 @@ class GroupGame {
     // We check if the user has a disabled button. We don't include it if we have one
     alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
 
-    const examName = this.groupState.matchInformation.examName
+    const examId = this.groupState.matchInformation.examId
     const questionAnswer = this.getQuestionAnswer()
 
     const optionsToRemove = []
@@ -181,7 +184,7 @@ class GroupGame {
     let firstRandomOption = -1
 
     // This code piece is for 4 options
-    if (examName === 'LGS') {
+    if (examId === 1) {
       while (loop < 2) {
         randomNumber = Math.floor(Math.random() * 4) + 1
         // Random number shouldn't be equal to the answer and the other choosen number
@@ -224,7 +227,7 @@ class GroupGame {
 
   // TODO Add points logic like in ranked
   // This will not work now
-  async saveMatchResults (groupRoomId) {
+  saveMatchResults (groupRoomId, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -236,21 +239,42 @@ class GroupGame {
 
     // Need to add more attributes like point, gameResult
     resultsKeys.forEach(key => {
+      // parseInt is used for converting '0' to 0
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
       playerList.push({
-        examName: matchInformation.examName,
-        subjectName: matchInformation.subjectName,
-        courseName: matchInformation.courseName,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
-        // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
+
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
 
-    await postMatchResults(playerList)
+    postMatchResults(playerList)
+  }
+
+  decideUserJokers (userJokers, userId, databaseId) {
+    if (userJokers[userId] !== null) {
+      userJokers[userId].forEach(userJoker => {
+        if (userJoker.isUsed) {
+          if (userJoker.amount === 0) destroyUserJoker(databaseId, userJoker.id)
+          else {
+            updateUserJoker({
+              userId: databaseId,
+              jokerId: userJoker.id,
+              amount: userJoker.amount
+            })
+          }
+        }
+      })
+    }
   }
 
   // TODO need to implement replay logic for group
@@ -269,24 +293,20 @@ class GroupGame {
   }
 }
 
-// Gets random numbers for given range and lenght
-function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
-  const arr = []
-  while (arr.length < uniqueItemNumber) {
-    const r = Math.floor(Math.random() * topNumber) + 1
-    if (arr.indexOf(r) === -1) arr.push(r)
-  }
-  return arr
-}
-
-// Gets questions by providing it with random indexes
-async function getQuestions (matchInformation, questionIdList) {
+// Gets questions based on given question amount
+function getQuestions (
+  examId,
+  courseId,
+  subjectId,
+  questionAmount
+) {
   try {
-    const questions = await getMultipleQuestions(
-      questionIdList,
-      matchInformation
+    return getMultipleQuestions(
+      examId,
+      courseId,
+      subjectId,
+      questionAmount
     )
-    return questions
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot get questions')
     logger.error(error.stack)
@@ -316,25 +336,59 @@ function postMatchResults (playerList) {
   }
 }
 
+function fetchUserJoker (userId) {
+  try {
+    return getUserJoker(userId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function destroyUserJoker (userId, jokerId) {
+  try {
+    return deleteUserJoker(userId, jokerId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot delete userJoker')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserJoker (userJokerEntity) {
+  try {
+    return putUserJoker(userJokerEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+    logger.error(error.stack)
+  }
+}
+
 class GroupRoom extends colyseus.Room {
   constructor () {
     super()
     this.maxClients = 30
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionIdList = []
     this.questionAmount = 3
     this.isMatchFinished = false
     this.isMatchStarted = false
     this.joinedPlayerNum = 0
+    this.userJokers = {}
   }
 
+  // TODO USE THE NEW FUNCTIONS
   onInit (options) {
-    // We get a random list of numbers for our question fetching
-    this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
-
     // We initialize our game here
     this.setState(new GroupGame())
+
+    const matchInformation = {
+      examId: options.examId,
+      courseId: options.courseId,
+      subjectId: options.subjectId,
+      roomCode: options.roomCode
+    }
+
+    this.state.setMatchInformation(matchInformation)
   }
 
   // If this room is full new users will join another room
@@ -357,33 +411,41 @@ class GroupRoom extends colyseus.Room {
     }
   }
 
-  async onJoin (client, options) {
-    // We don't do these steps again for a second player. Only for once
-    if (this.joinedPlayerNum === 0) {
-      this.joinedPlayerNum++
-      const matchInformation = {
-        examName: options.examName,
-        courseName: options.courseName,
-        subjectName: options.subjectName,
-        roomCode: options.roomCode
-      }
-
-      this.state.setMatchInformation(matchInformation)
-    }
+  onJoin (client, options) {
+    // We get user jokers from database
+    // Later on we send all the joker names and ids to the client
+    // If the client doesnt have a joker it will be blacked out
+    // TODO Send the joker names to our client
+    // SEND THIS WHEN THE APP OPENS
+    fetchUserJoker(options.databaseId).then(userJokers => {
+      this.userJokers[client.id] = []
+      if (Object.keys(userJokers).length !== 0) {
+        userJokers.forEach(userJoker => {
+          this.userJokers[client.id].push({
+            isUsed: false,
+            amount: userJoker.amount,
+            id: userJoker.jokerId
+          })
+        })
+      } else this.userJokers[client.id] = null
+    })
 
     // Getting user information from database
-    const userInformation = await getUser(options.databaseId)
-
-    // Finally adding the player to our room state
-    this.state.addPlayer(client.id, userInformation, options.databaseId)
-
-    // We send the clients player information
-    setTimeout(() => {
-      this.broadcast({
-        action: 'player-props',
-        playerProps: this.state.getPlayerProps()
-      })
-    }, 500)
+    getUser(options.databaseId).then(userInformation => {
+      const { dataValues } = userInformation
+      userInformation = dataValues
+      // Finally adding the player to our room state
+      this.state.addPlayer(client.id, userInformation, options.databaseId)
+      // We send the clients player information
+      setTimeout(() => {
+        this.broadcast({
+          action: 'player-props',
+          playerProps: this.state.getPlayerProps()
+        })
+      }, 500)
+    }).catch(error => {
+      logger.error(error.stack)
+    })
 
     if (this._maxClientsReached) {
       // If we have reached the maxClients, we lock the room for unexpected things
@@ -420,7 +482,7 @@ class GroupRoom extends colyseus.Room {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults()
+              await this.state.saveMatchResults(this.roomId, this.userJokers)
             }, 5000)
             break
           }
@@ -439,6 +501,13 @@ class GroupRoom extends colyseus.Room {
         this.state.setPlayerAnswerResults(client.id, data.button)
         break
       case 'remove-options-joker':
+        // We mark the joker as used
+        if (this.userJokers[client.id] !== null) {
+          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.id][index].amount--
+        }
+
         let optionsToRemove
 
         // If we have a disabled button before hand, we send it. Otherwise we don't
@@ -450,6 +519,13 @@ class GroupRoom extends colyseus.Room {
         })
         break
       case 'second-chance-joker':
+        // We mark the joker as used
+        if (this.userJokers[client.id] !== null) {
+          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.id][index].amount--
+        }
+
         const questionAnswer = this.state.getQuestionAnswer()
 
         // We send the question answer to client for checking if it choose the correct option
@@ -480,20 +556,30 @@ class GroupRoom extends colyseus.Room {
         break
       // The leader presses start
       case 'start-match':
+        if (this.clients.length === 2) break
         this.isMatchStarted = true
-        // Fetching questions from database
-        const questionProps = await getQuestions(
-          this.state.getMatchInformation(),
-          this.questionIdList
-        )
-        const questionList = []
 
-        // Getting only the question links
-        questionProps.forEach(element => {
-          questionList.push(element.questionLink)
+        const matchInformation = this.state.getMatchInformation()
+
+        // Fetching questions from database
+        getQuestions(
+          matchInformation.examId,
+          matchInformation.courseId,
+          matchInformation.subjectId,
+          this.questionAmount
+        ).then(questionProps => {
+          const questionList = []
+
+          // Getting only the question links
+          questionProps.forEach(element => {
+            questionList.push(element.questionLink)
+          })
+
+          // Setting general match related info
+          this.state.setQuestions(questionProps, questionList)
+        }).catch(error => {
+          logger.error(error.stack)
         })
-        // Setting general match related info
-        this.state.setQuestions(questionProps, questionList)
 
         this.broadcast({
           action: 'start-match'
@@ -547,6 +633,7 @@ class GroupRoom extends colyseus.Room {
     else {
       // If the match hasn't started yet, we just delete the client object and move on
       delete playerProps[client.id]
+      delete this.userJokers[client.id]
       const index = playerIdList.indexOf(client.id)
       playerIdList.splice(index, 1)
     }
@@ -589,7 +676,7 @@ class GroupRoom extends colyseus.Room {
     // Because there are no winners and losers in this game mode, it doesn't matter if we save the match results right before the room closes
     // If the match hasn't started yet, we don't save any result because there aren't any lol
     if (!this.isMatchFinished && this.isMatchStarted) {
-      await this.state.saveMatchResults()
+      await this.state.saveMatchResults(this.roomId, this.userJokers)
     }
   }
 }
