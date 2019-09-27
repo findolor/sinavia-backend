@@ -638,6 +638,7 @@ class GroupRoom extends colyseus.Room {
       playerIdList.splice(index, 1)
     }
 
+    this.state.changeStateInformation('player-props')
     this.state.setPlayerProps(playerProps)
     this.state.setPlayerIdList(playerIdList)
 
