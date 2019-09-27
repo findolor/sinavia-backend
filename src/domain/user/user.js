@@ -15,6 +15,7 @@ const User = t.struct({
   coverPicture: t.String,
   totalPoints: t.maybe(t.Number),
   fcmToken: t.maybe(t.String),
+  deviceId: t.String,
   // userLevel: t.maybe(t.Object),
   password: t.maybe(t.String),
   createdAt: t.maybe(t.Date),

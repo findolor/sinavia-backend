@@ -8,14 +8,17 @@ const Token = require('src/domain/token')
  */
 module.exports = ({ userRepository, webToken }) => {
   // code for getting all the items
-  const validate = ({ body }) => {
+  const validate = ({ body, deviceId }) => {
     return Promise.resolve().then(async () => {
       const credentials = Token(body)
-      const userCredentials = await userRepository.findOne({
+      let userCredentials = await userRepository.findOne({
         where: {
           email: credentials.email
         }
       })
+
+      const { dataValues } = userCredentials
+      userCredentials = dataValues
 
       const validatePass = userRepository.validatePassword(
         userCredentials.password
@@ -25,6 +28,17 @@ module.exports = ({ userRepository, webToken }) => {
         throw new Error('Invalid Credentials')
       }
       const signIn = webToken.signin()
+
+      // If the user logs in from a different device
+      // We save it and make sure that they don't log in from two devices later
+      if (userCredentials.deviceId !== deviceId) {
+        userCredentials.deviceId = deviceId
+        await userRepository.update(userCredentials, {
+          where: {
+            id: userCredentials.id
+          }
+        })
+      }
 
       return {
         token: signIn({

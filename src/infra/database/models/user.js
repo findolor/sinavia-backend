@@ -53,6 +53,10 @@ module.exports = (sequelize, DataTypes) => {
     fcmToken: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    deviceId: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     hooks: {
