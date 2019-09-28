@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     gameResult: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('won', 'lost', 'draw'),
       allowNull: true
     },
     earnedPoints: {

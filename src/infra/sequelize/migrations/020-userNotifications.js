@@ -1,7 +1,7 @@
 'use strict'
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('friendships', {
+    return queryInterface.createTable('userNotifications', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -16,18 +16,18 @@ module.exports = {
           key: 'id'
         }
       },
-      friendId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        }
+      notificationType: {
+        type: Sequelize.ENUM('friendshipAccepted', 'gameRequest'),
+        allowNull: false
       },
-      friendshipStatus: {
-        type: Sequelize.ENUM('requested', 'approved'),
+      notificationData: {
+        type: Sequelize.JSONB,
+        allowNull: false
+      },
+      read: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: 'requested'
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +42,6 @@ module.exports = {
     })
   },
   down: function (queryInterface) {
-    return queryInterface.dropTable('friendships')
+    return queryInterface.dropTable('userNotifications')
   }
 }

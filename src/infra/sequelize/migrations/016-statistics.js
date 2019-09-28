@@ -45,7 +45,7 @@ module.exports = {
         allowNull: false
       },
       gameResult: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('won', 'lost', 'draw'),
         allowNull: true
       },
       earnedPoints: {

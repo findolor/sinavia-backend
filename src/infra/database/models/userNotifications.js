@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Friendship = sequelize.define('friendships', {
+  const UserNotification = sequelize.define('userNotifications', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
@@ -10,19 +10,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    friendId: {
-      type: DataTypes.STRING,
+    notificationType: {
+      type: DataTypes.ENUM('friendshipAccepted', 'gameRequest'),
       allowNull: false
     },
-    friendshipStatus: {
-      type: DataTypes.ENUM('requested', 'approved'),
+    notificationData: {
+      type: DataTypes.JSON,
+      allowNull: false
+    },
+    read: {
+      type: DataTypes.NUMBER,
       allowNull: false,
-      defaultValue: 'requested'
+      defaultValue: false
     }
   }, {
     freezeTableName: true,
     timestamps: false
   })
 
-  return Friendship
+  return UserNotification
 }
