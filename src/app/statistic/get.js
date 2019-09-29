@@ -12,7 +12,8 @@ module.exports = ({ statisticRepository, Sequelize }) => {
     'correctNumber',
     'incorrectNumber',
     'unansweredNumber',
-    'createdAt'
+    'createdAt',
+    'gameResult'
   ]
 
   const getBatch = ({ userId }) => {
