@@ -24,6 +24,11 @@ const FINISH_MATCH_POINT = 20
 const WIN_MATCH_POINT = 100
 const CORRECT_ANSWER_MULTIPLIER = 20
 const DRAW_MATCH_POINT = 50
+const BOT_CLIENT_ID = 'bot_client_id'
+const BOT_USERNAME = 'BOT'
+const BOT_PROFILE_PICTURE = 'https://pbs.twimg.com/profile_images/740159807211114496/BC9W_CDf.jpg'
+const BOT_COVER_PICTURE = 'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80'
+const BOT_ID = 'bot_id'
 
 class RankedState {
   constructor (
@@ -62,11 +67,11 @@ class RankedGame {
   }
 
   // Adds the player to our room state
-  addPlayer (clientId, userInformation, databaseId) {
+  addPlayer (clientId, userInformation) {
     this.rankedState.playerProps[clientId] = {
       username: userInformation.username,
       answers: [],
-      databaseId: databaseId,
+      databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
       coverPicture: userInformation.coverPicture
     }
@@ -136,6 +141,10 @@ class RankedGame {
 
   getPlayerProps () {
     return this.rankedState.playerProps
+  }
+
+  setPlayerPropsMatchInformation (matchInformation) {
+    this.rankedState.playerProps.matchInformation = matchInformation
   }
 
   getPlayerId (playerNumber) {
@@ -295,9 +304,11 @@ class RankedGame {
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
       })
 
-      this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
-      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
-      this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+      if (userScores[userId] !== undefined) {
+        this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
+        this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+        this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+      } else playerList.pop()
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -334,9 +345,11 @@ class RankedGame {
         userId: playerProps[userId].databaseId
       })
 
-      this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
-      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
-      this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+      if (userScores[userId] !== undefined) {
+        this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
+        this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+        this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+      } else playerList.pop()
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -607,6 +620,7 @@ class RankedRoom extends colyseus.Room {
     this.userScores = {}
     this.userJokers = {}
     this.userInformations = {}
+    this.isBotGame = false
     /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
         // If we have reached the maxClients, we lock the room for unexpected things
@@ -650,6 +664,8 @@ class RankedRoom extends colyseus.Room {
         courseId: options.courseId,
         subjectId: options.subjectId
       }
+
+      this.state.setPlayerPropsMatchInformation(matchInformation)
 
       // Fetching questions from database
       getQuestions(
@@ -724,10 +740,10 @@ class RankedRoom extends colyseus.Room {
         this.userInformations[client.id] = userInformation
         this.fetchedUserInfoNumber++
         // Finally adding the player to our room state
-        this.state.addPlayer(client.id, userInformation, options.databaseId)
+        this.state.addPlayer(client.id, userInformation)
 
         if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-        // If we have reached the maxClients, we lock the room for unexpected things
+          // If we have reached the maxClients, we lock the room for unexpected things
           this.lock()
           // We send the clients player information
           this.clock.setTimeout(() => {
@@ -757,6 +773,25 @@ class RankedRoom extends colyseus.Room {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
           }, 3000) */
+            // We set a timeout for bot
+            if (this.isBotGame) {
+              let botAnswer = Math.floor((Math.random() * 6) + 1)
+              let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+
+              this.clock.setTimeout(() => {
+                // Bot answers the question
+                this.state.setPlayerAnswerResults(BOT_CLIENT_ID, botAnswer)
+                // If the user answered before the bot
+                // We make them resend finished action again
+                if (++this.finishedPlayerCount === 2) {
+                  this.finishedPlayerCount--
+                  this.broadcast({
+                    action: 'resend-finished'
+                  })
+                }
+              }, botTimer)
+            }
+
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
           }
@@ -764,8 +799,8 @@ class RankedRoom extends colyseus.Room {
           // 'finished' action is sent after a player answers a question.
         case 'finished':
           if (++this.finishedPlayerCount === 2) {
-          // We check if this is the last question
-          // We extract one because questionNumber started from -1
+            // We check if this is the last question
+            // We extract one because questionNumber started from -1
             if (this.state.getQuestionNumber() === this.questionAmount - 1) {
               this.state.changeStateInformation('show-results')
               // Sending the questions in full for favouriting
@@ -791,6 +826,22 @@ class RankedRoom extends colyseus.Room {
             this.clock.setTimeout(() => {
               that.state.nextQuestion()
               that.state.changeStateInformation('question')
+
+              if (this.isBotGame) {
+                let botAnswer = Math.floor((Math.random() * 6) + 1)
+                // let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+                let botTimer = 5000
+
+                this.clock.setTimeout(() => {
+                  this.state.setPlayerAnswerResults(BOT_CLIENT_ID, botAnswer)
+                  if (++this.finishedPlayerCount === 2) {
+                    this.finishedPlayerCount--
+                    this.broadcast({
+                      action: 'resend-finished'
+                    })
+                  }
+                }, botTimer)
+              }
             }, 5000)
           }
           break
@@ -871,6 +922,29 @@ class RankedRoom extends colyseus.Room {
             // Setting general match related info
             this.state.setQuestions(questionProps, questionList)
           })
+          break
+        case 'start-with-bot':
+          // We set the game as bot game
+          this.isBotGame = true
+
+          const userInformation = {}
+          userInformation.username = BOT_USERNAME
+          userInformation.id = BOT_ID
+          // Some egg picture
+          userInformation.profilePicture = BOT_PROFILE_PICTURE
+          // Some field picture
+          userInformation.coverPicture = BOT_COVER_PICTURE
+          // Adding the bot to our props
+          this.state.addPlayer(BOT_CLIENT_ID, userInformation)
+
+          // Lock the room as usual and broadcast the props
+          this.lock()
+          // We send the clients player information
+          this.clock.setTimeout(() => {
+            this.readyPlayerCount++
+            this.broadcast(this.state.getPlayerProps())
+          }, 500)
+          logger.info(`Ranked game with bot starts with p: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId}`)
           break
       }
     } catch (error) {
