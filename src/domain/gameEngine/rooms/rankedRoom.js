@@ -829,8 +829,7 @@ class RankedRoom extends colyseus.Room {
 
               if (this.isBotGame) {
                 let botAnswer = Math.floor((Math.random() * 6) + 1)
-                // let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
-                let botTimer = 5000
+                let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
 
                 this.clock.setTimeout(() => {
                   this.state.setPlayerAnswerResults(BOT_CLIENT_ID, botAnswer)
