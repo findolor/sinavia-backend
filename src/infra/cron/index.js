@@ -1,27 +1,24 @@
-const cron = require('node-cron')
-const uuid = require('uuidv4').default
+const CronJob = require('cron').CronJob
 const {
   getAllScores,
   makeLeaderboards,
-  postUserScore,
   checkLeaderboard,
   updateLeaderboard
 } = require('../../interfaces/databaseInterface/interface')
 
 module.exports = () => {
   return {
-    startJob: (
-      second,
-      minute,
-      hour,
-      dayOfMonth,
-      month,
-      dayOfWeek,
-      callbackFunction,
-      callbackFunctionParams
-    ) => cron.schedule(`${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`, () => {
-      callbackFunction(callbackFunctionParams)
-    }),
+    testCronJob: () => {
+      const date = new Date()
+
+      date.setSeconds(date.getSeconds() + 5)
+
+      const job = new CronJob(date, () => {
+        // console.log('Every second', new Date())
+        console.log(`Starts at ${new Date()} made at ${date}`)
+      })
+      job.start()
+    },
     // TODO ADD CRON JOBS HERE LIKE
     // FRIEND GAME CRON
     // Save the friend game crons somewhere and if the game is resolved stop the job
@@ -29,7 +26,7 @@ module.exports = () => {
     // Calculate the leaderboards at 4 AM maybe???
     // Calculate this for every content we have
     // Right now its every hour
-    leaderboardCronJob: () => cron.schedule('* 1 * * *', () => {
+    leaderboardCronJob: () => new CronJob('* * 1 * * *', () => {
       getAllScores(1)
         .then(data => {
           const userList = []
@@ -83,51 +80,9 @@ module.exports = () => {
             })
           }
         })
-    }, {
-      scheduled: true,
-      timezone: 'Europe/Istanbul'
-    }),
-    addRandomUserScores: () => cron.schedule('* * * * * *', () => {
-      postUserScore({
-        userId: uuid(),
-        examId: 1,
-        subjectId: 1,
-        courseId: 1,
-        totalPoints: Math.floor((Math.random() * 3000) + 250),
-        totalWin: 0,
-        totalLose: 0,
-        totalDraw: 0
-      })
-      postUserScore({
-        userId: uuid(),
-        examId: 1,
-        subjectId: 1,
-        courseId: 1,
-        totalPoints: Math.floor((Math.random() * 3000) + 250),
-        totalWin: 0,
-        totalLose: 0,
-        totalDraw: 0
-      })
-      postUserScore({
-        userId: uuid(),
-        examId: 1,
-        subjectId: 1,
-        courseId: 1,
-        totalPoints: Math.floor((Math.random() * 3000) + 250),
-        totalWin: 0,
-        totalLose: 0,
-        totalDraw: 0
-      })
-      postUserScore({
-        userId: uuid(),
-        examId: 1,
-        subjectId: 1,
-        courseId: 1,
-        totalPoints: Math.floor((Math.random() * 3000) + 250),
-        totalWin: 0,
-        totalLose: 0,
-        totalDraw: 0
-      })
-    })
+    },
+    null,
+    true,
+    'Europe/Istanbul')
   }
 }

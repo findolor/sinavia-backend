@@ -14,7 +14,8 @@ module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
         .then(server.start)
         .then(app => gameEngine.start(app))
         // Leaderboard cron job that runs at 4 AM (?)
-        .then(cronJob.leaderboardCronJob())
+        // .then(cronJob.leaderboardCronJob())
+        // .then(cronJob.testCronJob())
         .catch(err => logger.error(err.stack))
   }
 }
