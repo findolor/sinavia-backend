@@ -1,21 +1,12 @@
 'use strict'
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('userScores', {
+    return queryInterface.createTable('leaderboards', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false
-      },
-      userId: {
-        type: Sequelize.UUID,
-        allowNull: false
-        // TODO MAKE THIS REFERENCED AGAIN
-        /* references: {
-          model: 'users',
-          key: 'id'
-        } */
       },
       examId: {
         type: Sequelize.INTEGER,
@@ -25,9 +16,13 @@ module.exports = {
           key: 'id'
         }
       },
+      // If courseId and subjectId is null
+      // That means the row is for the whole exam
+      // If subjectId is null
+      // That means it is for the whole course
       courseId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'courseEntities',
           key: 'id'
@@ -35,26 +30,14 @@ module.exports = {
       },
       subjectId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'subjectEntities',
           key: 'id'
         }
       },
-      totalPoints: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      totalWin: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      totalLose: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      totalDraw: {
-        type: Sequelize.INTEGER,
+      userList: {
+        type: Sequelize.ARRAY(Sequelize.JSONB),
         allowNull: false
       },
       createdAt: {
@@ -70,6 +53,6 @@ module.exports = {
     })
   },
   down: function (queryInterface) {
-    return queryInterface.dropTable('userScores')
+    return queryInterface.dropTable('leaderboards')
   }
 }

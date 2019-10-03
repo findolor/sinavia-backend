@@ -25,19 +25,19 @@ client.onOpen.add(() => {
     room.send({
       action: 'start-with-bot'
     })
-  }, 2000)
+  }, 1500)
 
   // Game state coming from server
   room.onStateChange.add(state => {
     const rankedState = state.rankedState
     switch (state.rankedState.stateInformation) {
-      case 'question-bot':
+      case 'question':
         // Answering the question 2 seconds later
         setTimeout(() => {
           answerQuestion(room)
         }, 1500)
         break
-      case 'match-finished-bot':
+      case 'match-finished':
         console.log(`Player One answers: ${rankedState.playerProps[rankedState.playerOneId].answers}`)
         process.exit()
     }

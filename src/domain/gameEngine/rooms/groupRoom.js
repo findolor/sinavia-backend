@@ -9,7 +9,7 @@ const {
   getUserJoker,
   putUserJoker,
   deleteUserJoker
-} = require('../../../interfaces/engineInterface/interface')
+} = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
 } = require('./helper')

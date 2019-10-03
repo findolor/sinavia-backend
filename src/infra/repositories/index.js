@@ -13,6 +13,7 @@ const CourseEntity = require('./courseEntity')
 const SubjectEntity = require('./subjectEntity')
 const UserJoker = require('./userJoker')
 const UserNotification = require('./userNotification')
+const Leaderboard = require('./leaderboard')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -30,6 +31,7 @@ module.exports = ({ database }) => {
   const subjectEntityModel = database.models.subjectEntities
   const userJokerModel = database.models.userJokers
   const userNotificationModel = database.models.userNotifications
+  const leaderboardModel = database.models.leaderboards
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -136,6 +138,7 @@ module.exports = ({ database }) => {
     courseEntityRepository: CourseEntity({ model: courseEntityModel }),
     subjectEntityRepository: SubjectEntity({ model: subjectEntityModel }),
     userJokerRepository: UserJoker({ model: userJokerModel }),
-    userNotificationRepository: UserNotification({ model: userNotificationModel })
+    userNotificationRepository: UserNotification({ model: userNotificationModel }),
+    leaderboardRepository: Leaderboard({ model: leaderboardModel })
   }
 }

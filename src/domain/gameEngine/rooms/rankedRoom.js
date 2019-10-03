@@ -13,7 +13,7 @@ const {
   putUserJoker,
   deleteUserJoker,
   updateUserTotalPoints
-} = require('../../../interfaces/engineInterface/interface')
+} = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
 } = require('./helper')

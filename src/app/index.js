@@ -5,7 +5,7 @@
  * memcache
  * express server
  */
-module.exports = ({ server, database, gameEngine, logger }) => {
+module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
   return {
     start: () =>
       Promise
@@ -13,6 +13,8 @@ module.exports = ({ server, database, gameEngine, logger }) => {
         .then(database.authenticate)
         .then(server.start)
         .then(app => gameEngine.start(app))
+        // Leaderboard cron job that runs at 4 AM (?)
+        .then(cronJob.leaderboardCronJob())
         .catch(err => logger.error(err.stack))
   }
 }

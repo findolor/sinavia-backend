@@ -61,3 +61,19 @@ exports.deleteUserJoker = (userId, jokerId) => {
 exports.updateUserTotalPoints = (userEntity) => {
   return engineInterface().putUserUseCase.updateUser({ id: userEntity.id, body: userEntity })
 }
+
+exports.getAllScores = (examId, courseId, subjectId) => {
+  return engineInterface().getUserScoreUseCase.getBatch({ examId: examId, courseId: courseId, subjectId: subjectId })
+}
+
+exports.makeLeaderboards = (leaderboardEntity) => {
+  return engineInterface().postLeaderboardUseCase.create({ leaderboardEntity: leaderboardEntity })
+}
+
+exports.checkLeaderboard = (examId, courseId, subjectId) => {
+  return engineInterface().getLeaderboardUseCase.checkOne({ examId: examId, courseId: courseId, subjectId: subjectId })
+}
+
+exports.updateLeaderboard = (leaderboardEntity) => {
+  return engineInterface().putLeaderboardUseCase.update({ leaderboardEntity: leaderboardEntity })
+}
