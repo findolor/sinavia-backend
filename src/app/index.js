@@ -11,6 +11,8 @@ module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
       Promise
         .resolve()
         .then(database.authenticate)
+        // Loads the ongoing matches from database
+        .then(cronJob.loadOngoingMatchCrons())
         .then(server.start)
         .then(app => gameEngine.start(app))
         // Leaderboard cron job that runs at 4 AM (?)

@@ -14,6 +14,7 @@ const SubjectEntity = require('./subjectEntity')
 const UserJoker = require('./userJoker')
 const UserNotification = require('./userNotification')
 const Leaderboard = require('./leaderboard')
+const OngoingMatch = require('./ongoingMatch')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -32,6 +33,7 @@ module.exports = ({ database }) => {
   const userJokerModel = database.models.userJokers
   const userNotificationModel = database.models.userNotifications
   const leaderboardModel = database.models.leaderboards
+  const ongoingMatchModel = database.models.ongoingMatches
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -123,6 +125,19 @@ module.exports = ({ database }) => {
   jokerModel.hasMany(userJokerModel, { foreignKey: 'jokerId' })
   userJokerModel.belongsTo(jokerModel, { foreignKey: 'jokerId' })
 
+  // ONGOING_MATCH belongs to USERs
+  // USERs has many matches with other USERs
+  userModel.hasMany(ongoingMatchModel, { as: 'ongoingMatchUser', foreignKey: 'userId' })
+  userModel.hasMany(ongoingMatchModel, { as: 'ongoingMatchFriend', foreignKey: 'friendId' })
+  ongoingMatchModel.belongsTo(userModel, { as: 'ongoingMatchUser', foreignKey: 'userId' })
+  ongoingMatchModel.belongsTo(userModel, { as: 'ongoingMatchFriend', foreignKey: 'friendId' })
+
+  // ONGOING_MATCH belongs to STATISTICs
+  statisticModel.hasMany(ongoingMatchModel, { as: 'ongoingMatchUserStatistics', foreignKey: 'userResults' })
+  statisticModel.hasMany(ongoingMatchModel, { as: 'ongoingMatchFriendStatistics', foreignKey: 'friendResults' })
+  ongoingMatchModel.belongsTo(statisticModel, { as: 'ongoingMatchUserStatistics', foreignKey: 'userResults' })
+  ongoingMatchModel.belongsTo(statisticModel, { as: 'ongoingMatchFriendStatistics', foreignKey: 'friendResults' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -139,6 +154,7 @@ module.exports = ({ database }) => {
     subjectEntityRepository: SubjectEntity({ model: subjectEntityModel }),
     userJokerRepository: UserJoker({ model: userJokerModel }),
     userNotificationRepository: UserNotification({ model: userNotificationModel }),
-    leaderboardRepository: Leaderboard({ model: leaderboardModel })
+    leaderboardRepository: Leaderboard({ model: leaderboardModel }),
+    ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel })
   }
 }

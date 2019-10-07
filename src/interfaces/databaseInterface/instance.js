@@ -1,11 +1,12 @@
 const container = require('src/container') // we have to get the DI
 const { getQuestion } = require('src/app/question')
 const { getUser, putUser } = require('src/app/user')
-const { postStatistic } = require('src/app/statistic')
+const { postStatistic, putStatistic } = require('src/app/statistic')
 const { postFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
 const { getUserJoker, putUserJoker, deleteUserJoker } = require('src/app/userJoker')
 const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/leaderboard')
+const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch } = require('src/app/ongoingMatch')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -31,6 +32,9 @@ module.exports = () => {
     },
     repository: {
       leaderboardRepository
+    },
+    repository: {
+      ongoingMatchRepository
     }
   } = container.cradle
 
@@ -48,6 +52,11 @@ module.exports = () => {
   const postLeaderboardUseCase = postLeaderboard({ leaderboardRepository })
   const getLeaderboardUseCase = getLeaderboard({ leaderboardRepository })
   const putLeaderboardUseCase = putLeaderboard({ leaderboardRepository })
+  const getOngoingMatchUseCase = getOngoingMatch({ ongoingMatchRepository, database })
+  const postOngoingMatchUseCase = postOngoingMatch({ ongoingMatchRepository })
+  const deleteOngoingMatchUseCase = deleteOngoingMatch({ ongoingMatchRepository })
+  const putOngoingMatchUseCase = putOngoingMatch({ ongoingMatchRepository })
+  const putStatisticUseCase = putStatistic({ statisticRepository })
 
   return {
     getQuestionUseCase,
@@ -63,6 +72,11 @@ module.exports = () => {
     putUserUseCase,
     postLeaderboardUseCase,
     getLeaderboardUseCase,
-    putLeaderboardUseCase
+    putLeaderboardUseCase,
+    getOngoingMatchUseCase,
+    postOngoingMatchUseCase,
+    deleteOngoingMatchUseCase,
+    putOngoingMatchUseCase,
+    putStatisticUseCase
   }
 }

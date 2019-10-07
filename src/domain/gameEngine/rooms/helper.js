@@ -47,6 +47,51 @@ const calculateResults = (playerList) => {
   return resultList
 }
 
+const calculateResultsSolo = (player) => {
+  // Results are returned in this list
+  const resultList = []
+
+  let playerCorrect = 0
+  let playerIncorrect = 0
+  let playerUnanswered = 0
+
+  // We iterate through answers
+  player.answers.forEach(answer => {
+    // If the user doesn't have any answers we just give him 0 answers
+    if (Object.keys(answer).length === 0) {
+      resultList.push({
+        correct: 0,
+        incorrect: 0,
+        unanswered: 0
+      })
+      return
+    }
+    switch (answer.result) {
+      case null:
+        playerUnanswered++
+        break
+      case true:
+        playerCorrect++
+        break
+      case false:
+        playerIncorrect++
+        break
+    }
+  })
+  // We push the results to the result list
+  resultList.push({
+    correct: playerCorrect,
+    incorrect: playerIncorrect,
+    unanswered: playerUnanswered
+  })
+  playerCorrect = 0
+  playerIncorrect = 0
+  playerUnanswered = 0
+
+  return resultList
+}
+
 module.exports = {
-  calculateResults
+  calculateResults,
+  calculateResultsSolo
 }

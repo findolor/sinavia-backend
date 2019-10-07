@@ -34,5 +34,14 @@ module.exports = (gameEngine) => {
       .on('leave', (room, client) => logger.info(`${client.id} left ${room.roomId}`))
   })
 
+  // .filterBy(['roomCode'])
+  gameEngine.register('friendSoloRoom', rooms.friendSoloRoom).then(handler => {
+    handler
+      .on('create', (room) => logger.info(`room created: ${room.roomId}`))
+      .on('dispose', (room) => logger.info(`room disposed: ${room.roomId}`))
+      .on('join', (room, client) => logger.info(`${client.id} joined ${room.roomId}`))
+      .on('leave', (room, client) => logger.info(`${client.id} left ${room.roomId}`))
+  })
+
   return gameEngine
 }

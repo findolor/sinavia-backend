@@ -9,11 +9,14 @@ const {
   postFriendGameMatchResult,
   getUserJoker,
   deleteUserJoker,
-  putUserJoker
+  putUserJoker,
+  updateOngoingMatch
 } = require('../../../interfaces/databaseInterface/interface')
 const {
-  calculateResults
+  calculateResults,
+  calculateResultsSolo
 } = require('./helper')
+const cronJob = require('../../../infra/cron')
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -99,6 +102,10 @@ class FriendGame {
     this.friendState.questionList = questionList
   }
 
+  getQuestionProps () {
+    return this.friendState.questionProps
+  }
+
   nextQuestion () {
     this.friendState.questionNumber++
   }
@@ -145,6 +152,18 @@ class FriendGame {
 
     // We send playerList and get back the results
     const resultList = calculateResults(playerList)
+    const results = {}
+
+    resultList.forEach((player, index) => {
+      results[index] = player
+    })
+
+    return results
+  }
+
+  getTotalResultsSolo () {
+    // We send playerList and get back the results
+    const resultList = calculateResultsSolo(this.friendState.playerProps[this.friendState.playerOneId])
     const results = {}
 
     resultList.forEach((player, index) => {
@@ -350,8 +369,46 @@ class FriendGame {
     await postFriendMatchResults(friendMatchInformation)
   }
 
+  saveSoloMatchResults (friendRoomId, userJokers, soloGameDatabaseId) {
+    const matchInformation = this.getMatchInformation()
+    const playerProps = this.getPlayerProps()
+
+    const results = this.getTotalResultsSolo()
+
+    const resultsKeys = Object.keys(results)
+
+    const playerList = []
+
+    resultsKeys.forEach(key => {
+      let userId = this.getPlayerId(parseInt(key, 10) + 1)
+
+      playerList.push({
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
+        correctNumber: results[key].correct,
+        incorrectNumber: results[key].incorrect,
+        unansweredNumber: results[key].unanswered,
+        // parseInt is used for converting '0' to 0
+        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+      })
+
+      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+    })
+
+    logger.info(`Friend solo game ends roomId: ${friendRoomId}`)
+
+    // After posting the statistics
+    // We update the ongoing game userResult field with the id from statistic
+    postMatchResultsSolo(playerList).then(data => {
+      updateOngoingMatch({
+        id: soloGameDatabaseId,
+        userResults: data.id
+      })
+    })
+  }
+
   decideUserJokers (userJokers, userId, databaseId) {
-    console.log(userJokers[userId])
     if (userJokers[userId] !== null) {
       userJokers[userId].forEach(userJoker => {
         if (userJoker.isUsed) {
@@ -478,6 +535,19 @@ function postMatchResults (playerList) {
   }
 }
 
+function postMatchResultsSolo (playerList) {
+  try {
+    return Promise
+      .resolve()
+      .then(() => {
+        return postStatistic(playerList[0])
+      })
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
+    logger.error(error.stack)
+  }
+}
+
 // Saves the friend game match results to the database
 function postFriendMatchResults (friendMatchInformation) {
   try {
@@ -527,6 +597,8 @@ class FriendRoom extends colyseus.Room {
     this.joinedPlayerNum = 0
     this.fetchedUserInfoNumber = 0
     this.userJokers = {}
+    this.isSoloGame = false
+    this.soloGameDBId = 0
   }
 
   onInit (options) {
@@ -537,7 +609,9 @@ class FriendRoom extends colyseus.Room {
       examId: options.examId,
       courseId: options.courseId,
       subjectId: options.subjectId,
-      roomCode: options.roomCode
+      roomCode: options.roomCode,
+      userId: options.userId,
+      friendId: options.friendId
     }
 
     // Fetching questions from database
@@ -613,7 +687,7 @@ class FriendRoom extends colyseus.Room {
         this.clock.setTimeout(() => {
           this.broadcast(this.state.getPlayerProps())
         }, 500)
-        logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+        logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
       }
     }).catch(error => {
       logger.error(error.stack)
@@ -636,6 +710,10 @@ class FriendRoom extends colyseus.Room {
           that.state.nextQuestion()
           that.state.changeStateInformation('question')
         }
+        break
+      case 'ready-solo':
+        that.state.nextQuestion()
+        that.state.changeStateInformation('question')
         break
       // 'finished' action is sent after a player answers a question.
       case 'finished':
@@ -662,6 +740,25 @@ class FriendRoom extends colyseus.Room {
             that.state.changeStateInformation('question')
           }, 5000)
         }
+        break
+      case 'finished-solo':
+        if (this.state.getQuestionNumber() === this.questionAmount - 1) {
+          this.state.changeStateInformation('show-results')
+          // Like always there is a delay to show the answers
+          setTimeout(() => {
+            this.state.changeStateInformation('match-finished')
+            this.isMatchFinished = true
+            // We save the results after the match is finished
+            this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+          }, 5000)
+          break
+        }
+        this.state.changeStateInformation('show-results')
+        // Delay for showing the results
+        setTimeout(() => {
+          that.state.nextQuestion()
+          that.state.changeStateInformation('question')
+        }, 5000)
         break
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
@@ -742,6 +839,34 @@ class FriendRoom extends colyseus.Room {
         // Setting general match related info
         this.state.setQuestions(questionProps, questionList)
         break
+        // TODO Make the cron here
+      case 'start-ahead':
+        this.isSoloGame = true
+        this.lock()
+        logger.info(`Friend solo game starts with player: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} roomId: ${this.roomId}`)
+
+        const matchInformation = this.state.getMatchInformation()
+
+        // We stringfy every question to store it as json
+        const questions = this.state.getQuestionProps()
+        const questionsJSON = []
+
+        questions.forEach(question => {
+          questionsJSON.push(JSON.stringify(question))
+        })
+
+        // We start a cron job for this solo friend game
+        // We send a notification to the other user
+        // When the match resolves we will delete this cron later
+        cronJob().makeFriendGameCronJob(
+          matchInformation.userId,
+          matchInformation.friendId,
+          questionsJSON
+        ).then(data => {
+          // We save the id for ongoing game to update it later
+          this.soloGameDBId = data
+        })
+        break
     }
   }
 
@@ -751,6 +876,7 @@ class FriendRoom extends colyseus.Room {
       clientId: client.id,
       consented: consented
     })
+
     // TODO add errors on all of these events
     // If the room is not empty
     if (this.clients.length !== 0) {
@@ -767,9 +893,10 @@ class FriendRoom extends colyseus.Room {
       if (!this.isMatchFinished) {
         // We send the leaving clients id
         // We do different stuff if the client has left before the match ends
-        await this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers)
+        this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers)
       }
     }
+    if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
   }
 
   onDispose () {

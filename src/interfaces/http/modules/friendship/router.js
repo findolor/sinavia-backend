@@ -49,12 +49,12 @@ module.exports = ({
               postUseCase
                 .create({ body: req.body })
                 .then(data => {
-                  fcmService.sendNotificationDataMessage(
+                  fcmService.sendDataMessage(
                     dataValues.fcmToken,
-                    {
+                    /* {
                       title: 'Arkadaş İsteği!',
                       body: `${req.body.username} seni arkadaş olarak ekledi.`
-                    },
+                    }, */
                     {
                       type: 'friendRequest',
                       userId: req.body.userId,

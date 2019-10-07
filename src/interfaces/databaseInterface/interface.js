@@ -77,3 +77,27 @@ exports.checkLeaderboard = (examId, courseId, subjectId) => {
 exports.updateLeaderboard = (leaderboardEntity) => {
   return engineInterface().putLeaderboardUseCase.update({ leaderboardEntity: leaderboardEntity })
 }
+
+exports.getOngoingMatch = (ongoingMatchId) => {
+  return engineInterface().getOngoingMatchUseCase.getOne({ id: ongoingMatchId })
+}
+
+exports.createOngoingMatch = (userId, friendId, endDate, questionList) => {
+  return engineInterface().postOngoingMatchUseCase.create({ userId: userId, friendId: friendId, endDate: endDate, questionList: questionList })
+}
+
+exports.deleteOngoingMatch = (ongoingMatchId) => {
+  return engineInterface().deleteOngoingMatchUseCase.remove({ id: ongoingMatchId })
+}
+
+exports.updateOngoingMatch = (ongoingMatchEntity) => {
+  return engineInterface().putOngoingMatchUseCase.update({ ongoingMatchEntity: ongoingMatchEntity })
+}
+
+exports.getAllOngoingMatches = () => {
+  return engineInterface().getOngoingMatchUseCase.getAll()
+}
+
+exports.updateStatistic = (statisticEntity) => {
+  return engineInterface().putStatisticUseCase.update({ statisticEntity: statisticEntity })
+}
