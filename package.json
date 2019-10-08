@@ -70,6 +70,7 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.23",
     "morgan": "1.9.1",
+    "node-cache": "^4.2.1",
     "nodemon": "1.18.10",
     "passport": "0.4.0",
     "passport-jwt": "4.0.0",

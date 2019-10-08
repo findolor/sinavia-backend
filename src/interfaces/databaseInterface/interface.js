@@ -101,3 +101,7 @@ exports.getAllOngoingMatches = () => {
 exports.updateStatistic = (statisticEntity) => {
   return engineInterface().putStatisticUseCase.update({ statisticEntity: statisticEntity })
 }
+
+exports.getGameContent = () => {
+  return engineInterface().getExamEntityUseCase.getAll()
+}

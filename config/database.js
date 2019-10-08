@@ -13,11 +13,11 @@ module.exports = {
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres',
     timezone: process.env.TIMEZONE,
-    // ssl: process.env.DATABASE_SSL_ENABLED,
+    ssl: process.env.DATABASE_SSL_ENABLED,
     dialectOptions: {
-      /* ssl: {
+      ssl: {
         require: process.env.DATABASE_SSL_ENABLED
-      } */
+      },
       useUTC: false
     }
   },

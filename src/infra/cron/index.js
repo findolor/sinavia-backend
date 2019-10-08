@@ -11,12 +11,13 @@ const {
   deleteOngoingMatch,
   getAllOngoingMatches,
   updateStatistic,
-  postFriendGameMatchResult
+  postFriendGameMatchResult,
+  getGameContent
 } = require('../../interfaces/databaseInterface/interface')
 
 const ongoingMatchesList = []
 
-module.exports = () => {
+module.exports = ({ logger, nodeCache }) => {
   // Gets the ongoing match and after sending the notifications deletes it
   // Updates the user statistics and friendsMatch
   const finishUpOngoingMatch = (ongoingMatchId) => {
@@ -178,7 +179,7 @@ module.exports = () => {
     // TODO Calculate the leaderboards at 4 AM maybe???
     // Calculate this for every content we have
     // Right now its every hour
-    leaderboardCronJob: () => new CronJob('* * 1 * * *', () => {
+    leaderboardCronJob: () => new CronJob('* * 4 * * *', () => {
       getAllScores(1)
         .then(data => {
           const userList = []
@@ -232,9 +233,16 @@ module.exports = () => {
             })
           }
         })
-    },
-    null,
-    true,
-    'Europe/Istanbul')
+    }, null, true, 'Europe/Istanbul', null, true),
+    makeGameContentCronJob: () => new CronJob('* * 4 * * *', () => {
+      getGameContent().then(data => {
+        nodeCache.setValue('gameContent', data).then(response => {
+          if (response) logger.info(`Successfully set with the key "gameContent"`)
+        })
+          .catch(error => {
+            logger.error(error.stack)
+          })
+      })
+    }, null, true, 'Europe/Istanbul', null, true)
   }
 }
