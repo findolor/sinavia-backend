@@ -21,7 +21,10 @@ module.exports = ({
           title: 'Arkadaş oyun isteği!',
           body: `${req.body.username} seni oyuna çağırıyor.`,
           userId: req.body.id,
-          roomCode: req.body.roomCode
+          roomCode: req.body.roomCode,
+          examId: req.body.matchInformation.examId.toString(),
+          courseId: req.body.matchInformation.courseId.toString(),
+          subjectId: req.body.matchInformation.subjectId.toString()
         }
       )
         .then(() => {

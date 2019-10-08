@@ -29,6 +29,18 @@ module.exports = (sequelize, DataTypes) => {
     endDate: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    examId: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    courseId: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    subjectId: {
+      type: DataTypes.NUMBER,
+      allowNull: false
     }
   }, {
     freezeTableName: true,

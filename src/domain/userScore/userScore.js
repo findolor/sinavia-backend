@@ -12,6 +12,7 @@ const UserScore = t.struct({
   totalWin: t.Number,
   totalLose: t.Number,
   totalDraw: t.Number,
+  totalGames: t.Number,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

@@ -1,6 +1,6 @@
 const NodeCache = require('node-cache')
 
-module.exports = ({ logger }) => {
+module.exports = () => {
   const myCache = new NodeCache()
 
   const flushAllData = () => {

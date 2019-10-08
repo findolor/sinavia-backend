@@ -12,7 +12,10 @@ const {
   getAllOngoingMatches,
   updateStatistic,
   postFriendGameMatchResult,
-  getGameContent
+  getGameContent,
+  getUserScore,
+  postUserScore,
+  putUserScore
 } = require('../../interfaces/databaseInterface/interface')
 
 const ongoingMatchesList = []
@@ -51,6 +54,45 @@ module.exports = ({ logger, nodeCache }) => {
             loserId: data.ongoingMatchFriend.id,
             isMatchDraw: true
           })
+          // Getting the user scores and updating accordingly
+          getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchUser.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 0,
+                totalLose: 0,
+                totalDraw: 1,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalDraw++
+              putUserScore(userScore)
+            }
+          })
+          getUserScore(data.ongoingMatchFriend.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchFriend.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 0,
+                totalLose: 0,
+                totalDraw: 1,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalDraw++
+              putUserScore(userScore)
+            }
+          })
         } else if (userNet > friendNet) {
           data.ongoingMatchUserStatistics.gameResult = 'won'
           data.ongoingMatchFriendStatistics.gameResult = 'lost'
@@ -59,6 +101,44 @@ module.exports = ({ logger, nodeCache }) => {
             loserId: data.ongoingMatchFriend.id,
             isMatchDraw: false
           })
+          getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchUser.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 1,
+                totalLose: 0,
+                totalDraw: 0,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalWin++
+              putUserScore(userScore)
+            }
+          })
+          getUserScore(data.ongoingMatchFriend.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchFriend.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 0,
+                totalLose: 1,
+                totalDraw: 0,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalLose++
+              putUserScore(userScore)
+            }
+          })
         } else {
           data.ongoingMatchUserStatistics.gameResult = 'lost'
           data.ongoingMatchFriendStatistics.gameResult = 'won'
@@ -66,6 +146,44 @@ module.exports = ({ logger, nodeCache }) => {
             loserId: data.ongoingMatchUser.id,
             winnerId: data.ongoingMatchFriend.id,
             isMatchDraw: false
+          })
+          getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchUser.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 0,
+                totalLose: 1,
+                totalDraw: 0,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalLose++
+              putUserScore(userScore)
+            }
+          })
+          getUserScore(data.ongoingMatchFriend.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchFriend.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 1,
+                totalLose: 0,
+                totalDraw: 0,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              userScore.totalWin++
+              putUserScore(userScore)
+            }
           })
         }
 
@@ -83,6 +201,24 @@ module.exports = ({ logger, nodeCache }) => {
           })
         })
       } else {
+        getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+          if (userScore === null) {
+            postUserScore({
+              userId: data.ongoingMatchUser.id,
+              examId: data.examId,
+              subjectId: data.subjectId,
+              courseId: data.courseId,
+              totalPoints: 0,
+              totalWin: 0,
+              totalLose: 0,
+              totalDraw: 0,
+              totalGames: 1
+            })
+          } else {
+            userScore.totalGames++
+            putUserScore(userScore)
+          }
+        })
         deleteOngoingMatch(ongoingMatchId).then(data => {
           return data
         })
@@ -123,7 +259,7 @@ module.exports = ({ logger, nodeCache }) => {
     // If the friend plays the match normally, we just stop the cron and remove it from the list and db
     // TODO ADD FUNCS FOR FRIENDMATCHES
     // UPDATE THE GAME RESULTS WHEN THE USERS FINISH
-    makeFriendGameCronJob: (userId, friendId, questionList) => {
+    makeFriendGameCronJob: (userId, friendId, questionList, examId, courseId, subjectId) => {
       return Promise
         .resolve()
         .then(async () => {
@@ -135,7 +271,7 @@ module.exports = ({ logger, nodeCache }) => {
           }
 
           // First create an ongoing match entry
-          const data = await createOngoingMatch(userId, friendId, endDate, questionList)
+          const data = await createOngoingMatch(userId, friendId, endDate, questionList, examId, courseId, subjectId)
           friendGameCronJob.ongoingMatchId = data.id
 
           // This cron will run after 1 day if the match is not resolved

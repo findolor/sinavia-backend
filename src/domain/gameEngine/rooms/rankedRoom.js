@@ -301,7 +301,7 @@ class RankedGame {
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
 
       if (userScores[userId] !== undefined) {
@@ -371,6 +371,7 @@ class RankedGame {
           userScores[userId].userScore.totalDraw++
           break
       }
+      userScores[userId].userScore.totalGames++
       updateUserScore(userScores[userId].userScore)
     } else {
       let win = 0
@@ -395,7 +396,8 @@ class RankedGame {
         totalPoints: winLoseDrawAndPoints[key].points,
         totalWin: win,
         totalLose: lose,
-        totalDraw: draw
+        totalDraw: draw,
+        totalGames: 1
       })
     }
   }
@@ -718,8 +720,6 @@ class RankedRoom extends colyseus.Room {
       // We get user jokers from database
       // Later on we send all the joker names and ids to the client
       // If the client doesnt have a joker it will be blacked out
-      // TODO Send the joker names to our client
-      // SEND THIS WHEN THE APP OPENS
       fetchUserJoker(options.databaseId).then(userJokers => {
         this.userJokers[client.id] = []
         if (Object.keys(userJokers).length !== 0) {
@@ -976,6 +976,8 @@ class RankedRoom extends colyseus.Room {
           // We do different stuff if the client has left before the match ends
           this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers, this.userInformations)
         }
+      } else {
+        if (!this.isMatchFinished) this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
       }
     } catch (error) {
       logger.error(error.stack)

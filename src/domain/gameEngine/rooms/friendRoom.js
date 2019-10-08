@@ -10,13 +10,17 @@ const {
   getUserJoker,
   deleteUserJoker,
   putUserJoker,
-  updateOngoingMatch
+  updateOngoingMatch,
+  getUserScore,
+  putUserScore,
+  postUserScore
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
   calculateResultsSolo
 } = require('./helper')
 const cronJob = require('../../../infra/cron')
+const nodeCache = require('../../../infra/cache')
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -233,7 +237,7 @@ class FriendGame {
   }
 
   // This is called when one of the clients leaves the game
-  async saveUnfinishedMatchResults (leavingClientId, friendRoomId, userJokers) {
+  async saveUnfinishedMatchResults (leavingClientId, friendRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -283,10 +287,11 @@ class FriendGame {
         unansweredNumber: results[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
 
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
     switch (winLoseDraw[0].status) {
@@ -314,7 +319,7 @@ class FriendGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  async saveMatchResults (friendRoomId, userJokers) {
+  async saveMatchResults (friendRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -339,10 +344,11 @@ class FriendGame {
         unansweredNumber: results[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
 
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
     switch (winLoseDraw[0].status) {
@@ -390,7 +396,7 @@ class FriendGame {
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[userId].databaseId
       })
 
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
@@ -421,6 +427,50 @@ class FriendGame {
             })
           }
         }
+      })
+    }
+  }
+
+  decideUserScores (userScores, winLoseDrawAndPoints, matchInformation, key, userId, databaseId) {
+    if (userScores[userId].shouldUpdate) {
+      switch (winLoseDrawAndPoints[key].status) {
+        case 'won':
+          userScores[userId].userScore.totalWin++
+          break
+        case 'lost':
+          userScores[userId].userScore.totalLose++
+          break
+        case 'draw':
+          userScores[userId].userScore.totalDraw++
+          break
+      }
+      userScores[userId].userScore.totalGames++
+      updateUserScore(userScores[userId].userScore)
+    } else {
+      let win = 0
+      let lose = 0
+      let draw = 0
+      switch (winLoseDrawAndPoints[key].status) {
+        case 'won':
+          win = 1
+          break
+        case 'lost':
+          lose = 1
+          break
+        case 'draw':
+          draw = 1
+          break
+      }
+      createUserScore({
+        userId: databaseId,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
+        totalPoints: 0,
+        totalWin: win,
+        totalLose: lose,
+        totalDraw: draw,
+        totalGames: 1
       })
     }
   }
@@ -585,6 +635,43 @@ function updateUserJoker (userJokerEntity) {
   }
 }
 
+function fetchUserScore (
+  userId,
+  examId,
+  courseId,
+  subjectId
+) {
+  try {
+    return getUserScore(
+      userId,
+      examId,
+      courseId,
+      subjectId
+    )
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+    logger.error(error.stack)
+  }
+}
+
+function createUserScore (userScoreEntity) {
+  try {
+    return postUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserScore (userScoreEntity) {
+  try {
+    return putUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+    logger.error(error.stack)
+  }
+}
+
 class FriendRoom extends colyseus.Room {
   constructor () {
     super()
@@ -597,6 +684,7 @@ class FriendRoom extends colyseus.Room {
     this.joinedPlayerNum = 0
     this.fetchedUserInfoNumber = 0
     this.userJokers = {}
+    this.userScores = {}
     this.isSoloGame = false
     this.soloGameDBId = 0
   }
@@ -613,6 +701,7 @@ class FriendRoom extends colyseus.Room {
       userId: options.userId,
       friendId: options.friendId
     }
+    this.state.setMatchInformation(matchInformation)
 
     // Fetching questions from database
     getQuestions(
@@ -629,7 +718,6 @@ class FriendRoom extends colyseus.Room {
       })
       // Setting general match related info
       this.state.setQuestions(questionProps, questionList)
-      this.state.setMatchInformation(matchInformation)
     }).catch(error => {
       logger.error(error.stack)
     })
@@ -654,6 +742,7 @@ class FriendRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    const matchInformation = this.state.getMatchInformation()
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
@@ -670,6 +759,28 @@ class FriendRoom extends colyseus.Room {
           })
         })
       } else this.userJokers[client.id] = null
+    })
+
+    // We get the user score from database
+    // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+    // When the game ends we save it to db accordingly
+    fetchUserScore(
+      options.databaseId,
+      matchInformation.examId,
+      matchInformation.courseId,
+      matchInformation.subjectId
+    ).then(userScore => {
+      if (userScore === null) {
+        this.userScores[client.id] = {
+          shouldUpdate: false,
+          userScore: userScore
+        }
+      } else {
+        this.userScores[client.id] = {
+          shouldUpdate: true,
+          userScore: userScore
+        }
+      }
     })
 
     // Getting user information from database
@@ -727,7 +838,7 @@ class FriendRoom extends colyseus.Room {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId, this.userJokers)
+              await this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
             }, 5000)
             break
           }
@@ -858,10 +969,13 @@ class FriendRoom extends colyseus.Room {
         // We start a cron job for this solo friend game
         // We send a notification to the other user
         // When the match resolves we will delete this cron later
-        cronJob().makeFriendGameCronJob(
+        cronJob({ logger, nodeCache }).makeFriendGameCronJob(
           matchInformation.userId,
           matchInformation.friendId,
-          questionsJSON
+          questionsJSON,
+          matchInformation.examId,
+          matchInformation.courseId,
+          matchInformation.subjectId
         ).then(data => {
           // We save the id for ongoing game to update it later
           this.soloGameDBId = data
@@ -870,7 +984,7 @@ class FriendRoom extends colyseus.Room {
     }
   }
 
-  async onLeave (client, consented) {
+  onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
       clientId: client.id,
@@ -893,7 +1007,7 @@ class FriendRoom extends colyseus.Room {
       if (!this.isMatchFinished) {
         // We send the leaving clients id
         // We do different stuff if the client has left before the match ends
-        this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers)
+        this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers, this.userScores)
       }
     }
     if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)

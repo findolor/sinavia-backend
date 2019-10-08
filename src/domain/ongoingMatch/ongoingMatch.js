@@ -10,6 +10,9 @@ const OngoingMatch = t.struct({
   friendResults: t.maybe(t.Number),
   questionList: t.maybe(t.Array),
   endDate: t.maybe(t.Date),
+  examId: t.maybe(t.Number),
+  courseId: t.maybe(t.Number),
+  subjectId: t.maybe(t.Number),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

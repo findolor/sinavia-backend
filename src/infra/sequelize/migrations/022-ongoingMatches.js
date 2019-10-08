@@ -48,6 +48,30 @@ module.exports = {
         type: Sequelize.ARRAY(Sequelize.JSONB),
         allowNull: false
       },
+      examId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'examEntities',
+          key: 'id'
+        }
+      },
+      courseId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'courseEntities',
+          key: 'id'
+        }
+      },
+      subjectId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'subjectEntities',
+          key: 'id'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

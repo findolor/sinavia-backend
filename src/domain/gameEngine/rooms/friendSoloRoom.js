@@ -15,6 +15,7 @@ const {
   calculateResultsSolo
 } = require('./helper')
 const cronJob = require('../../../infra/cron')
+const nodeCache = require('../../../infra/cache')
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -249,7 +250,7 @@ class FriendSoloGame {
         id: matchInformation.ongoingMatchId,
         friendResults: data.id
       }).then(data => {
-        cronJob().stopOngoingMatchCron(data.id)
+        cronJob({ logger, nodeCache }).stopOngoingMatchCron(data.id)
       })
     })
   }

@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     totalDraw: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    totalGames: {
+      type: DataTypes.NUMBER,
+      allowNull: false
     }
   }, {
     freezeTableName: true,

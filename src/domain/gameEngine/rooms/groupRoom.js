@@ -8,7 +8,10 @@ const {
   getOneUser,
   getUserJoker,
   putUserJoker,
-  deleteUserJoker
+  deleteUserJoker,
+  getUserScore,
+  putUserScore,
+  postUserScore
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -227,7 +230,7 @@ class GroupGame {
 
   // TODO Add points logic like in ranked
   // This will not work now
-  saveMatchResults (groupRoomId, userJokers) {
+  saveMatchResults (groupRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -253,6 +256,7 @@ class GroupGame {
       })
 
       this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
@@ -273,6 +277,25 @@ class GroupGame {
             })
           }
         }
+      })
+    }
+  }
+
+  decideUserScores (userScores, matchInformation, userId, databaseId) {
+    if (userScores[userId].shouldUpdate) {
+      userScores[userId].userScore.totalGames++
+      updateUserScore(userScores[userId].userScore)
+    } else {
+      createUserScore({
+        userId: databaseId,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
+        totalPoints: 0,
+        totalWin: 0,
+        totalLose: 0,
+        totalDraw: 0,
+        totalGames: 1
       })
     }
   }
@@ -363,6 +386,43 @@ function updateUserJoker (userJokerEntity) {
   }
 }
 
+function fetchUserScore (
+  userId,
+  examId,
+  courseId,
+  subjectId
+) {
+  try {
+    return getUserScore(
+      userId,
+      examId,
+      courseId,
+      subjectId
+    )
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+    logger.error(error.stack)
+  }
+}
+
+function createUserScore (userScoreEntity) {
+  try {
+    return postUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserScore (userScoreEntity) {
+  try {
+    return putUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+    logger.error(error.stack)
+  }
+}
+
 class GroupRoom extends colyseus.Room {
   constructor () {
     super()
@@ -374,6 +434,7 @@ class GroupRoom extends colyseus.Room {
     this.isMatchStarted = false
     this.joinedPlayerNum = 0
     this.userJokers = {}
+    this.userScores = {}
   }
 
   // TODO USE THE NEW FUNCTIONS
@@ -412,11 +473,10 @@ class GroupRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    const matchInformation = this.state.getMatchInformation()
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
-    // TODO Send the joker names to our client
-    // SEND THIS WHEN THE APP OPENS
     fetchUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
       if (Object.keys(userJokers).length !== 0) {
@@ -428,6 +488,28 @@ class GroupRoom extends colyseus.Room {
           })
         })
       } else this.userJokers[client.id] = null
+    })
+
+    // We get the user score from database
+    // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+    // When the game ends we save it to db accordingly
+    fetchUserScore(
+      options.databaseId,
+      matchInformation.examId,
+      matchInformation.courseId,
+      matchInformation.subjectId
+    ).then(userScore => {
+      if (userScore === null) {
+        this.userScores[client.id] = {
+          shouldUpdate: false,
+          userScore: userScore
+        }
+      } else {
+        this.userScores[client.id] = {
+          shouldUpdate: true,
+          userScore: userScore
+        }
+      }
     })
 
     // Getting user information from database
@@ -478,11 +560,11 @@ class GroupRoom extends colyseus.Room {
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
-            setTimeout(async () => {
+            setTimeout(() => {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId, this.userJokers)
+              this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
             }, 5000)
             break
           }
@@ -677,7 +759,7 @@ class GroupRoom extends colyseus.Room {
     // Because there are no winners and losers in this game mode, it doesn't matter if we save the match results right before the room closes
     // If the match hasn't started yet, we don't save any result because there aren't any lol
     if (!this.isMatchFinished && this.isMatchStarted) {
-      await this.state.saveMatchResults(this.roomId, this.userJokers)
+      await this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
     }
   }
 }
