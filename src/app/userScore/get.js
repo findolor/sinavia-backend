@@ -22,7 +22,9 @@ module.exports = ({ userScoreRepository, database }) => {
         const queryOptions = {
           where: {
             examId: examId
-          }
+          },
+          order: [['totalPoints', 'DESC']],
+          include: [database.models.users]
         }
 
         if (courseId) {
@@ -32,11 +34,7 @@ module.exports = ({ userScoreRepository, database }) => {
           } else queryOptions.where.courseId = courseId
         }
 
-        return userScoreRepository.findAll({
-          queryOptions,
-          order: [['totalPoints', 'DESC']],
-          include: [database.models.users]
-        })
+        return userScoreRepository.findAll(queryOptions)
       })
   }
 

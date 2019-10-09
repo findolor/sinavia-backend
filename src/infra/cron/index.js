@@ -226,6 +226,64 @@ module.exports = ({ logger, nodeCache }) => {
     })
   }
 
+  const getScoresAndMakeLeaderboards = (examId, courseId, subjectId) => {
+    getAllScores(examId, courseId, subjectId)
+      .then(data => {
+        const userList = []
+
+        data.forEach(userScore => {
+          // TODO We will delete this if later
+          if (userScore.user !== null) {
+            const { dataValues } = userScore.user
+            userScore.user = dataValues
+
+            delete userScore.user.password
+            delete userScore.user.city
+            delete userScore.user.totalPoints
+            delete userScore.user.fcmToken
+            delete userScore.user.deviceId
+            delete userScore.user.email
+            delete userScore.user.birthDate
+            delete userScore.user.coverPicture
+            delete userScore.user.name
+            delete userScore.user.lastname
+          } else {
+            userScore.user = {
+              id: userScore.userId,
+              username: userScore.userId.substring(0, 8),
+              profilePicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTahJbOytdJpTgUSiOKKpoayRwgfYMXnMg2Pk6UOvvoeGey-yQF'
+            }
+          }
+
+          userList.push(JSON.stringify(userScore))
+        })
+
+        if (Object.keys(userList).length !== 0) {
+          // We check the leaderboard
+          checkLeaderboard(examId, courseId, subjectId).then(data => {
+            // If we have an entry we update it
+            // If its a new entry we create it
+            if (data) {
+              updateLeaderboard({
+                id: data.id,
+                examId: data.examId,
+                courseId: data.courseId,
+                subjectId: data.subjectId,
+                userList: userList
+              })
+            } else {
+              makeLeaderboards({
+                examId: examId,
+                courseId: courseId,
+                subjectId: subjectId,
+                userList: userList
+              })
+            }
+          })
+        }
+      })
+  }
+
   return {
     // This function will run when server starts (after a crash, after updating...)
     // It will load all the ongoing matches back to our list
@@ -312,64 +370,26 @@ module.exports = ({ logger, nodeCache }) => {
           finishUpOngoingMatch(ongoingMatch.ongoingMatchId)
         })
     },
-    // TODO Calculate the leaderboards at 4 AM maybe???
+    // Calculating the leaderboards at 4 AM
     // Calculate this for every content we have
     // Right now its every hour
+    // TODO CACHE EVERY LEADERBOARD INFORMATION FOR GETTING IT LATER ???
     leaderboardCronJob: () => new CronJob('* * 4 * * *', () => {
-      getAllScores(1)
-        .then(data => {
-          const userList = []
-
-          data.forEach(userScore => {
-            // TODO We will delete this if later
-            if (userScore.user !== null) {
-              const { dataValues } = userScore.user
-              userScore.user = dataValues
-
-              delete userScore.user.password
-              delete userScore.user.city
-              delete userScore.user.totalPoints
-              delete userScore.user.fcmToken
-              delete userScore.user.deviceId
-              delete userScore.user.email
-              delete userScore.user.birthDate
-              delete userScore.user.coverPicture
-              delete userScore.user.name
-              delete userScore.user.lastname
-            } else {
-              userScore.user = {
-                id: userScore.userId,
-                username: userScore.userId.substring(0, 8),
-                profilePicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTahJbOytdJpTgUSiOKKpoayRwgfYMXnMg2Pk6UOvvoeGey-yQF'
-              }
-            }
-
-            userList.push(JSON.stringify(userScore))
-          })
-
-          if (Object.keys(userList).length !== 0) {
-            // We check the leaderboard
-            checkLeaderboard(1, null, null).then(data => {
-            // If we have an entry we update it
-            // If its a new entry we create it
-              if (data) {
-                updateLeaderboard({
-                  id: data.id,
-                  examId: data.examId,
-                  courseId: data.courseId,
-                  subjectId: data.subjectId,
-                  userList: userList
-                })
-              } else {
-                makeLeaderboards({
-                  examId: 1,
-                  userList: userList
-                })
-              }
+      getGameContent().then(gameContent => {
+        // Recursively go through every content and calculate leaderboards
+        gameContent.forEach(examEntity => {
+          getScoresAndMakeLeaderboards(examEntity.id, null, null)
+          examEntity.courseEntities.forEach(courseEntity => {
+            getScoresAndMakeLeaderboards(examEntity.id, courseEntity.id, null)
+            courseEntity.subjectEntities.forEach(subjectEntity => {
+              getScoresAndMakeLeaderboards(examEntity.id, courseEntity.id, subjectEntity.id)
             })
-          }
+          })
         })
+      })
     }, null, true, 'Europe/Istanbul', null, true),
+    // Gets all the game content from db
+    // Saves it in cache every night at 4 AM
     makeGameContentCronJob: () => new CronJob('* * 4 * * *', () => {
       getGameContent().then(data => {
         nodeCache.setValue('gameContent', data).then(response => {
