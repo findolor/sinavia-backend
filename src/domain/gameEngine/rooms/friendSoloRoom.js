@@ -250,7 +250,7 @@ class FriendSoloGame {
         id: matchInformation.ongoingMatchId,
         friendResults: data.id
       }).then(data => {
-        cronJob({ logger, nodeCache }).stopOngoingMatchCron(data.id)
+        cronJob({ logger, nodeCache }).stopOngoingMatchCron(data.id, false)
       })
     })
   }
@@ -397,10 +397,6 @@ class FriendSoloRoom extends colyseus.Room {
     }
 
     getOngoingMatchInfo(options.ongoingMatchId).then(data => {
-      data.ongoingMatchUser = data.ongoingMatchUser.dataValues
-      data.ongoingMatchFriend = data.ongoingMatchFriend.dataValues
-      data.ongoingMatchUserStatistics = data.ongoingMatchUserStatistics.dataValues
-
       const questionList = []
       const questionProps = []
 
@@ -451,28 +447,6 @@ class FriendSoloRoom extends colyseus.Room {
       case 'ready-solo':
         that.state.nextQuestion()
         that.state.changeStateInformation('question')
-        break
-      // 'finished' action is sent after a player answers a question.
-      case 'finished':
-        // We check if this is the last question
-        // We extract one because questionNumber started from -1
-        if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-          this.state.changeStateInformation('show-results')
-          // Like always there is a delay to show the answers
-          setTimeout(async () => {
-            this.state.changeStateInformation('match-finished')
-            this.isMatchFinished = true
-            // We save the results after the match is finished
-            await this.state.saveMatchResults(this.roomId, this.userJokers)
-          }, 5000)
-          break
-        }
-        this.state.changeStateInformation('show-results')
-        // Delay for showing the results
-        setTimeout(() => {
-          that.state.nextQuestion()
-          that.state.changeStateInformation('question')
-        }, 5000)
         break
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {

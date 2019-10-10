@@ -22,7 +22,7 @@ module.exports = ({ model }) => {
     model.findAll(...args).then((entity) =>
       entity.map((data) => {
         const { dataValues } = data
-        return toEntity(dataValues)
+        return dataValues
       })
     )
 

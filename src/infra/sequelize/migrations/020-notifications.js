@@ -1,7 +1,7 @@
 'use strict'
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('userNotifications', {
+    return queryInterface.createTable('notifications', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -42,6 +42,6 @@ module.exports = {
     })
   },
   down: function (queryInterface) {
-    return queryInterface.dropTable('userNotifications')
+    return queryInterface.dropTable('notifications')
   }
 }

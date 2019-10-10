@@ -13,7 +13,7 @@ module.exports = () => {
       password: password,
       city: 'sehir',
       birthDate: new Date(),
-      deviceId: '9B2B72B8-4AB3-4522-9D4F-44A357160F6A',
+      deviceId: 'E6559387-A6D2-4CCD-903A-3C8D2F936AD0',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     },
@@ -26,7 +26,7 @@ module.exports = () => {
       password: password,
       city: 'sehir',
       birthDate: new Date(),
-      deviceId: '9B2B72B8-4AB3-4522-9D4F-44A357160F6A',
+      deviceId: '6B58287D-49D3-452F-832C-5FFA0DE4EEB8',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     },

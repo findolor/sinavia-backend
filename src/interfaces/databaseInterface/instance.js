@@ -8,6 +8,7 @@ const { getUserJoker, putUserJoker, deleteUserJoker } = require('src/app/userJok
 const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/leaderboard')
 const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch } = require('src/app/ongoingMatch')
 const { getExamEntity } = require('src/app/examEntity')
+const { postNotification, putNotification } = require('src/app/notification')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -39,6 +40,9 @@ module.exports = () => {
     },
     repository: {
       examEntityRepository
+    },
+    repository: {
+      notificationRepository
     }
   } = container.cradle
 
@@ -62,6 +66,8 @@ module.exports = () => {
   const putOngoingMatchUseCase = putOngoingMatch({ ongoingMatchRepository })
   const putStatisticUseCase = putStatistic({ statisticRepository })
   const getExamEntityUseCase = getExamEntity({ examEntityRepository, database })
+  const postNotificationUseCase = postNotification({ notificationRepository })
+  const putNotificationUseCase = putNotification({ notificationRepository })
 
   return {
     getQuestionUseCase,
@@ -83,6 +89,8 @@ module.exports = () => {
     deleteOngoingMatchUseCase,
     putOngoingMatchUseCase,
     putStatisticUseCase,
-    getExamEntityUseCase
+    getExamEntityUseCase,
+    postNotificationUseCase,
+    putNotificationUseCase
   }
 }

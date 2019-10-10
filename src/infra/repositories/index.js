@@ -12,7 +12,7 @@ const ExamEntity = require('./examEntity')
 const CourseEntity = require('./courseEntity')
 const SubjectEntity = require('./subjectEntity')
 const UserJoker = require('./userJoker')
-const UserNotification = require('./userNotification')
+const Notification = require('./notification')
 const Leaderboard = require('./leaderboard')
 const OngoingMatch = require('./ongoingMatch')
 
@@ -31,7 +31,7 @@ module.exports = ({ database }) => {
   const courseEntityModel = database.models.courseEntities
   const subjectEntityModel = database.models.subjectEntities
   const userJokerModel = database.models.userJokers
-  const userNotificationModel = database.models.userNotifications
+  const notificationModel = database.models.notifications
   const leaderboardModel = database.models.leaderboards
   const ongoingMatchModel = database.models.ongoingMatches
 
@@ -138,6 +138,11 @@ module.exports = ({ database }) => {
   ongoingMatchModel.belongsTo(statisticModel, { as: 'ongoingMatchUserStatistics', foreignKey: 'userResults' })
   ongoingMatchModel.belongsTo(statisticModel, { as: 'ongoingMatchFriendStatistics', foreignKey: 'friendResults' })
 
+  // USER has many NOTIFICATIONs
+  // NOTIFICATION belongs to one USER
+  userModel.hasMany(notificationModel, { foreignKey: 'userId' })
+  notificationModel.belongsTo(userModel, { foreignKey: 'userId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -153,7 +158,7 @@ module.exports = ({ database }) => {
     courseEntityRepository: CourseEntity({ model: courseEntityModel }),
     subjectEntityRepository: SubjectEntity({ model: subjectEntityModel }),
     userJokerRepository: UserJoker({ model: userJokerModel }),
-    userNotificationRepository: UserNotification({ model: userNotificationModel }),
+    notificationRepository: Notification({ model: notificationModel }),
     leaderboardRepository: Leaderboard({ model: leaderboardModel }),
     ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel })
   }

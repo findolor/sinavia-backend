@@ -105,3 +105,11 @@ exports.updateStatistic = (statisticEntity) => {
 exports.getGameContent = () => {
   return engineInterface().getExamEntityUseCase.getAll()
 }
+
+exports.createNotification = (notificationEntity) => {
+  return engineInterface().postNotificationUseCase.create({ body: notificationEntity })
+}
+
+exports.updateNotification = (notificationEntity) => {
+  return engineInterface().putNotificationUseCase.update({ notificationEntity: notificationEntity })
+}

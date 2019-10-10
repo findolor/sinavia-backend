@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const UserNotification = sequelize.define('userNotifications', {
+  const Notification = sequelize.define('notifications', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
@@ -28,5 +28,5 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   })
 
-  return UserNotification
+  return Notification
 }

@@ -410,6 +410,8 @@ class FriendGame {
       updateOngoingMatch({
         id: soloGameDatabaseId,
         userResults: data.id
+      }).then(ongoingMatch => {
+        cronJob({ logger, nodeCache }).stopOngoingMatchCron(ongoingMatch.id, true)
       })
     })
   }
@@ -699,7 +701,12 @@ class FriendRoom extends colyseus.Room {
       subjectId: options.subjectId,
       roomCode: options.roomCode,
       userId: options.userId,
-      friendId: options.friendId
+      friendId: options.friendId,
+      userUsername: options.userUsername,
+      userProfilePicture: options.userProfilePicture,
+      examName: options.examName,
+      courseName: options.courseName,
+      subjectName: options.subjectName
     }
     this.state.setMatchInformation(matchInformation)
 
@@ -975,7 +982,14 @@ class FriendRoom extends colyseus.Room {
           questionsJSON,
           matchInformation.examId,
           matchInformation.courseId,
-          matchInformation.subjectId
+          matchInformation.subjectId,
+          matchInformation.userUsername,
+          matchInformation.userProfilePicture,
+          {
+            examName: matchInformation.examName,
+            courseName: matchInformation.courseName,
+            subjectName: matchInformation.subjectName
+          }
         ).then(data => {
           // We save the id for ongoing game to update it later
           this.soloGameDBId = data
@@ -1010,7 +1024,7 @@ class FriendRoom extends colyseus.Room {
         this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userJokers, this.userScores)
       }
     }
-    if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+    if (this.isSoloGame && !this.isMatchFinished) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
   }
 
   onDispose () {

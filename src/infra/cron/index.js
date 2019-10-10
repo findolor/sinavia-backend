@@ -15,7 +15,9 @@ const {
   getGameContent,
   getUserScore,
   postUserScore,
-  putUserScore
+  putUserScore,
+  createNotification,
+  updateNotification
 } = require('../../interfaces/databaseInterface/interface')
 
 const ongoingMatchesList = []
@@ -23,13 +25,13 @@ const ongoingMatchesList = []
 module.exports = ({ logger, nodeCache }) => {
   // Gets the ongoing match and after sending the notifications deletes it
   // Updates the user statistics and friendsMatch
-  const finishUpOngoingMatch = (ongoingMatchId) => {
+  const finishUpOngoingMatch = (ongoingMatchId, isFromUser) => {
     getOngoingMatch(ongoingMatchId).then(data => {
       // Converting to normal object
       data.ongoingMatchUser = data.ongoingMatchUser.dataValues
       data.ongoingMatchFriend = data.ongoingMatchFriend.dataValues
-      data.ongoingMatchUserStatistics = data.ongoingMatchUserStatistics.dataValues
-      if (data.ongoingMatchFriendStatistics !== null) {
+      if (data.ongoingMatchFriendStatistics !== null && data.ongoingMatchUserStatistics !== null) {
+        data.ongoingMatchUserStatistics = data.ongoingMatchUserStatistics.dataValues
         data.ongoingMatchFriendStatistics = data.ongoingMatchFriendStatistics.dataValues
 
         // Calculating user nets
@@ -194,6 +196,8 @@ module.exports = ({ logger, nodeCache }) => {
             // Sending the notifications to both players
             // Blabla notis
 
+            // Stopping ongoing match cron
+            findAndStopMatchCron(ongoingMatchId)
             // Deleting the ongoing match row from db
             deleteOngoingMatch(ongoingMatchId).then(data => {
               return data
@@ -201,27 +205,32 @@ module.exports = ({ logger, nodeCache }) => {
           })
         })
       } else {
-        getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
-          if (userScore === null) {
-            postUserScore({
-              userId: data.ongoingMatchUser.id,
-              examId: data.examId,
-              subjectId: data.subjectId,
-              courseId: data.courseId,
-              totalPoints: 0,
-              totalWin: 0,
-              totalLose: 0,
-              totalDraw: 0,
-              totalGames: 1
-            })
-          } else {
-            userScore.totalGames++
-            putUserScore(userScore)
-          }
-        })
-        deleteOngoingMatch(ongoingMatchId).then(data => {
-          return data
-        })
+        // This will run when the match ends without the friend playing
+        // Match cron is already finished
+        // if isFromUser is false that means the cron finished normally
+        if (data.ongoingMatchUserStatistics !== null && data.ongoingMatchFriendStatistics === null && !isFromUser) {
+          getUserScore(data.ongoingMatchUser.id, data.examId, data.courseId, data.subjectId).then(userScore => {
+            if (userScore === null) {
+              postUserScore({
+                userId: data.ongoingMatchUser.id,
+                examId: data.examId,
+                subjectId: data.subjectId,
+                courseId: data.courseId,
+                totalPoints: 0,
+                totalWin: 0,
+                totalLose: 0,
+                totalDraw: 0,
+                totalGames: 1
+              })
+            } else {
+              userScore.totalGames++
+              putUserScore(userScore)
+            }
+          })
+          deleteOngoingMatch(ongoingMatchId).then(data => {
+            return data
+          })
+        }
       }
     })
   }
@@ -284,6 +293,17 @@ module.exports = ({ logger, nodeCache }) => {
       })
   }
 
+  const findAndStopMatchCron = (ongoingMatchId) => {
+    // Finding the ongoing match object
+    const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === ongoingMatchId)
+    let ongoingMatch = ongoingMatchesList.splice(index, 1)
+
+    // Stopping the cron job for that match
+    // And deleting it from db
+    ongoingMatch = ongoingMatch[0]
+    ongoingMatch.cronJob.stop()
+  }
+
   return {
     // This function will run when server starts (after a crash, after updating...)
     // It will load all the ongoing matches back to our list
@@ -300,7 +320,7 @@ module.exports = ({ logger, nodeCache }) => {
             const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === ongoingMatch.id)
             ongoingMatchesList.splice(index, 1)
 
-            finishUpOngoingMatch(ongoingMatch.id)
+            finishUpOngoingMatch(ongoingMatch.id, false)
           }, null, false, 'Europe/Istanbul')
 
           // Adding the cron to the list and starting it again
@@ -317,7 +337,7 @@ module.exports = ({ logger, nodeCache }) => {
     // If the friend plays the match normally, we just stop the cron and remove it from the list and db
     // TODO ADD FUNCS FOR FRIENDMATCHES
     // UPDATE THE GAME RESULTS WHEN THE USERS FINISH
-    makeFriendGameCronJob: (userId, friendId, questionList, examId, courseId, subjectId) => {
+    makeFriendGameCronJob: (userId, friendId, questionList, examId, courseId, subjectId, userUsername, userProfilePicture, contentNames) => {
       return Promise
         .resolve()
         .then(async () => {
@@ -325,23 +345,51 @@ module.exports = ({ logger, nodeCache }) => {
 
           const friendGameCronJob = {
             cronJob: null,
-            ongoingMatchId: null
+            ongoingMatchId: null,
+            friendNotification: null
           }
 
           // First create an ongoing match entry
           const data = await createOngoingMatch(userId, friendId, endDate, questionList, examId, courseId, subjectId)
           friendGameCronJob.ongoingMatchId = data.id
 
+          // Adding the notification to our db and then sending the notification to the user
+          const notificationBody = {
+            notificationType: 'gameRequest',
+            notificationData: JSON.stringify({
+              message: `${userUsername} seni oyuna çağırıyor!`,
+              profilePicture: userProfilePicture,
+              userId: userId,
+              ongoingMatchId: data.id,
+              examName: contentNames.examName,
+              courseName: contentNames.courseName,
+              subjectName: contentNames.subjectName,
+              examId: examId,
+              courseId: courseId,
+              subjectId: subjectId
+            }),
+            userId: friendId
+          }
+
+          // Creating the notification
+          const notification = await createNotification(notificationBody)
+
           // This cron will run after 1 day if the match is not resolved
           const ongoingMatchCron = new CronJob(endDate, () => {
             const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === data.id)
-            ongoingMatchesList.splice(index, 1)
+            let ongoingMatch = ongoingMatchesList.splice(index, 1)
+
+            ongoingMatch = ongoingMatch[0]
+            ongoingMatch.friendNotification.read = true
+
+            updateNotification(ongoingMatch.friendNotification)
 
             finishUpOngoingMatch(data.id)
           }, null, false, 'Europe/Istanbul')
 
           // Adding the cron to the list
           friendGameCronJob.cronJob = ongoingMatchCron
+          friendGameCronJob.friendNotification = notification
           ongoingMatchesList.push(friendGameCronJob)
           ongoingMatchCron.start()
 
@@ -353,22 +401,10 @@ module.exports = ({ logger, nodeCache }) => {
     // We will also send notifications to our our users
     // TODO ADD FUNCS FOR FRIENDMATCHES
     // UPDATE THE GAME RESULTS WHEN THE USERS FINISH
-    stopOngoingMatchCron: (ongoingMatchId) => {
+    stopOngoingMatchCron: (ongoingMatchId, isFromUser) => {
       return Promise
         .resolve()
-        .then(() => {
-          // ongoingMatchId = parseInt(ongoingMatchId, 10)
-          // Finding the ongoing match object
-          const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === ongoingMatchId)
-          let ongoingMatch = ongoingMatchesList.splice(index, 1)
-
-          // Stopping the cron job for that match
-          // And deleting it from db
-          ongoingMatch = ongoingMatch[0]
-          ongoingMatch.cronJob.stop()
-
-          finishUpOngoingMatch(ongoingMatch.ongoingMatchId)
-        })
+        .then(() => finishUpOngoingMatch(ongoingMatchId, isFromUser))
     },
     // Calculating the leaderboards at 4 AM
     // Calculate this for every content we have

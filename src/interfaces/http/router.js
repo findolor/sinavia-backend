@@ -61,7 +61,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/courseEntities', controller('courseEntity').router)
   apiRouter.use('/subjectEntities', controller('subjectEntity').router)
   apiRouter.use('/userJokers', controller('userJoker').router)
-  apiRouter.use('/userNotifications', controller('userNotification').router)
+  apiRouter.use('/notifications', controller('notification').router)
   apiRouter.use('/leaderboards', controller('leaderboard').router)
 
   router.use(`/api/${config.version}`, apiRouter)

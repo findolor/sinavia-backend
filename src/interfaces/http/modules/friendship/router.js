@@ -7,6 +7,7 @@ module.exports = ({
   putUseCase,
   deleteUseCase,
   getUserUseCase,
+  postNotificationUseCase,
   logger,
   auth,
   fcmService,
@@ -137,16 +138,31 @@ module.exports = ({
           putUseCase
             .updateFriendship({ body: req.body })
             .then(data => {
-              fcmService.sendDataMessage(
-                dataValues.fcmToken,
-                {
-                  type: 'friendApproved',
-                  title: 'Arkadaş İsteği!',
-                  body: `${req.body.username} arkadaş isteğini kabul etti.`,
+              // Adding the notification to our db and then sending the notification to the user
+              const notificationBody = {
+                notificationType: 'friendshipAccepted',
+                notificationData: JSON.stringify({
+                  message: `${req.body.username} arkadaşlık isteğini kabul etti.`,
+                  profilePicture: dataValues.profilePicture,
                   userId: req.body.friendId
-                }
-              )
-              res.status(Status.OK).json(Success(data))
+                }),
+                userId: req.body.userId
+              }
+
+              postNotificationUseCase
+                .create({ body: notificationBody })
+                .then(notification => {
+                  fcmService.sendDataMessage(
+                    dataValues.fcmToken,
+                    {
+                      type: 'friendApproved',
+                      title: 'Arkadaş İsteği!',
+                      body: `${req.body.username} arkadaşlık isteğini kabul etti.`,
+                      userId: req.body.friendId
+                    }
+                  )
+                  res.status(Status.OK).json(Success(data))
+                })
             })
             .catch((error) => {
               logger.error(error.stack) // we still need to log every error for debugging

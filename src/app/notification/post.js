@@ -1,6 +1,6 @@
-const { UserNotification } = require('src/domain/userNotification')
+const { Notification } = require('src/domain/notification')
 
-module.exports = ({ userNotificationRepository }) => {
+module.exports = ({ notificationRepository }) => {
   const create = ({ body }) => {
     return Promise.resolve().then(() => {
       const entity = Object.assign({}, {
@@ -8,9 +8,9 @@ module.exports = ({ userNotificationRepository }) => {
         notificationData: body.notificationData,
         userId: body.userId
       })
-      const userNotification = UserNotification(entity)
+      const notification = Notification(entity)
 
-      return userNotificationRepository.create(userNotification)
+      return notificationRepository.create(notification)
     })
   }
 
