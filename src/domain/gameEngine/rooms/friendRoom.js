@@ -437,16 +437,15 @@ class FriendGame {
     if (userScores[userId].shouldUpdate) {
       switch (winLoseDrawAndPoints[key].status) {
         case 'won':
-          userScores[userId].userScore.totalWin++
+          userScores[userId].userScore.totalFriendWin++
           break
         case 'lost':
-          userScores[userId].userScore.totalLose++
+          userScores[userId].userScore.totalFriendLose++
           break
         case 'draw':
-          userScores[userId].userScore.totalDraw++
+          userScores[userId].userScore.totalFriendDraw++
           break
       }
-      userScores[userId].userScore.totalGames++
       updateUserScore(userScores[userId].userScore)
     } else {
       let win = 0
@@ -469,10 +468,9 @@ class FriendGame {
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
         totalPoints: 0,
-        totalWin: win,
-        totalLose: lose,
-        totalDraw: draw,
-        totalGames: 1
+        totalFriendWin: win,
+        totalFriendLose: lose,
+        totalFriendDraw: draw
       })
     }
   }

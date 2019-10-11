@@ -26,7 +26,42 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.NUMBER,
       allowNull: false
     },
-    totalWin: {
+    totalRankedWin: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalRankedLose: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalRankedDraw: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalFriendWin: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalFriendLose: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalFriendDraw: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    totalGroupGames: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    }
+    /* totalWin: {
       type: DataTypes.NUMBER,
       allowNull: false
     },
@@ -41,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     totalGames: {
       type: DataTypes.NUMBER,
       allowNull: false
-    }
+    } */
   }, {
     freezeTableName: true,
     timestamps: false

@@ -12,33 +12,8 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  /**
- * @swagger
- * /users:
- *   post:
- *     tags:
- *       - Users
- *     description: Create new user
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: body
- *         description: User's Entity
- *         in: body
- *         required: true
- *         type: string
- *         schema:
- *           $ref: '#/definitions/user'
- *     responses:
- *       200:
- *         description: Successfully Created
- *         schema:
- *           $ref: '#/definitions/user'
- *       401:
- *         $ref: '#/responses/Unauthorized'
- *       400:
- *         $ref: '#/responses/BadRequest'
- */
+  // router.use(auth.authenticate())
+
   router
     .post('/', (req, res) => {
       postUseCase
@@ -53,52 +28,6 @@ module.exports = ({
         })
     })
 
-  /**
- * @swagger
- * definitions:
- *   user:
- *     properties:
- *       id:
- *         type: string
- *         format: uuid
- *       firstName:
- *         type: string
- *       lastName:
- *         type: string
- *       middleName:
- *         type: string
- *       email:
- *         type: string
- *       roleId:
- *         type: number
- *       isDeleted:
- *         type: number
- *       createdBy:
- *         type: string
- *         format: uuid
- */
-
-  router.use(auth.authenticate())
-
-  /**
- * @swagger
- * /users:
- *   get:
- *     tags:
- *       - Users
- *     description: Returns a list of users
- *     security:
- *       - JWT: []
- *     responses:
- *       200:
- *         description: An array of users
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/user'
- *       401:
- *        $ref: '#/responses/Unauthorized'
- */
   router
     .get('/:id', (req, res) => {
       getUseCase
@@ -125,10 +54,13 @@ module.exports = ({
         .then(data => {
           const FRIENDSHIPS = []
           const STATISTICS = {
-            winCount: 0,
-            loseCount: 0,
-            drawCount: 0,
-            totalGameCount: 0
+            rankedWinCount: 0,
+            rankedLoseCount: 0,
+            rankedDrawCount: 0,
+            friendWinCount: 0,
+            friendLoseCount: 0,
+            friendDrawCount: 0,
+            groupGameCount: 0
           }
           const FRIENDMATCHES_WINNER = []
           const FRIENDMATCHES_LOSER = []
@@ -155,10 +87,13 @@ module.exports = ({
             FRIENDSHIPS.push(friendship.dataValues)
           })
           data.dataValues.userScores.forEach(userScore => {
-            STATISTICS.winCount += userScore.dataValues.totalWin
-            STATISTICS.loseCount += userScore.dataValues.totalLose
-            STATISTICS.drawCount += userScore.dataValues.totalDraw
-            STATISTICS.totalGameCount = userScore.dataValues.totalGames
+            STATISTICS.rankedWinCount += userScore.dataValues.totalRankedWin
+            STATISTICS.rankedLoseCount += userScore.dataValues.totalRankedLose
+            STATISTICS.rankedDrawCount += userScore.dataValues.totalRankedDraw
+            STATISTICS.friendWinCount += userScore.dataValues.totalFriendWin
+            STATISTICS.friendLoseCount += userScore.dataValues.totalFriendLose
+            STATISTICS.friendDrawCount += userScore.dataValues.totalFriendDraw
+            STATISTICS.groupGameCount = userScore.dataValues.totalGroupGames
           })
           data.dataValues.winner.forEach(win => {
             if (win.dataValues.isMatchDraw) FRIENDMATCHES_DRAW.push(win.dataValues)

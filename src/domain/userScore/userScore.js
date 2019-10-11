@@ -8,11 +8,18 @@ const UserScore = t.struct({
   examId: t.Number,
   courseId: t.Number,
   subjectId: t.Number,
-  totalPoints: t.Number,
-  totalWin: t.Number,
+  totalPoints: t.maybe(t.Number),
+  totalRankedWin: t.maybe(t.Number),
+  totalFriendWin: t.maybe(t.Number),
+  totalRankedLose: t.maybe(t.Number),
+  totalFriendLose: t.maybe(t.Number),
+  totalRankedDraw: t.maybe(t.Number),
+  totalFriendDraw: t.maybe(t.Number),
+  totalGroupGames: t.maybe(t.Number),
+  /* totalWin: t.Number,
   totalLose: t.Number,
   totalDraw: t.Number,
-  totalGames: t.Number,
+  totalGames: t.Number, */
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

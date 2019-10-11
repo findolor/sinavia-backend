@@ -362,16 +362,15 @@ class RankedGame {
       userScores[userId].userScore.totalPoints = userScores[userId].userScore.totalPoints + winLoseDrawAndPoints[key].points
       switch (winLoseDrawAndPoints[key].status) {
         case 'won':
-          userScores[userId].userScore.totalWin++
+          userScores[userId].userScore.totalRankedWin++
           break
         case 'lost':
-          userScores[userId].userScore.totalLose++
+          userScores[userId].userScore.totalRankedLose++
           break
         case 'draw':
-          userScores[userId].userScore.totalDraw++
+          userScores[userId].userScore.totalRankedDraw++
           break
       }
-      userScores[userId].userScore.totalGames++
       updateUserScore(userScores[userId].userScore)
     } else {
       let win = 0
@@ -394,10 +393,9 @@ class RankedGame {
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
         totalPoints: winLoseDrawAndPoints[key].points,
-        totalWin: win,
-        totalLose: lose,
-        totalDraw: draw,
-        totalGames: 1
+        totalRankedWin: win,
+        totalRankedLose: lose,
+        totalRankedDraw: draw
       })
     }
   }
@@ -977,7 +975,7 @@ class RankedRoom extends colyseus.Room {
           this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers, this.userInformations)
         }
       } else {
-        if (!this.isMatchFinished) this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
+        if (!this.isMatchFinished && this.isBotGame) this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
       }
     } catch (error) {
       logger.error(error.stack)

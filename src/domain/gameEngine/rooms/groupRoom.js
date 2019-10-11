@@ -283,7 +283,7 @@ class GroupGame {
 
   decideUserScores (userScores, matchInformation, userId, databaseId) {
     if (userScores[userId].shouldUpdate) {
-      userScores[userId].userScore.totalGames++
+      userScores[userId].userScore.totalGroupGames++
       updateUserScore(userScores[userId].userScore)
     } else {
       createUserScore({
@@ -292,10 +292,7 @@ class GroupGame {
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
         totalPoints: 0,
-        totalWin: 0,
-        totalLose: 0,
-        totalDraw: 0,
-        totalGames: 1
+        totalGroupGames: 1
       })
     }
   }
@@ -754,12 +751,12 @@ class GroupRoom extends colyseus.Room {
     }
   }
 
-  async onDispose () {
+  onDispose () {
     logger.info('Room disposed')
     // Because there are no winners and losers in this game mode, it doesn't matter if we save the match results right before the room closes
     // If the match hasn't started yet, we don't save any result because there aren't any lol
     if (!this.isMatchFinished && this.isMatchStarted) {
-      await this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
+      this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
     }
   }
 }

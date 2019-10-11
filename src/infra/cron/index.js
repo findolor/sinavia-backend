@@ -65,14 +65,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 0,
-                totalLose: 0,
-                totalDraw: 1,
-                totalGames: 1
+                totalFriendWin: 0,
+                totalFriendLose: 0,
+                totalFriendDraw: 1
               })
             } else {
-              userScore.totalGames++
-              userScore.totalDraw++
+              userScore.totalFriendDraw++
               putUserScore(userScore)
             }
           })
@@ -84,14 +82,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 0,
-                totalLose: 0,
-                totalDraw: 1,
-                totalGames: 1
+                totalFriendWin: 0,
+                totalFriendLose: 0,
+                totalFriendDraw: 1
               })
             } else {
-              userScore.totalGames++
-              userScore.totalDraw++
+              userScore.totalFriendDraw++
               putUserScore(userScore)
             }
           })
@@ -111,14 +107,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 1,
-                totalLose: 0,
-                totalDraw: 0,
-                totalGames: 1
+                totalFriendWin: 1,
+                totalFriendLose: 0,
+                totalFriendDraw: 0
               })
             } else {
-              userScore.totalGames++
-              userScore.totalWin++
+              userScore.totalFriendWin++
               putUserScore(userScore)
             }
           })
@@ -130,14 +124,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 0,
-                totalLose: 1,
-                totalDraw: 0,
-                totalGames: 1
+                totalFriendWin: 0,
+                totalFriendLose: 1,
+                totalFriendDraw: 0
               })
             } else {
-              userScore.totalGames++
-              userScore.totalLose++
+              userScore.totalFriendLose++
               putUserScore(userScore)
             }
           })
@@ -157,14 +149,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 0,
-                totalLose: 1,
-                totalDraw: 0,
-                totalGames: 1
+                totalFriendWin: 0,
+                totalFriendLose: 1,
+                totalFriendDraw: 0
               })
             } else {
-              userScore.totalGames++
-              userScore.totalLose++
+              userScore.totalFriendLose++
               putUserScore(userScore)
             }
           })
@@ -176,14 +166,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 1,
-                totalLose: 0,
-                totalDraw: 0,
-                totalGames: 1
+                totalFriendWin: 1,
+                totalFriendLose: 0,
+                totalFriendDraw: 0
               })
             } else {
-              userScore.totalGames++
-              userScore.totalWin++
+              userScore.totalFriendWin++
               putUserScore(userScore)
             }
           })
@@ -217,13 +205,12 @@ module.exports = ({ logger, nodeCache }) => {
                 subjectId: data.subjectId,
                 courseId: data.courseId,
                 totalPoints: 0,
-                totalWin: 0,
-                totalLose: 0,
-                totalDraw: 0,
-                totalGames: 1
+                totalFriendWin: 0,
+                totalFriendLose: 0,
+                totalFriendDraw: 0
               })
             } else {
-              userScore.totalGames++
+              userScore.totalGroupGames++
               putUserScore(userScore)
             }
           })

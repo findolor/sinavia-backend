@@ -1,4 +1,6 @@
-module.exports = ({ userScoreRepository, database }) => {
+module.exports = ({ userScoreRepository, database, Sequelize }) => {
+  const Op = Sequelize.Op
+
   const getOne = ({ userId, examId, courseId, subjectId }) => {
     return Promise
       .resolve()
@@ -21,7 +23,10 @@ module.exports = ({ userScoreRepository, database }) => {
       .then(() => {
         const queryOptions = {
           where: {
-            examId: examId
+            examId: examId,
+            totalPoints: {
+              [Op.ne]: 0
+            }
           },
           order: [['totalPoints', 'DESC']],
           include: [database.models.users]

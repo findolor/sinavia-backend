@@ -50,7 +50,7 @@ module.exports = () => {
   const postStatisticUseCase = postStatistic({ statisticRepository })
   const getUserUseCase = getUser({ userRepository, Sequelize })
   const postFriendsMatchUseCase = postFriendsMatch({ friendsMatchRepository })
-  const getUserScoreUseCase = getUserScore({ userScoreRepository, database })
+  const getUserScoreUseCase = getUserScore({ userScoreRepository, database, Sequelize })
   const postUserScoreUseCase = postUserScore({ userScoreRepository })
   const putUserScoreUseCase = putUserScore({ userScoreRepository })
   const getUserJokerUseCase = getUserJoker({ userJokerRepository, database })

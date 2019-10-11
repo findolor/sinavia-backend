@@ -45,7 +45,42 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      totalWin: {
+      totalRankedWin: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalRankedLose: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalRankedDraw: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalFriendWin: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalFriendLose: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalFriendDraw: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      totalGroupGames: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      /* totalWin: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
@@ -60,7 +95,7 @@ module.exports = {
       totalGames: {
         type: Sequelize.INTEGER,
         allowNull: false
-      },
+      }, */
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
