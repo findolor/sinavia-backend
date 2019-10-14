@@ -8,6 +8,7 @@ pm2.connect(() => {
     script: 'index.js',
     instances: instances,
     max_memory_restart: `${maxMemory}M`,
+    exec_mode: 'fork',
     env: {
       NODE_ENV: process.env.NODE_ENV || 'development',
       NODE_PATH: '.'

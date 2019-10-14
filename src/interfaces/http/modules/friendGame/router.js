@@ -37,5 +37,19 @@ module.exports = ({
         })
     })
 
+  router
+    .delete('/:ongoingMatchId', (req, res) => {
+      const ongoingMatchId = parseInt(req.params.ongoingMatchId, 10)
+      cronJob.stopOngoingMatchCron(ongoingMatchId, false)
+        .then(() => {
+          res.status(Status.OK).json(Success(true))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
   return router
 }

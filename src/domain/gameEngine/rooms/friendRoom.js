@@ -730,6 +730,12 @@ class FriendRoom extends colyseus.Room {
 
   // If this room is full new users will join another room
   requestJoin (options, isNew) {
+    if (options.rejectGame) {
+      this.broadcast({
+        action: 'game-reject'
+      })
+      this.disconnect()
+    }
     if (isNew) {
       if (options.create) return true
       else return false

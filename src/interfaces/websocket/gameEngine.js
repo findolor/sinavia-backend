@@ -4,7 +4,7 @@ const monitor = require('@colyseus/monitor').monitor
 const roomRegisterService = require('../../domain/gameEngine')
 
 module.exports = ({ logger, config }) => {
-  const port = config.gameEnginePort
+  const port = config.gameEnginePort // + Number(process.env.NODE_APP_INSTANCE)
 
   return {
     start: (app) => new Promise((resolve) => {

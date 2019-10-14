@@ -10,6 +10,7 @@
   "scripts": {
     "gc": "git-cz",
     "start": "NODE_PATH=. node -r dotenv-flow/config index.js",
+    "start:cluster": "NODE_PATH=. node -r dotenv-flow/config cluster.js",
     "start:inspect": "NODE_PATH=. node --inspect -r dotenv-flow/config index.js",
     "start:dev": "NODE_PATH=. nodemon index.js",
     "deploy": "scripts/set_env_vars.sh && npm run start",
