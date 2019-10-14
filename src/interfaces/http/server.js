@@ -15,10 +15,15 @@ module.exports = ({ config, router, logger, auth }) => {
   // we define our static folder
   app.use(express.static('public'))
 
+  let port = 0
+
+  if (config.isProxyEnabled) port = Number(config.port) + Number(process.env.NODE_APP_INSTANCE)
+  else port = config.port
+
   return {
     app,
     start: () => new Promise((resolve) => {
-      const http = app.listen(config.port, () => {
+      const http = app.listen(port, () => {
         const { port } = http.address()
         logger.info(`🤘 API - Port ${port}`)
         resolve(app)

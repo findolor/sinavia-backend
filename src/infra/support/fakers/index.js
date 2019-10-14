@@ -1,5 +1,3 @@
-
-require('dotenv-flow').config()
 const path = require('path')
 
 module.exports = function createFixtureRoutes (fixtureURI) {

@@ -10,7 +10,8 @@
   "scripts": {
     "gc": "git-cz",
     "start": "NODE_PATH=. node -r dotenv-flow/config index.js",
-    "start:cluster": "NODE_PATH=. node -r dotenv-flow/config cluster.js",
+    "proxy:colyseus": "NODE_PATH=. node -r dotenv-flow/config src/interfaces/proxy/colyseusProxy/proxy.js",
+    "proxy:backend": "NODE_PATH=. node -r dotenv-flow/config src/interfaces/proxy/backendProxy/proxy.js",
     "start:inspect": "NODE_PATH=. node --inspect -r dotenv-flow/config index.js",
     "start:dev": "NODE_PATH=. nodemon index.js",
     "deploy": "scripts/set_env_vars.sh && npm run start",
@@ -83,7 +84,9 @@
     "sequelize-cli": "^5.5.0",
     "swagger-jsdoc": "3.2.9",
     "tcomb": "3.2.29",
-    "winston": "3.2.1"
+    "winston": "3.2.1",
+    "ioredis": "^4.9.0",
+    "redbird": "^0.9.0"
   },
   "devDependencies": {
     "@colyseus/loadtest": "^0.10.2",
@@ -109,7 +112,12 @@
     "snazzy": "^8.0.0",
     "standard": "^12.0.1",
     "supertest": "3.4.2",
-    "uuidv4": "^5.0.1"
+    "uuidv4": "^5.0.1",
+    "@types/ioredis": "^4.0.10",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^11.12.1",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.3.4000"
   },
   "standard": {
     "ignore": [

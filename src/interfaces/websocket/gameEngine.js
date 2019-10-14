@@ -4,14 +4,19 @@ const monitor = require('@colyseus/monitor').monitor
 const roomRegisterService = require('../../domain/gameEngine')
 
 module.exports = ({ logger, config }) => {
-  const port = config.gameEnginePort // + Number(process.env.NODE_APP_INSTANCE)
+  let port
+
+  if (config.isProxyEnabled) port = Number(config.gameEnginePort) + Number(process.env.NODE_APP_INSTANCE)
+  else port = config.gameEnginePort
 
   return {
     start: (app) => new Promise((resolve) => {
       const server = http.createServer(app)
       const gameEngine = new colyseus.Server({
         server: server
-        // For now redis is disabled. We dont use it.
+        /* presence: new colyseus.RedisPresence({
+          url: "redis://127.0.0.1:6379/0"
+        }) */
         // TODO migrate colyseus
         /* presence: new colyseus.RedisPresence({
           host: config.cache.host,

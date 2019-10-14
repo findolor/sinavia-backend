@@ -1,5 +1,3 @@
-require('dotenv-flow').config()
-
 const fs = require('fs')
 const path = require('path')
 const Sequelize = require('sequelize')
@@ -12,7 +10,8 @@ module.exports = ({ config, basePath }) => {
     {
       port: config.db.port,
       host: config.db.host,
-      dialect: 'postgres'
+      dialect: 'postgres',
+      logging: false
     }
   )
 
