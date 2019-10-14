@@ -1,6 +1,8 @@
 /**
  * since mocha don't see enviroment variables we have to use dotenv
  */
+require('dotenv-flow').config()
+
 // TODO fix SSL issue
 module.exports = {
   local: {

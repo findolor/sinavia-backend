@@ -1,7 +1,7 @@
 const { encryptPassword } = require('src/infra/encryption')
 
 module.exports = () => {
-  const password = encryptPassword('pass')
+  const password = encryptPassword('password')
 
   return [
     {

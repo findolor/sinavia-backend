@@ -2,12 +2,12 @@
 /**
  * This is a hardcoded alternative to using proxies + Colyseus.
  */
-var processIdsLocalhost = {
+/* var processIdsLocalhost = {
   '0': 'http://127.0.0.1:4000',
   '1': 'http://127.0.0.1:4001',
   '2': 'http://127.0.0.1:4002',
   '3': 'http://127.0.0.1:4003'
-}
+} */
 
 var ip = '10.253.86.16'
 
