@@ -42,6 +42,28 @@ module.exports = () => {
       deviceId: '9B2B72B8-4AB3-4522-9D4F-44A357160F6A',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
       coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+    },
+    {
+      id: '08f228a0-443b-4003-8b17-efe835cf6916',
+      username: 'MarmeladeBaby',
+      name: 'Arda',
+      lastname: 'Nakisci',
+      email: 'littlepossum66@gmail.com',
+      password: password,
+      deviceId: '6B58287D-49D3-452F-832C-5FFA0DE4EEB8',
+      profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+    },
+    {
+      id: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
+      username: 'ShellbreakerTurtle',
+      name: 'Daar',
+      lastname: 'Kinasci',
+      email: 'anakisci@gmail.com',
+      password: password,
+      deviceId: 'CEAD0717-2323-4621-BB1E-AE9FA5624205',
+      profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
     }
   ]
 }

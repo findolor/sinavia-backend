@@ -73,7 +73,8 @@ class RankedGame {
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
-      coverPicture: userInformation.coverPicture
+      coverPicture: userInformation.coverPicture,
+      totalPoints: userInformation.totalPoints
     }
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
