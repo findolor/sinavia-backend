@@ -28,7 +28,7 @@ module.exports = ({
   router
     .get('/friends', (req, res) => {
       getUserScoreUseCase
-        .getFriendScores({ userIdList: req.query.userIdList })
+        .getFriendScores({ userIdList: req.query.userIdList, clientId: req.query.clientId, examId: req.query.examId, courseId: req.query.courseId, subjectId: req.query.subjectId })
         .then(data => {
           const scores = []
 

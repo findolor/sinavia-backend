@@ -43,17 +43,28 @@ module.exports = ({ userScoreRepository, database, Sequelize }) => {
       })
   }
 
-  const getFriendScores = ({ userIdList }) => {
+  const getFriendScores = ({ userIdList, clientId, examId, courseId, subjectId }) => {
     return Promise
       .resolve()
       .then(() => {
-        return userScoreRepository.findAll({
+        userIdList.push(clientId)
+
+        const queryOptions = {
           where: {
-            userId: userIdList
+            examId: examId
           },
           order: [['totalPoints', 'DESC']],
           include: [database.models.users]
-        })
+        }
+
+        if (courseId) {
+          if (subjectId) {
+            queryOptions.where.courseId = courseId
+            queryOptions.where.subjectId = subjectId
+          } else queryOptions.where.courseId = courseId
+        }
+
+        return userScoreRepository.findAll(queryOptions)
       })
   }
 
