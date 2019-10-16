@@ -13,7 +13,8 @@ const {
   updateOngoingMatch,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
+  getFriendMatches
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -612,6 +613,15 @@ function postFriendMatchResults (friendMatchInformation) {
   }
 }
 
+function getPlayedFriendMatches (userId, friendId) {
+  try {
+    return getFriendMatches(userId, friendId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get friend match information')
+    logger.error(error.stack)
+  }
+}
+
 function fetchUserJoker (userId) {
   try {
     return getUserJoker(userId)
@@ -850,11 +860,11 @@ class FriendRoom extends colyseus.Room {
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
-            setTimeout(async () => {
+            setTimeout(() => {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
+              this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
             }, 5000)
             break
           }
@@ -1029,8 +1039,8 @@ class FriendRoom extends colyseus.Room {
       this.send(lastClient, {
         action: 'client-leaving',
         clientId: lastClient.id,
-          playerProps: this.state.getPlayerProps(),
-          fullQuestionList: this.state.getQuestionProps()
+        playerProps: this.state.getPlayerProps(),
+        fullQuestionList: this.state.getQuestionProps()
       })
 
       // We save the leaving clients id to mark it as lost for later
