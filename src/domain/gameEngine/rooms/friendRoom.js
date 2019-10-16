@@ -138,6 +138,10 @@ class FriendGame {
     return this.friendState.playerProps
   }
 
+  setPlayerPropsMatchInformation (matchInformation) {
+    this.friendState.playerProps.matchInformation = matchInformation
+  }
+
   getPlayerId (playerNumber) {
     switch (playerNumber) {
       case 1:
@@ -707,6 +711,7 @@ class FriendRoom extends colyseus.Room {
       subjectName: options.subjectName
     }
     this.state.setMatchInformation(matchInformation)
+    this.state.setPlayerPropsMatchInformation(matchInformation)
 
     // Fetching questions from database
     getQuestions(
@@ -866,6 +871,13 @@ class FriendRoom extends colyseus.Room {
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
           this.state.changeStateInformation('show-results')
+          // Sending the questions in full for favouriting
+          this.clock.setTimeout(() => {
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+          }, 1000)
           // Like always there is a delay to show the answers
           setTimeout(() => {
             this.state.changeStateInformation('match-finished')
@@ -1015,7 +1027,10 @@ class FriendRoom extends colyseus.Room {
       const lastClient = this.clients[0]
 
       this.send(lastClient, {
-        action: 'client-leaving'
+        action: 'client-leaving',
+        clientId: lastClient.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps()
       })
 
       // We save the leaving clients id to mark it as lost for later
