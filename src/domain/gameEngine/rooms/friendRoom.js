@@ -861,6 +861,12 @@ class FriendRoom extends colyseus.Room {
             this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
             setTimeout(() => {
+              getPlayedFriendMatches(
+                this.state.getMatchInformation().userId,
+                this.state.getMatchInformation().friendId
+              ).then(data => {
+                console.log(data)
+              })
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
