@@ -864,13 +864,17 @@ class FriendRoom extends colyseus.Room {
               getPlayedFriendMatches(
                 this.state.getMatchInformation().userId,
                 this.state.getMatchInformation().friendId
-              ).then(data => {
-                console.log(data)
+              ).then(friendMatches => {
+                this.broadcast({
+                  action: 'friend-matches',
+                  friendMatches: friendMatches
+                })
+
+                this.state.changeStateInformation('match-finished')
+                this.isMatchFinished = true
+                // We save the results after the match is finished
+                this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
               })
-              this.state.changeStateInformation('match-finished')
-              this.isMatchFinished = true
-              // We save the results after the match is finished
-              this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
             }, 5000)
             break
           }
@@ -1042,11 +1046,14 @@ class FriendRoom extends colyseus.Room {
     if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
 
-      this.send(lastClient, {
-        action: 'client-leaving',
-        clientId: lastClient.id,
-        playerProps: this.state.getPlayerProps(),
-        fullQuestionList: this.state.getQuestionProps()
+      getPlayedFriendMatches(this.state.getMatchInformation().userId, this.state.getMatchInformation().friendId).then(friendMatches => {
+        this.send(lastClient, {
+          action: 'client-leaving',
+          clientId: lastClient.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps(),
+          friendMatches: friendMatches
+        })
       })
 
       // We save the leaving clients id to mark it as lost for later

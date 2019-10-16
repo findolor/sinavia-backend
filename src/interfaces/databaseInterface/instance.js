@@ -68,7 +68,7 @@ module.exports = () => {
   const getExamEntityUseCase = getExamEntity({ examEntityRepository, database })
   const postNotificationUseCase = postNotification({ notificationRepository })
   const putNotificationUseCase = putNotification({ notificationRepository })
-  const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository })
+  const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository, Sequelize })
 
   return {
     getQuestionUseCase,
