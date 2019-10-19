@@ -824,7 +824,7 @@ class FriendRoom extends colyseus.Room {
         this.clock.setTimeout(() => {
           this.broadcast(this.state.getPlayerProps())
         }, 500)
-        logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
+        logger.info(`Friend game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
       }
     }).catch(error => {
       logger.error(error.stack)
