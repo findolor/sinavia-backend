@@ -47,7 +47,7 @@ module.exports = ({
   router
     .get('/opponent/:userId', (req, res) => {
       getUseCase
-        .getOpponentFullInformation({ userId: req.params.userId, clientId: req.query.clientId })
+        .getOpponentFullInformation({ userId: req.params.userId })
         // Data contains a user's;
         // Statistics
         // Friend matches

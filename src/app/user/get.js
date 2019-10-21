@@ -15,7 +15,7 @@ module.exports = ({ userRepository, Sequelize, database }) => {
     })
   }
 
-  const getOpponentFullInformation = ({ userId, clientId }) => {
+  const getOpponentFullInformation = ({ userId }) => {
     return Promise.resolve().then(() => {
       return userRepository.findOne({
         where: {
