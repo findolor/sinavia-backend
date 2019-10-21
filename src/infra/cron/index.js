@@ -225,36 +225,38 @@ module.exports = ({ logger, nodeCache }) => {
   const getScoresAndMakeLeaderboards = (examId, courseId, subjectId) => {
     getAllScores(examId, courseId, subjectId)
       .then(data => {
-        const userList = []
+        const userList = {}
 
         data.forEach(userScore => {
-          // TODO We will delete this if later
-          if (userScore.user !== null) {
-            const { dataValues } = userScore.user
-            userScore.user = dataValues
-
-            delete userScore.user.password
-            delete userScore.user.city
-            delete userScore.user.totalPoints
-            delete userScore.user.fcmToken
-            delete userScore.user.deviceId
-            delete userScore.user.email
-            delete userScore.user.birthDate
-            delete userScore.user.coverPicture
-            delete userScore.user.name
-            delete userScore.user.lastname
-          } else {
-            userScore.user = {
-              id: userScore.userId,
-              username: userScore.userId.substring(0, 8),
-              profilePicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTahJbOytdJpTgUSiOKKpoayRwgfYMXnMg2Pk6UOvvoeGey-yQF'
-            }
+          const leaderboardEntity = {
+            totalPoints: null,
+            username: null,
+            profilePicture: null,
+            id: null
           }
 
-          userList.push(JSON.stringify(userScore))
+          const { dataValues } = userScore.user
+          userScore.user = dataValues
+
+          leaderboardEntity.username = userScore.user.username
+          leaderboardEntity.profilePicture = userScore.user.profilePicture
+          leaderboardEntity.id = userScore.user.id
+          leaderboardEntity.totalPoints = userScore.totalPoints
+
+          if (userList[userScore.userId] === undefined) {
+            userList[userScore.userId] = leaderboardEntity
+          } else {
+            userList[userScore.userId].totalPoints += leaderboardEntity.totalPoints
+          }
         })
 
-        if (Object.keys(userList).length !== 0) {
+        const leaderboardList = []
+
+        Object.keys(userList).forEach(userId => {
+          leaderboardList.push(JSON.stringify(userList[userId]))
+        })
+
+        if (Object.keys(leaderboardList).length !== 0) {
           // We check the leaderboard
           checkLeaderboard(examId, courseId, subjectId).then(data => {
             // If we have an entry we update it
@@ -265,14 +267,14 @@ module.exports = ({ logger, nodeCache }) => {
                 examId: data.examId,
                 courseId: data.courseId,
                 subjectId: data.subjectId,
-                userList: userList
+                userList: leaderboardList
               })
             } else {
               makeLeaderboards({
                 examId: examId,
                 courseId: courseId,
                 subjectId: subjectId,
-                userList: userList
+                userList: leaderboardList
               })
             }
           })

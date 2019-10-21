@@ -30,36 +30,40 @@ module.exports = ({
       getUserScoreUseCase
         .getFriendScores({ userIdList: req.query.userIdList, clientId: req.query.clientId, examId: req.query.examId, courseId: req.query.courseId, subjectId: req.query.subjectId })
         .then(data => {
-          const scores = []
+          const userList = {}
 
-          // TODO Again this null check will be deleted in production
           data.forEach(userScore => {
-            if (userScore.user !== null) {
-              let { dataValues } = userScore.user
-              userScore.user = dataValues
-
-              delete userScore.user.password
-              delete userScore.user.city
-              delete userScore.user.totalPoints
-              delete userScore.user.fcmToken
-              delete userScore.user.deviceId
-              delete userScore.user.email
-              delete userScore.user.birthDate
-              delete userScore.user.coverPicture
-              delete userScore.user.name
-              delete userScore.user.lastname
-            } else {
-              userScore.user = {
-                id: userScore.userId,
-                username: userScore.userId.substring(0, 8),
-                profilePicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTahJbOytdJpTgUSiOKKpoayRwgfYMXnMg2Pk6UOvvoeGey-yQF'
-              }
+            const leaderboardEntity = {
+              totalPoints: null,
+              username: null,
+              profilePicture: null,
+              id: null
             }
 
-            scores.push(userScore)
+            let { dataValues } = userScore.user
+            userScore.user = dataValues
+
+            leaderboardEntity.username = userScore.user.username
+            leaderboardEntity.profilePicture = userScore.user.profilePicture
+            leaderboardEntity.id = userScore.user.id
+            leaderboardEntity.totalPoints = userScore.totalPoints
+
+            if (userList[userScore.userId] === undefined) {
+              userList[userScore.userId] = leaderboardEntity
+            } else {
+              userList[userScore.userId].totalPoints += leaderboardEntity.totalPoints
+            }
           })
 
-          res.status(Status.OK).json(Success(data))
+          const leaderboardList = []
+
+          Object.keys(userList).forEach(userId => {
+            leaderboardList.push(JSON.stringify(userList[userId]))
+          })
+
+          res.status(Status.OK).json(Success({
+            userList: leaderboardList
+          }))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
