@@ -33,7 +33,7 @@ module.exports = ({ userRepository, Sequelize, database }) => {
           },
           {
             model: database.models.userScores
-          },
+          }
         ]
       })
     })

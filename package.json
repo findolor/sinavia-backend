@@ -121,7 +121,8 @@
   },
   "standard": {
     "ignore": [
-      "/public/docs"
+      "/public/docs",
+      "src/interfaces/proxy"
     ],
     "globals": [
       "request",
