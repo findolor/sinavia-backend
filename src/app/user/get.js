@@ -34,20 +34,6 @@ module.exports = ({ userRepository, Sequelize, database }) => {
           {
             model: database.models.userScores
           },
-          {
-            model: database.models.friendsMatches,
-            as: 'winner',
-            where: {
-              loserId: clientId
-            }
-          },
-          {
-            model: database.models.friendsMatches,
-            as: 'loser',
-            where: {
-              winnerId: clientId
-            }
-          }
         ]
       })
     })

@@ -6,6 +6,7 @@ module.exports = ({
   postUseCase,
   putUseCase,
   deleteUseCase,
+  getFriendsMatchUseCase,
   logger,
   auth,
   response: { Success, Fail }
@@ -48,7 +49,6 @@ module.exports = ({
       getUseCase
         .getOpponentFullInformation({ userId: req.params.userId, clientId: req.query.clientId })
         // Data contains a user's;
-        // Friendships
         // Statistics
         // Friend matches
         .then(data => {
@@ -68,6 +68,7 @@ module.exports = ({
           let isFriend = false
           let isRequesting = false
           let isRequested = false
+
           data.dataValues.user.forEach(friendship => {
             if (friendship.dataValues.friendId === req.query.clientId) {
               if (friendship.dataValues.friendshipStatus === 'approved') {
@@ -95,25 +96,34 @@ module.exports = ({
             STATISTICS.friendDrawCount += userScore.dataValues.totalFriendDraw
             STATISTICS.groupGameCount = userScore.dataValues.totalGroupGames
           })
-          data.dataValues.winner.forEach(win => {
-            if (win.dataValues.isMatchDraw) FRIENDMATCHES_DRAW.push(win.dataValues)
-            else FRIENDMATCHES_WINNER.push(win.dataValues)
-          })
-          data.dataValues.loser.forEach(lose => {
-            if (lose.dataValues.isMatchDraw) FRIENDMATCHES_DRAW.push(lose.dataValues)
-            else FRIENDMATCHES_LOSER.push(lose.dataValues)
-          })
-          const returnData = {
-            isFriend: isFriend,
-            isRequesting: isRequesting,
-            isRequested: isRequested,
-            friendships: FRIENDSHIPS,
-            statistics: STATISTICS,
-            friendGameWins: FRIENDMATCHES_WINNER,
-            friendGameDefeats: FRIENDMATCHES_LOSER,
-            friendGameDraws: FRIENDMATCHES_DRAW
-          }
-          res.status(Status.OK).json(Success(returnData))
+
+          getFriendsMatchUseCase
+            .getMatches({ userId: req.params.userId, friendId: req.query.clientId })
+            .then(friendMatches => {
+              friendMatches.forEach(friendMatch => {
+                if (friendMatch.isMatchDraw) FRIENDMATCHES_DRAW.push(friendMatch)
+                else if(friendMatch.winnerId === req.params.clientId ) {
+                  FRIENDMATCHES_WINNER.push(friendMatch)
+                } else FRIENDMATCHES_LOSER.push(friendMatch)
+              })
+              const returnData = {
+                isFriend: isFriend,
+                isRequesting: isRequesting,
+                isRequested: isRequested,
+                friendships: FRIENDSHIPS,
+                statistics: STATISTICS,
+                friendGameWins: FRIENDMATCHES_WINNER,
+                friendGameDefeats: FRIENDMATCHES_LOSER,
+                friendGameDraws: FRIENDMATCHES_DRAW
+              }
+    
+              res.status(Status.OK).json(Success(returnData))
+            })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
