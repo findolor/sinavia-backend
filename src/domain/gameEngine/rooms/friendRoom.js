@@ -13,7 +13,8 @@ const {
   updateOngoingMatch,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
+  getFriendMatches
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -136,6 +137,10 @@ class FriendGame {
 
   getPlayerProps () {
     return this.friendState.playerProps
+  }
+
+  setPlayerPropsMatchInformation (matchInformation) {
+    this.friendState.playerProps.matchInformation = matchInformation
   }
 
   getPlayerId (playerNumber) {
@@ -608,6 +613,15 @@ function postFriendMatchResults (friendMatchInformation) {
   }
 }
 
+function getPlayedFriendMatches (userId, friendId) {
+  try {
+    return getFriendMatches(userId, friendId)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get friend match information')
+    logger.error(error.stack)
+  }
+}
+
 function fetchUserJoker (userId) {
   try {
     return getUserJoker(userId)
@@ -707,6 +721,7 @@ class FriendRoom extends colyseus.Room {
       subjectName: options.subjectName
     }
     this.state.setMatchInformation(matchInformation)
+    this.state.setPlayerPropsMatchInformation(matchInformation)
 
     // Fetching questions from database
     getQuestions(
@@ -809,7 +824,7 @@ class FriendRoom extends colyseus.Room {
         this.clock.setTimeout(() => {
           this.broadcast(this.state.getPlayerProps())
         }, 500)
-        logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
+        logger.info(`Friend game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
       }
     }).catch(error => {
       logger.error(error.stack)
@@ -845,11 +860,21 @@ class FriendRoom extends colyseus.Room {
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
-            setTimeout(async () => {
-              this.state.changeStateInformation('match-finished')
-              this.isMatchFinished = true
-              // We save the results after the match is finished
-              await this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
+            setTimeout(() => {
+              getPlayedFriendMatches(
+                this.state.getMatchInformation().userId,
+                this.state.getMatchInformation().friendId
+              ).then(friendMatches => {
+                this.broadcast({
+                  action: 'friend-matches',
+                  friendMatches: friendMatches
+                })
+
+                this.state.changeStateInformation('match-finished')
+                this.isMatchFinished = true
+                // We save the results after the match is finished
+                this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
+              })
             }, 5000)
             break
           }
@@ -866,6 +891,13 @@ class FriendRoom extends colyseus.Room {
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
           this.state.changeStateInformation('show-results')
+          // Sending the questions in full for favouriting
+          this.clock.setTimeout(() => {
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+          }, 1000)
           // Like always there is a delay to show the answers
           setTimeout(() => {
             this.state.changeStateInformation('match-finished')
@@ -1014,8 +1046,14 @@ class FriendRoom extends colyseus.Room {
     if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
 
-      this.send(lastClient, {
-        action: 'client-leaving'
+      getPlayedFriendMatches(this.state.getMatchInformation().userId, this.state.getMatchInformation().friendId).then(friendMatches => {
+        this.send(lastClient, {
+          action: 'client-leaving',
+          clientId: lastClient.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps(),
+          friendMatches: friendMatches
+        })
       })
 
       // We save the leaving clients id to mark it as lost for later

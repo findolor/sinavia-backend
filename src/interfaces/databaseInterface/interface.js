@@ -113,3 +113,7 @@ exports.createNotification = (notificationEntity) => {
 exports.updateNotification = (notificationEntity) => {
   return engineInterface().putNotificationUseCase.update({ notificationEntity: notificationEntity })
 }
+
+exports.getFriendMatches = (userId, friendId) => {
+  return engineInterface().getFriendsMatchUseCase.getMatches({ userId: userId, friendId: friendId })
+}

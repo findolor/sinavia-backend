@@ -2,7 +2,7 @@ const container = require('src/container') // we have to get the DI
 const { getQuestion } = require('src/app/question')
 const { getUser, putUser } = require('src/app/user')
 const { postStatistic, putStatistic } = require('src/app/statistic')
-const { postFriendsMatch } = require('src/app/friendsMatch')
+const { postFriendsMatch, getFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
 const { getUserJoker, putUserJoker, deleteUserJoker } = require('src/app/userJoker')
 const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/leaderboard')
@@ -68,6 +68,7 @@ module.exports = () => {
   const getExamEntityUseCase = getExamEntity({ examEntityRepository, database })
   const postNotificationUseCase = postNotification({ notificationRepository })
   const putNotificationUseCase = putNotification({ notificationRepository })
+  const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository, Sequelize })
 
   return {
     getQuestionUseCase,
@@ -91,6 +92,7 @@ module.exports = () => {
     putStatisticUseCase,
     getExamEntityUseCase,
     postNotificationUseCase,
-    putNotificationUseCase
+    putNotificationUseCase,
+    getFriendsMatchUseCase
   }
 }

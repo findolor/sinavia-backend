@@ -963,7 +963,10 @@ class RankedRoom extends colyseus.Room {
         const lastClient = this.clients[0]
 
         this.send(lastClient, {
-          action: 'client-leaving'
+          action: 'client-leaving',
+          clientId: lastClient.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps()
         })
 
         // We save the leaving clients id to mark it as lost for later
