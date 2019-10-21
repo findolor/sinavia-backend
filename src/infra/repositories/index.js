@@ -67,8 +67,8 @@ module.exports = ({ database }) => {
   // USER has many matches with other USERS
   userModel.hasMany(friendsMatchModel, { as: 'winner', foreignKey: 'winnerId' })
   userModel.hasMany(friendsMatchModel, { as: 'loser', foreignKey: 'loserId' })
-  friendsMatchModel.belongsTo(userModel, { as: 'winner' })
-  friendsMatchModel.belongsTo(userModel, { as: 'loser' })
+  friendsMatchModel.belongsTo(userModel, { as: 'winner', foreignKey: 'winnerId' })
+  friendsMatchModel.belongsTo(userModel, { as: 'loser', foreignKey: 'loserId' })
 
   // EXAM has many COURSEs
   // COURSEs belongs to EXAM

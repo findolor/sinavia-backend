@@ -15,7 +15,7 @@ module.exports = ({ userRepository, Sequelize, database }) => {
     })
   }
 
-  const getOpponentFullInformation = ({ userId }) => {
+  const getOpponentFullInformation = ({ userId, clientId }) => {
     return Promise.resolve().then(() => {
       return userRepository.findOne({
         where: {
@@ -36,11 +36,17 @@ module.exports = ({ userRepository, Sequelize, database }) => {
           },
           {
             model: database.models.friendsMatches,
-            as: 'winner'
+            as: 'winner',
+            where: {
+              loserId: clientId
+            }
           },
           {
             model: database.models.friendsMatches,
-            as: 'loser'
+            as: 'loser',
+            where: {
+              winnerId: clientId
+            }
           }
         ]
       })
