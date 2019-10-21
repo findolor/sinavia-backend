@@ -46,7 +46,7 @@
     }
   },
   "lint-staged": {
-    "*.js,": "npm run lint"
+    "*.js": "npm run lint"
   },
   "dependencies": {
     "@colyseus/monitor": "^0.11.5",
