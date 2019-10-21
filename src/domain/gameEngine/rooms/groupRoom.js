@@ -106,6 +106,14 @@ class GroupGame {
     this.groupState.questionList = questionList
   }
 
+  getQuestionProps () {
+    return this.groupState.questionProps
+  }
+
+  setPlayerPropsMatchInformation (matchInformation) {
+    this.groupState.playerProps.matchInformation = matchInformation
+  }
+
   nextQuestion () {
     this.groupState.questionNumber++
   }
@@ -299,6 +307,7 @@ class GroupGame {
 
   // TODO need to implement replay logic for group
   // This code might change later
+  // TODO Might delete this
   resetRoom () {
     const playerIds = Object.keys(this.groupState.playerProps)
 
@@ -556,6 +565,13 @@ class GroupRoom extends colyseus.Room {
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
+            // Sending the questions in full for favouriting
+            this.clock.setTimeout(() => {
+              this.broadcast({
+                action: 'save-questions',
+                fullQuestionList: this.state.getQuestionProps()
+              })
+            }, 1000)
             // Like always there is a delay to show the answers
             setTimeout(() => {
               this.state.changeStateInformation('match-finished')
@@ -656,6 +672,8 @@ class GroupRoom extends colyseus.Room {
 
           // Setting general match related info
           this.state.setQuestions(questionProps, questionList)
+
+          this.state.setPlayerPropsMatchInformation(matchInformation)
         }).catch(error => {
           logger.error(error.stack)
         })
@@ -730,12 +748,16 @@ class GroupRoom extends colyseus.Room {
     // If there are more players than one, we send all of them "client-leaving" signal
     if (this.clients.length !== 1) {
       this.broadcast({
-        action: 'client-leaving'
+        action: 'client-leaving',
+        username: playerProps[client.id].username
       })
     } else {
       // If everyone left the game but one client, we send "only-client" signal to it
       this.send(this.clients[0], {
-        action: 'only-client'
+        action: 'only-client',
+        clientId: this.clients[0].id,
+        playerProps: this.state.getPlayerProps(),
+        fullQuestionList: this.state.getQuestionProps()
       })
     }
 
