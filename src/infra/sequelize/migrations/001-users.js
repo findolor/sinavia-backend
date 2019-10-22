@@ -60,8 +60,11 @@ module.exports = {
       },
       isPremium: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
+        allowNull: false
+      },
+      premiumEndDate: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,

@@ -1,4 +1,6 @@
 const { encryptPassword } = require('src/infra/encryption')
+const moment = require('moment')
+moment.locale('tr')
 
 module.exports = () => {
   const password = encryptPassword('password')
@@ -15,7 +17,8 @@ module.exports = () => {
       birthDate: new Date(),
       deviceId: 'E6559387-A6D2-4CCD-903A-3C8D2F936AD0',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG',
+      isPremium: false
     },
     {
       id: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
@@ -28,7 +31,8 @@ module.exports = () => {
       birthDate: new Date(),
       deviceId: '6B58287D-49D3-452F-832C-5FFA0DE4EEB8',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG',
+      isPremium: false
     },
     {
       id: 'b46c9693-c17d-498a-adf6-bd618c23f4b3',
@@ -41,7 +45,8 @@ module.exports = () => {
       birthDate: new Date(),
       deviceId: '9B2B72B8-4AB3-4522-9D4F-44A357160F6A',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG',
+      isPremium: false
     },
     {
       id: '08f228a0-443b-4003-8b17-efe835cf6916',
@@ -52,7 +57,9 @@ module.exports = () => {
       password: password,
       deviceId: '6B58287D-49D3-452F-832C-5FFA0DE4EEB8',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG',
+      isPremium: true,
+      premiumEndDate: moment().add(1, 'weeks').toDate()
     },
     {
       id: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
@@ -63,7 +70,9 @@ module.exports = () => {
       password: password,
       deviceId: 'CEAD0717-2323-4621-BB1E-AE9FA5624205',
       profilePicture: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png',
-      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG'
+      coverPicture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYsqp6g6oM5OS7VVBPZFfxICh0niuPUx8e8Rl4m-YzlVRkTUHG',
+      isPremium: true,
+      premiumEndDate: moment().add(1, 'weeks').toDate()
     }
   ]
 }

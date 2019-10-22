@@ -59,8 +59,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     isPremium: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true
+      allowNull: false
+    },
+    premiumEndDate: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     hooks: {
