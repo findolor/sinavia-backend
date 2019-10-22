@@ -686,6 +686,10 @@ function updateUserScore (userScoreEntity) {
   }
 }
 
+function convertUnderscoreToSpace (text) {
+  return text.replace('_', ' ')
+}
+
 class FriendRoom extends colyseus.Room {
   constructor () {
     super()
@@ -716,9 +720,9 @@ class FriendRoom extends colyseus.Room {
       friendId: options.friendId,
       userUsername: options.userUsername,
       userProfilePicture: options.userProfilePicture,
-      examName: options.examName,
-      courseName: options.courseName,
-      subjectName: options.subjectName
+      examName: convertUnderscoreToSpace(options.examName),
+      courseName: convertUnderscoreToSpace(options.courseName),
+      subjectName: convertUnderscoreToSpace(options.subjectName)
     }
     this.state.setMatchInformation(matchInformation)
     this.state.setPlayerPropsMatchInformation(matchInformation)
