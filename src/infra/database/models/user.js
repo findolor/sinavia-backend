@@ -56,6 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     deviceId: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    isPremium: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
     }
   }, {
     hooks: {
