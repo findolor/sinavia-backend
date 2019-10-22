@@ -15,6 +15,16 @@ module.exports = ({ userRepository, Sequelize, database }) => {
     })
   }
 
+  const getOneWithEmail = ({ email }) => {
+    return Promise.resolve().then(() => {
+      return userRepository.findOne({
+        where: {
+          email: email
+        }
+      })
+    })
+  }
+
   const getOpponentFullInformation = ({ userId }) => {
     return Promise.resolve().then(() => {
       return userRepository.findOne({
@@ -76,6 +86,7 @@ module.exports = ({ userRepository, Sequelize, database }) => {
 
   return {
     getOne,
+    getOneWithEmail,
     getMultiple,
     getUserWithKeyword,
     getOpponentFullInformation

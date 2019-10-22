@@ -9,9 +9,63 @@ module.exports = ({
   getFriendsMatchUseCase,
   logger,
   auth,
+  smtpService,
+  config,
   response: { Success, Fail }
 }) => {
   const router = Router()
+
+  router
+    .post('/password/reset', (req, res) => {
+      getUseCase
+        .getOneWithEmail({ email: req.body.email })
+        .then(user => {
+          const { dataValues } = user
+          user = dataValues
+
+          // Changing the password with the new one
+          const newPassword = Math.random().toString(36).substr(2, 10)
+          user.password = newPassword
+
+          config.fcm.firebaseAdmin.auth().getUserByEmail(req.body.email).then(firebaseUser => {
+            config.fcm.firebaseAdmin.auth().updateUser(firebaseUser.uid, {
+              password: newPassword
+            }).then(() => {
+              putUseCase
+                .updateUser({ id: user.id, body: user })
+                .then(() => {
+                  smtpService.sendEmail(
+                    req.body.email,
+                    'Sınavia şifre değişimi',
+                    `Yeni Sınavia şifren ${newPassword}`
+                  )
+
+                  res.status(Status.OK).json(Success(true))
+                })
+                .catch((error) => {
+                  logger.error(error.stack) // we still need to log every error for debugging
+                  res.status(Status.BAD_REQUEST).json(
+                    Fail(error.message))
+                })
+            })
+              .catch((error) => {
+                logger.error(error.stack) // we still need to log every error for debugging
+                res.status(Status.BAD_REQUEST).json(
+                  Fail(error.message))
+              })
+          })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
 
   // router.use(auth.authenticate())
 
@@ -146,40 +200,6 @@ module.exports = ({
         })
     })
 
-  /**
-   * @swagger
-   * /users:
-   *   put:
-   *     tags:
-   *       - Users
-   *     description: Update User
-   *     security:
-   *       - JWT: []
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: id
-   *         in: path
-   *         required: true
-   *         description: User's ID to update
-   *         type: string
-   *       - name: body
-   *         description: User's Entity
-   *         in: body
-   *         required: true
-   *         type: string
-   *         schema:
-   *           $ref: '#/definitions/user'
-   *     responses:
-   *       200:
-   *         description: Successfully Updated
-   *         schema:
-   *           $ref: '#/definitions/user'
-   *       401:
-   *         $ref: '#/responses/Unauthorized'
-   *       400:
-   *         $ref: '#/responses/BadRequest'
-   */
   router
     .put('/:id', (req, res) => {
       putUseCase
@@ -194,31 +214,6 @@ module.exports = ({
         })
     })
 
-  /**
-   * @swagger
-   * /users:
-   *   delete:
-   *     tags:
-   *       - Users
-   *     description: Delete User
-   *     security:
-   *       - JWT: []
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: id
-   *         in: path
-   *         required: true
-   *         description: User's ID to delete
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: Successfully Deleted
-   *         schema:
-   *           $ref: '#/definitions/user'
-   *       401:
-   *         $ref: '#/responses/Unauthorized'
-   */
   router
     .delete('/:id', (req, res) => {
       deleteUseCase
