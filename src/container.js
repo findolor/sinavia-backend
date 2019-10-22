@@ -16,6 +16,7 @@ const s3 = require('./infra/s3')
 const fcm = require('./infra/pushNotifications')
 const cron = require('./infra/cron')
 const nodeCache = require('./infra/cache')
+const smtp = require('./infra/smtp')
 
 const container = createContainer()
 
@@ -37,7 +38,8 @@ container
     s3service: asFunction(s3).singleton(),
     fcmService: asFunction(fcm).singleton(),
     cronJob: asFunction(cron).singleton(),
-    nodeCache: asFunction(nodeCache).singleton()
+    nodeCache: asFunction(nodeCache).singleton(),
+    smtpService: asFunction(smtp).singleton()
   })
 
 module.exports = container

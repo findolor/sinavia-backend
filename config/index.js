@@ -47,6 +47,14 @@ function loadFCMConfig () {
   throw new Error('FCM configuration is required')
 }
 
+function loadSMTPConfig () {
+  if (fs.existsSync(path.join(__dirname, './smtp.js'))) {
+    return require('./smtp')[ENV]
+  }
+
+  throw new Error('SMTP configuration is required')
+}
+
 const ENV = process.env.NODE_ENV || 'development'
 
 const appConfig = loadAppConfig()
@@ -54,6 +62,7 @@ const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()
 const awsConfig = loadAWSConfig()
 const fcmConfig = loadFCMConfig()
+const smtpConfig = loadSMTPConfig()
 
 admin.initializeApp({
   credential: admin.credential.cert(fcmConfig.serviceAccount),
@@ -67,7 +76,8 @@ const config = Object.assign({
   db: dbConfig,
   cache: cacheConfig,
   aws: awsConfig,
-  fcm: fcmConfig
+  fcm: fcmConfig,
+  smtp: smtpConfig
 }, appConfig)
 
 if (!config.db) {
@@ -84,6 +94,9 @@ if (!config.aws) {
 }
 if (!config.fcm) {
   throw new Error('fcm config file log not found')
+}
+if (!config.smtp) {
+  throw new Error('smtp config file log not found')
 }
 
 module.exports = config
