@@ -45,7 +45,7 @@ module.exports = () => {
     },
     {
       id: '08f228a0-443b-4003-8b17-efe835cf6916',
-      username: 'MarmeladeBaby',
+      username: 'Marmelade',
       name: 'Arda',
       lastname: 'Nakisci',
       email: 'littlepossum66@gmail.com',
@@ -56,7 +56,7 @@ module.exports = () => {
     },
     {
       id: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
-      username: 'ShellbreakerTurtle',
+      username: 'Shellbreaker',
       name: 'Daar',
       lastname: 'Kinasci',
       email: 'anakisci@gmail.com',

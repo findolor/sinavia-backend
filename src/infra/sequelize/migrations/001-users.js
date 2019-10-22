@@ -10,8 +10,7 @@ module.exports = {
       },
       username: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
       name: {
         type: Sequelize.STRING,
@@ -28,7 +27,7 @@ module.exports = {
       },
       city: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true
       },
       profilePicture: {
         type: Sequelize.STRING,
@@ -49,7 +48,7 @@ module.exports = {
       },
       birthDate: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true
       },
       fcmToken: {
         type: Sequelize.STRING,
