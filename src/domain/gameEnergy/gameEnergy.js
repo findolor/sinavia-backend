@@ -8,7 +8,7 @@ const GameEnergy = t.struct({
   energyAmount: t.Number,
   energyUsed: t.Number,
   shouldRenew: t.Boolean,
-  dateRenewed: t.String,
+  dateRenewed: t.Date,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

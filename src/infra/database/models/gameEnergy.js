@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     },
     dateRenewed: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: false
     }
   }, {
