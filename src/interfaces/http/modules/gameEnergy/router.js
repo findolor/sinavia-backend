@@ -57,9 +57,9 @@ module.exports = ({
     })
 
   router
-    .put('/remove/:id', (req, res) => {
+    .put('/remove', (req, res) => {
       getGameEnergyUseCase
-        .getOne({ userId: req.params.id })
+        .getOne({ userId: req.body.userId })
         .then(data => {
           if (data.energyAmount === 0) {
             res.status(Status.BAD_REQUEST).json(Fail('out-of-energy'))
