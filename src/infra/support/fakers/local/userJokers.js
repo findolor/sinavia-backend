@@ -1,19 +1,28 @@
 module.exports = () => {
   return [
     {
-      userId: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
-      jokerId: '2',
-      amount: 4
+      userId: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
+      jokerId: 1,
+      amount: 10,
+      amountUsed: 0,
+      shouldRenew: false,
+      dateRenewed: new Date()
     },
     {
-      userId: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
-      jokerId: '1',
-      amount: 2
+      userId: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
+      jokerId: 2,
+      amount: 10,
+      amountUsed: 0,
+      shouldRenew: false,
+      dateRenewed: new Date()
     },
     {
-      userId: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
-      jokerId: '3',
-      amount: 5
+      userId: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
+      jokerId: 3,
+      amount: 10,
+      amountUsed: 0,
+      shouldRenew: false,
+      dateRenewed: new Date()
     }
   ]
 }
