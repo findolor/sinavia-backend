@@ -11,10 +11,7 @@ module.exports = ({ userRepository }) => {
     return Promise
       .resolve()
       .then(() => {
-        const password = body.password || 'test'
-        const entity = Object.assign({}, body, {
-          password
-        })
+        const entity = Object.assign({}, body)
         const user = User(entity)
         return userRepository.create(user)
       })

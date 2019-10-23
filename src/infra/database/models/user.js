@@ -10,8 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     username: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING,
@@ -28,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     city: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     profilePicture: {
       type: DataTypes.STRING,
@@ -48,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     birthDate: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     fcmToken: {
       type: DataTypes.STRING,
@@ -57,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
     deviceId: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    isPremium: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    premiumEndDate: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     hooks: {
