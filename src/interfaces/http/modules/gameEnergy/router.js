@@ -61,6 +61,11 @@ module.exports = ({
       getGameEnergyUseCase
         .getOne({ userId: req.params.id })
         .then(data => {
+          if (data.energyAmount === 0) {
+            res.status(Status.BAD_REQUEST).json(Fail('out-of-energy'))
+            return
+          }
+
           data.energyAmount--
           data.energyUsed++
           data.shouldRenew = true
