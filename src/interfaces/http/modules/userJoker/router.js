@@ -58,21 +58,5 @@ module.exports = ({
         })
     })
 
-  // Posts a joker to db
-  // TODO this cannot go into wrong hands lol
-  router
-    .post('/', (req, res) => {
-      postUserJokerUseCase
-        .create({ body: req.body })
-        .then(data => {
-          res.status(Status.OK).json(Success(data))
-        })
-        .catch((error) => {
-          logger.error(error.stack)
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
-        })
-    })
-
   return router
 }
