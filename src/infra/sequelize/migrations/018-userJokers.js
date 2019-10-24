@@ -26,6 +26,21 @@ module.exports = {
       },
       amount: {
         type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 10
+      },
+      amountUsed: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      shouldRenew: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      dateRenewed: {
+        type: Sequelize.DATE,
         allowNull: false
       },
       createdAt: {

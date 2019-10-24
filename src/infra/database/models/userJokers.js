@@ -16,6 +16,21 @@ module.exports = (sequelize, DataTypes) => {
     },
     amount: {
       type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 10
+    },
+    amountUsed: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    shouldRenew: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    dateRenewed: {
+      type: DataTypes.DATE,
       allowNull: false
     }
   }, {

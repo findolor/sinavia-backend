@@ -54,10 +54,6 @@ exports.putUserJoker = (userJokerEntity) => {
   return engineInterface().putUserJokerUseCase.updateUserJoker({ userJokerEntity: userJokerEntity })
 }
 
-exports.deleteUserJoker = (userId, jokerId) => {
-  return engineInterface().deleteUserJokerUseCase.deleteUserJoker({ userId: userId, jokerId: jokerId })
-}
-
 exports.updateUserTotalPoints = (userEntity) => {
   return engineInterface().putUserUseCase.updateUser({ id: userEntity.id, body: userEntity })
 }

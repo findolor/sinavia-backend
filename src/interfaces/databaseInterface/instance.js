@@ -4,7 +4,7 @@ const { getUser, putUser } = require('src/app/user')
 const { postStatistic, putStatistic } = require('src/app/statistic')
 const { postFriendsMatch, getFriendsMatch } = require('src/app/friendsMatch')
 const { getUserScore, postUserScore, putUserScore } = require('src/app/userScore')
-const { getUserJoker, putUserJoker, deleteUserJoker } = require('src/app/userJoker')
+const { getUserJoker, putUserJoker } = require('src/app/userJoker')
 const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/leaderboard')
 const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch } = require('src/app/ongoingMatch')
 const { getExamEntity } = require('src/app/examEntity')
@@ -55,7 +55,6 @@ module.exports = () => {
   const putUserScoreUseCase = putUserScore({ userScoreRepository })
   const getUserJokerUseCase = getUserJoker({ userJokerRepository, database })
   const putUserJokerUseCase = putUserJoker({ userJokerRepository })
-  const deleteUserJokerUseCase = deleteUserJoker({ userJokerRepository })
   const putUserUseCase = putUser({ userRepository })
   const postLeaderboardUseCase = postLeaderboard({ leaderboardRepository })
   const getLeaderboardUseCase = getLeaderboard({ leaderboardRepository })
@@ -80,7 +79,6 @@ module.exports = () => {
     putUserScoreUseCase,
     getUserJokerUseCase,
     putUserJokerUseCase,
-    deleteUserJokerUseCase,
     putUserUseCase,
     postLeaderboardUseCase,
     getLeaderboardUseCase,

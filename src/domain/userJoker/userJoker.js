@@ -7,6 +7,9 @@ const UserJoker = t.struct({
   userId: t.String,
   jokerId: t.Number,
   amount: t.Number,
+  amountUsed: t.Number,
+  shouldRenew: t.Boolean,
+  dateRenewed: t.Date,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

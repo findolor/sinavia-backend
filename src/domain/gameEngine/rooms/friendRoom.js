@@ -8,7 +8,6 @@ const {
   getOneUser,
   postFriendGameMatchResult,
   getUserJoker,
-  deleteUserJoker,
   putUserJoker,
   updateOngoingMatch,
   getUserScore,
@@ -295,7 +294,7 @@ class FriendGame {
         userId: playerProps[userId].databaseId
       })
 
-      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
@@ -352,7 +351,7 @@ class FriendGame {
         userId: playerProps[userId].databaseId
       })
 
-      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
     })
 
@@ -404,7 +403,7 @@ class FriendGame {
         userId: playerProps[userId].databaseId
       })
 
-      this.decideUserJokers(userJokers, userId, playerProps[userId].databaseId)
+      this.decideUserJokers(userJokers, userId)
     })
 
     logger.info(`Friend solo game ends roomId: ${friendRoomId}`)
@@ -421,18 +420,15 @@ class FriendGame {
     })
   }
 
-  decideUserJokers (userJokers, userId, databaseId) {
+  decideUserJokers (userJokers, userId) {
     if (userJokers[userId] !== null) {
       userJokers[userId].forEach(userJoker => {
         if (userJoker.isUsed) {
-          if (userJoker.amount === 0) destroyUserJoker(databaseId, userJoker.id)
-          else {
-            updateUserJoker({
-              userId: databaseId,
-              jokerId: userJoker.id,
-              amount: userJoker.amount
-            })
-          }
+          userJoker.joker.amount--
+          userJoker.joker.amountUsed++
+          userJoker.joker.shouldRenew = true
+
+          updateUserJoker(userJoker.joker)
         }
       })
     }
@@ -631,15 +627,6 @@ function fetchUserJoker (userId) {
   }
 }
 
-function destroyUserJoker (userId, jokerId) {
-  try {
-    return deleteUserJoker(userId, jokerId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot delete userJoker')
-    logger.error(error.stack)
-  }
-}
-
 function updateUserJoker (userJokerEntity) {
   try {
     return putUserJoker(userJokerEntity)
@@ -784,7 +771,7 @@ class FriendRoom extends colyseus.Room {
         userJokers.forEach(userJoker => {
           this.userJokers[client.id].push({
             isUsed: false,
-            amount: userJoker.amount,
+            joker: userJoker,
             id: userJoker.jokerId
           })
         })
@@ -926,8 +913,13 @@ class FriendRoom extends colyseus.Room {
         // We mark the joker as used
         if (this.userJokers[client.id] !== null) {
           let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.id][index].joker.amount === 0) {
+            this.send(client, {
+              action: 'error-joker'
+            })
+            break
+          }
           this.userJokers[client.id][index].isUsed = true
-          this.userJokers[client.id][index].amount--
         }
 
         let optionsToRemove
@@ -944,8 +936,13 @@ class FriendRoom extends colyseus.Room {
         // We mark the joker as used
         if (this.userJokers[client.id] !== null) {
           let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.id][index].joker.amount === 0) {
+            this.send(client, {
+              action: 'error-joker'
+            })
+            break
+          }
           this.userJokers[client.id][index].isUsed = true
-          this.userJokers[client.id][index].amount--
         }
 
         const questionAnswer = this.state.getQuestionAnswer()
@@ -960,8 +957,17 @@ class FriendRoom extends colyseus.Room {
         // We mark the joker as used
         if (this.userJokers[client.id] !== null) {
           let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.id][index].joker.amount === 0) {
+            this.send(client, {
+              action: 'error-joker'
+            })
+            break
+          }
           this.userJokers[client.id][index].isUsed = true
-          this.userJokers[client.id][index].amount--
+
+          this.send(client, {
+            action: 'see-opponent-answer-joker'
+          })
         }
         break
       case 'replay':
