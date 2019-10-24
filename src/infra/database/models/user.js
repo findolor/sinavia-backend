@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     premiumEndDate: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: true
     }
   }, {

@@ -16,7 +16,7 @@ const User = t.struct({
   fcmToken: t.maybe(t.String),
   deviceId: t.String,
   isPremium: t.maybe(t.Boolean),
-  premiumEndDate: t.maybe(t.String),
+  premiumEndDate: t.maybe(t.Date),
   password: t.maybe(t.String),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)

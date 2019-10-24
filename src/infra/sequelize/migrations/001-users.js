@@ -63,7 +63,7 @@ module.exports = {
         allowNull: false
       },
       premiumEndDate: {
-        type: Sequelize.STRING,
+        type: Sequelize.DATE,
         allowNull: true
       },
       createdAt: {

@@ -5,7 +5,6 @@ moment.locale('tr')
 
 module.exports = ({
   getUserJokerUseCase,
-  postUserJokerUseCase,
   putUserJokerUseCase,
   logger,
   auth,
