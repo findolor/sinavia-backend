@@ -58,35 +58,6 @@ module.exports = ({
         })
     })
 
-  // TODO THIS WILL BE INSIDE THE ROOMS
-  router
-    .put('/remove', (req, res) => {
-      getUserJokerUseCase
-        .getJokers({ userId: req.body.userId })
-        .then(data => {
-          const index = data.findIndex(x => x.jokerId === req.body.jokerId)
-
-          if (data[index].amount === 0) {
-            res.status(Status.BAD_REQUEST).json(Fail('out-of-joker'))
-            return
-          }
-
-          data[index].amount--
-          data[index].amountUsed++
-          data[index].shouldRenew = true
-
-          putUserJokerUseCase
-            .updateUserJoker({ userJokerEntity: data[index] })
-            .then(() => {
-              res.status(Status.OK).json(Success(data[index]))
-            })
-            .catch(error => {
-              logger.error(error.stack)
-              res.status(Status.BAD_REQUEST).json(Fail(error.message))
-            })
-        })
-    })
-
   // Posts a joker to db
   // TODO this cannot go into wrong hands lol
   router
