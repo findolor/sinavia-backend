@@ -2,32 +2,32 @@ module.exports = () => {
   return [
     {
       name: 'Türkçe',
-      imageLink: 'https://www.tadbakirkoy.com/Upload/Icerikler/Kapak/167201815251780.jpg',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Fturkce.png?alt=media&token=f33eed62-aa7f-42bd-9a96-3c242e2fda3b',
       examId: 1
     },
     {
       name: 'Matematik',
-      imageLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoXwTi9AdFvlCpyq8v9Fwd7OrJwrHhRatzWnhBWjjoOYTdv_MB',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Fmatematik.png?alt=media&token=afeb97d2-decd-42d8-a8a0-98c9bc97b319',
       examId: 1
     },
     {
       name: 'Tarih',
-      imageLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA81HDaOkvXTMhOfGzLUx5jg0p-LXNpt-C5eFNq_EPidfItrcG',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Ftarih.png?alt=media&token=69c46cf5-05aa-418c-9bbd-0685608ea750',
       examId: 1
     },
     {
       name: 'Fen Bilimleri',
-      imageLink: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtMJ9ODHoXCvdN3TehxiVcOFtxUOwCb450tSvj3CrT2G1pt2C5NQ',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Ffen.png?alt=media&token=d8cb45bb-85d5-41fb-a6a6-759ec52c22be',
       examId: 1
     },
     {
       name: 'İngilizce',
-      imageLink: 'https://www.bilim.org/wp-content/uploads/english_blackboard.jpg',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Fingilizce.png?alt=media&token=c8fe147c-1ff8-4f21-858d-102fbfe998d6',
       examId: 1
     },
     {
       name: 'Din',
-      imageLink: 'http://gaziantepanadolulisesi.meb.k12.tr/meb_iys_dosyalar/27/01/149613/resimler/2016_12/k_28124837_dkab.jpg',
+      imageLink: 'https://firebasestorage.googleapis.com/v0/b/sinavia-a494f.appspot.com/o/LGS%2Fdin.png?alt=media&token=c741e5bc-bb4d-4c78-a350-05964e7c0848',
       examId: 1
     },
     {
