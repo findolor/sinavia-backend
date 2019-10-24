@@ -1,9 +1,12 @@
 const Status = require('http-status')
 const { Router } = require('express')
+const moment = require('moment')
+moment.locale('tr')
 
 module.exports = ({
   getUserJokerUseCase,
   postUserJokerUseCase,
+  putUserJokerUseCase,
   logger,
   auth,
   response: { Success, Fail }
@@ -18,12 +21,69 @@ module.exports = ({
       getUserJokerUseCase
         .getJokers({ userId: req.params.userId })
         .then(data => {
+          data.forEach(userJoker => {
+            const renewedDate = moment(userJoker.dateRenewed).format('MDD')
+            const currentDate = moment().format('MDD')
+
+            if (currentDate > renewedDate) {
+              if (userJoker.shouldRenew) {
+                // 10 is the given joker count for every player
+                // If joker is less then 10 we subtract the number from 10 and add that amount
+                // If it is equal to 10 and more we add 10
+                if (userJoker.amountUsed < 10) {
+                  userJoker.amount += userJoker.amountUsed
+                } else userJoker.amount += 10
+                // We mark shouldRenew false
+                userJoker.shouldRenew = false
+                // We mark the new date
+                userJoker.dateRenewed = new Date()
+                // We mark usedEnergy after renewing to 0
+                userJoker.amountUsed = 0
+
+                putUserJokerUseCase
+                  .updateUserJoker({ userJokerEntity: userJoker })
+                  .catch(error => {
+                    logger.error(error.stack)
+                    res.status(Status.BAD_REQUEST).json(Fail(error.message))
+                  })
+              }
+            }
+          })
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
+        })
+    })
+
+  // TODO THIS WILL BE INSIDE THE ROOMS
+  router
+    .put('/remove', (req, res) => {
+      getUserJokerUseCase
+        .getJokers({ userId: req.body.userId })
+        .then(data => {
+          const index = data.findIndex(x => x.jokerId === req.body.jokerId)
+
+          if (data[index].amount === 0) {
+            res.status(Status.BAD_REQUEST).json(Fail('out-of-joker'))
+            return
+          }
+
+          data[index].amount--
+          data[index].amountUsed++
+          data[index].shouldRenew = true
+
+          putUserJokerUseCase
+            .updateUserJoker({ userJokerEntity: data[index] })
+            .then(() => {
+              res.status(Status.OK).json(Success(data[index]))
+            })
+            .catch(error => {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(Fail(error.message))
+            })
         })
     })
 
