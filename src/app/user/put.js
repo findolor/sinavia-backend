@@ -10,6 +10,8 @@ module.exports = ({ userRepository }) => {
         // We do this if we have a password
         if (body.password) body.password = encryptPassword(body.password)
 
+        body.premiumEndDate = new Date(body.premiumEndDate)
+
         const user = User(body)
         await userRepository.update(user, {
           where: { id }

@@ -7,6 +7,7 @@ module.exports = ({
   putUseCase,
   deleteUseCase,
   getFriendsMatchUseCase,
+  postGameEnergyUseCase,
   logger,
   auth,
   smtpService,
@@ -74,7 +75,24 @@ module.exports = ({
       postUseCase
         .create({ body: req.body })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
+          const gameEnergyEntity = {
+            userId: data.id,
+            energyAmount: 6,
+            energyUsed: 0,
+            shouldRenew: false,
+            dateRenewed: new Date()
+          }
+
+          postGameEnergyUseCase
+            .create({ body: gameEnergyEntity })
+            .then(() => {
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch((error) => {
+              logger.error(error.stack) // we still need to log every error for debugging
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            })
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
