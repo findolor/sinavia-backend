@@ -11,7 +11,7 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  // router.use(auth.authenticate())
+  router.use(auth.authenticate())
 
   // Gets all the faved questions from db
   router
