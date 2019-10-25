@@ -11,7 +11,7 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  // router.use(auth.authenticate())
+  router.use(auth.authenticate())
 
   // Gets the user notifications from db
   router

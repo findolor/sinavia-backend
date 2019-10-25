@@ -9,7 +9,7 @@ module.exports = ({
 }) => {
   const router = Router()
 
-  // router.use(auth.authenticate())
+  router.use(auth.authenticate())
 
   // Gets one course entity from db
   router

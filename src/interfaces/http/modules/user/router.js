@@ -68,8 +68,6 @@ module.exports = ({
         })
     })
 
-  // router.use(auth.authenticate())
-
   router
     .post('/', (req, res) => {
       postUseCase
@@ -100,6 +98,8 @@ module.exports = ({
             Fail(error.message))
         })
     })
+
+  router.use(auth.authenticate())
 
   router
     .get('/:id', (req, res) => {
