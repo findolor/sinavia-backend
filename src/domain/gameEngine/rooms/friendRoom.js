@@ -1041,6 +1041,20 @@ class FriendRoom extends colyseus.Room {
           this.soloGameDBId = data
         })
         break
+      case 'leave-match':
+        getPlayedFriendMatches(
+          this.state.getMatchInformation().userId,
+          this.state.getMatchInformation().friendId
+        ).then(friendMatches => {
+          this.send(client, {
+            action: 'leave-match',
+            clientId: client.id,
+            playerProps: this.state.getPlayerProps(),
+            fullQuestionList: this.state.getQuestionProps(),
+            friendMatches: friendMatches
+          })
+        })
+        break
     }
   }
 

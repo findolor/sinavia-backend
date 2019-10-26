@@ -694,6 +694,14 @@ class GroupRoom extends colyseus.Room {
       case 'set-question-number':
         this.questionAmount = data.questionAmount
         break
+      case 'leave-match':
+        this.send(client, {
+          action: 'leave-match',
+          clientId: client.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps()
+        })
+        break
     }
   }
 
