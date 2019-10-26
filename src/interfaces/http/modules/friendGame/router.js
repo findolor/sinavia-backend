@@ -14,8 +14,12 @@ module.exports = ({
 
   router
     .post('/request', (req, res) => {
-      fcmService.sendDataMessage(
+      fcmService.sendNotificationDataMessage(
         req.body.requestedUserFCMToken,
+        {
+          title: 'Arkadaş oyun isteği!',
+          body: `${req.body.username} seni oyuna çağırıyor!`
+        },
         {
           type: 'friendGameRequest',
           title: 'Arkadaş oyun isteği!',
