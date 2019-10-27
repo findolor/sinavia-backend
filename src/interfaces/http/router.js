@@ -65,7 +65,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/leaderboards', controller('leaderboard').router)
   apiRouter.use('/gameEnergies', controller('gameEnergy').router)
 
-  router.use(`/api`, apiRouter)
+  router.use(`/api/${config.version}`, apiRouter)
 
   router.use(partialRight(errorHandler, [logger, config]))
 

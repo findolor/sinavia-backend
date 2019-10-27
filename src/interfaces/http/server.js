@@ -13,7 +13,7 @@ module.exports = ({ config, router, logger, auth }) => {
   // We use versions
   // If the user's version is not correct
   // We don't let them play
-  app.use(`/${config.version}`, router)
+  app.use(router)
 
   // we define our static folder
   app.use(express.static('public'))
