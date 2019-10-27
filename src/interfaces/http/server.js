@@ -10,9 +10,6 @@ module.exports = ({ config, router, logger, auth }) => {
   app.use(express.json()) */
 
   app.use(auth.initialize())
-  // We use versions
-  // If the user's version is not correct
-  // We don't let them play
   app.use(router)
 
   // we define our static folder
