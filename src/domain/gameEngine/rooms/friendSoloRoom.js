@@ -15,6 +15,8 @@ const {
 } = require('./helper')
 const cronJob = require('../../../infra/cron')
 const nodeCache = require('../../../infra/cache')
+let fcmService = require('../../../infra/pushNotifications')
+fcmService = fcmService({ config })
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -249,7 +251,7 @@ class FriendSoloGame {
         id: matchInformation.ongoingMatchId,
         friendResults: data.id
       }).then(data => {
-        cronJob({ logger, nodeCache }).stopOngoingMatchCron(data.id, false)
+        cronJob({ logger, nodeCache, fcmService }).stopOngoingMatchCron(data.id, false)
       })
     })
   }

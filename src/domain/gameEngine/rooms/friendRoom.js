@@ -21,6 +21,8 @@ const {
 } = require('./helper')
 const cronJob = require('../../../infra/cron')
 const nodeCache = require('../../../infra/cache')
+let fcmService = require('../../../infra/pushNotifications')
+fcmService = fcmService({ config })
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -415,7 +417,7 @@ class FriendGame {
         id: soloGameDatabaseId,
         userResults: data.id
       }).then(ongoingMatch => {
-        cronJob({ logger, nodeCache }).stopOngoingMatchCron(ongoingMatch.id, true)
+        cronJob({ logger, nodeCache, fcmService }).stopOngoingMatchCron(ongoingMatch.id, true)
       })
     })
   }
@@ -1022,7 +1024,7 @@ class FriendRoom extends colyseus.Room {
         // We start a cron job for this solo friend game
         // We send a notification to the other user
         // When the match resolves we will delete this cron later
-        cronJob({ logger, nodeCache }).makeFriendGameCronJob(
+        cronJob({ logger, nodeCache, fcmService }).makeFriendGameCronJob(
           matchInformation.userId,
           matchInformation.friendId,
           questionsJSON,

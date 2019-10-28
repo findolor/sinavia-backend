@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     notificationType: {
-      type: DataTypes.ENUM('friendshipAccepted', 'gameRequest'),
+      type: DataTypes.ENUM('friendshipAccepted', 'friendMatchResult', 'gameRequest'),
       allowNull: false
     },
     notificationData: {
