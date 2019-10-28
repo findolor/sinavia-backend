@@ -174,7 +174,7 @@ module.exports = ({
             .then(friendMatches => {
               friendMatches.forEach(friendMatch => {
                 if (friendMatch.isMatchDraw) FRIENDMATCHES_DRAW.push(friendMatch)
-                else if (friendMatch.winnerId === req.params.clientId) {
+                else if (friendMatch.winnerId === req.query.clientId) {
                   FRIENDMATCHES_WINNER.push(friendMatch)
                 } else FRIENDMATCHES_LOSER.push(friendMatch)
               })

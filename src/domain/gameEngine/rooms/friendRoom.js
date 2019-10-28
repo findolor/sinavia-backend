@@ -413,9 +413,16 @@ class FriendGame {
     // After posting the statistics
     // We update the ongoing game userResult field with the id from statistic
     postMatchResultsSolo(playerList).then(data => {
+      const answerList = []
+
+      playerProps[this.getPlayerId(1)].answers.forEach(answer => {
+        answerList.push(JSON.stringify(answer))
+      })
+
       updateOngoingMatch({
         id: soloGameDatabaseId,
-        userResults: data.id
+        userResults: data.id,
+        userAnswers: answerList
       }).then(ongoingMatch => {
         cronJob({ logger, nodeCache, fcmService }).stopOngoingMatchCron(ongoingMatch.id, true)
       })

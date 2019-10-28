@@ -12,6 +12,7 @@ const {
   getAllOngoingMatches,
   updateStatistic,
   postFriendGameMatchResult,
+  getFriendMatches,
   getGameContent,
   getUserScore,
   postUserScore,
@@ -26,7 +27,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
   // Gets the ongoing match and after sending the notifications deletes it
   // Updates the user statistics and friendsMatch
   const finishUpOngoingMatch = (ongoingMatchId, isFromUser) => {
-    getOngoingMatch(ongoingMatchId).then(data => {
+    getOngoingMatch(ongoingMatchId).then(async data => {
       // Converting to normal object
       data.ongoingMatchUser = data.ongoingMatchUser.dataValues
       data.ongoingMatchFriend = data.ongoingMatchFriend.dataValues
@@ -51,7 +52,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
           data.ongoingMatchUserStatistics.gameResult = 'draw'
           data.ongoingMatchFriendStatistics.gameResult = 'draw'
           // Save the match result to db
-          postFriendGameMatchResult({
+          await postFriendGameMatchResult({
             winnerId: data.ongoingMatchUser.id,
             loserId: data.ongoingMatchFriend.id,
             isMatchDraw: true
@@ -94,7 +95,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
         } else if (userNet > friendNet) {
           data.ongoingMatchUserStatistics.gameResult = 'won'
           data.ongoingMatchFriendStatistics.gameResult = 'lost'
-          postFriendGameMatchResult({
+          await postFriendGameMatchResult({
             winnerId: data.ongoingMatchUser.id,
             loserId: data.ongoingMatchFriend.id,
             isMatchDraw: false
@@ -136,7 +137,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
         } else {
           data.ongoingMatchUserStatistics.gameResult = 'lost'
           data.ongoingMatchFriendStatistics.gameResult = 'won'
-          postFriendGameMatchResult({
+          await postFriendGameMatchResult({
             loserId: data.ongoingMatchUser.id,
             winnerId: data.ongoingMatchFriend.id,
             isMatchDraw: false
@@ -180,37 +181,44 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
         // We update the statistics with win/lose/draw
         updateStatistic(data.ongoingMatchUserStatistics).then(() => {
           updateStatistic(data.ongoingMatchFriendStatistics).then(() => {
-            // Adding the notification to our db and then sending the notification to the user
-            const notificationBody = {
-              notificationType: 'friendMatchResult',
-              notificationData: JSON.stringify({
-                message: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`,
-                profilePicture: data.ongoingMatchFriend.profilePicture,
-                userStatistics: data.ongoingMatchUserStatistics,
-                friendStatistics: data.ongoingMatchFriendStatistics
-              }),
-              userId: data.ongoingMatchUser.id
-            }
+            // Getting the friend matches for notification
+            getFriendMatches(data.ongoingMatchUser.id, data.ongoingMatchFriend.id).then(friendMatches => {
+              // Adding the notification to our db and then sending the notification to the user
+              const notificationBody = {
+                notificationType: 'friendMatchResult',
+                notificationData: JSON.stringify({
+                  message: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`,
+                  friendUsername: data.ongoingMatchFriend.username,
+                  friendProfilePicture: data.ongoingMatchFriend.profilePicture,
+                  userStatistics: data.ongoingMatchUserStatistics,
+                  friendStatistics: data.ongoingMatchFriendStatistics,
+                  friendMatches: friendMatches,
+                  userAnswers: data.userAnswers,
+                  questionList: data.questionList
+                }),
+                userId: data.ongoingMatchUser.id
+              }
 
-            // Creating the notification
-            createNotification(notificationBody).then(() => {
+              // Creating the notification
+              createNotification(notificationBody).then(() => {
               // Sending the notification
-              fcmService.sendNotificationDataMessage(
-                data.ongoingMatchUser.fcmToken,
-                {
-                  title: 'Arkadaş oyunu!',
-                  body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
-                },
-                {
-                  type: 'friendMatchResult'
-                }
-              )
+                fcmService.sendNotificationDataMessage(
+                  data.ongoingMatchUser.fcmToken,
+                  {
+                    title: 'Arkadaş oyunu!',
+                    body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
+                  },
+                  {
+                    type: 'friendMatchResult'
+                  }
+                )
 
-              // Stopping ongoing match cron
-              findAndStopMatchCron(ongoingMatchId)
-              // Deleting the ongoing match row from db
-              deleteOngoingMatch(ongoingMatchId).then(data => {
-                return data
+                // Stopping ongoing match cron
+                findAndStopMatchCron(ongoingMatchId)
+                // Deleting the ongoing match row from db
+                deleteOngoingMatch(ongoingMatchId).then(data => {
+                  return data
+                })
               })
             })
           })

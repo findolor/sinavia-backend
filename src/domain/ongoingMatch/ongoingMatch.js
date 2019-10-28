@@ -6,8 +6,11 @@ const OngoingMatch = t.struct({
   id: t.maybe(t.Number),
   userId: t.maybe(t.String),
   friendId: t.maybe(t.String),
+  // Results are general statistics
   userResults: t.maybe(t.Number),
   friendResults: t.maybe(t.Number),
+  // Answers are question answers for each question
+  userAnswers: t.maybe(t.Array),
   questionList: t.maybe(t.Array),
   endDate: t.maybe(t.Date),
   examId: t.maybe(t.Number),
