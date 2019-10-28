@@ -35,7 +35,20 @@ module.exports = ({ config }) => {
   const sendNotificationOnlyMessage = (registrationToken, notification) => {
     const payload = {
       notification,
-      token: registrationToken
+      token: registrationToken,
+      android: {
+        notification: {
+          color: '#00D9EF',
+          sound: 'default'
+        }
+      },
+      apns: {
+        payload: {
+          aps: {
+            badge: 42
+          }
+        }
+      }
     }
 
     return config.fcm.firebaseAdmin.messaging().send(payload)
