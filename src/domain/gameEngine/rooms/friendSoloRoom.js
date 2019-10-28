@@ -8,7 +8,8 @@ const {
   getUserJoker,
   putUserJoker,
   updateOngoingMatch,
-  getOngoingMatch
+  getOngoingMatch,
+  getFriendMatches
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -440,13 +441,25 @@ class FriendSoloRoom extends colyseus.Room {
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
           this.state.changeStateInformation('show-results')
-          // Like always there is a delay to show the answers
-          setTimeout(() => {
-            this.state.changeStateInformation('match-finished')
-            this.isMatchFinished = true
-            // We save the results after the match is finished
-            this.state.saveSoloMatchResults(this.roomId, this.userJokers)
-          }, 5000)
+          getOngoingMatchInfo(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
+            getFriendMatches(ongoingMatch.ongoingMatchUser.dataValues.id, ongoingMatch.ongoingMatchFriend.dataValues.id).then(friendMatches => {
+              this.send(client, {
+                action: 'save-user-infos',
+                userUsername: ongoingMatch.ongoingMatchUser.dataValues.username,
+                userProfilePicture: ongoingMatch.ongoingMatchUser.dataValues.profilePicture,
+                userStatistics: ongoingMatch.ongoingMatchUserStatistics.dataValues,
+                friendMatches: friendMatches
+              })
+            })
+
+            // Like always there is a delay to show the answers
+            setTimeout(() => {
+              this.state.changeStateInformation('match-finished-friend')
+              this.isMatchFinished = true
+              // We save the results after the match is finished
+              this.state.saveSoloMatchResults(this.roomId, this.userJokers)
+            }, 5000)
+          })
           break
         }
         this.state.changeStateInformation('show-results')

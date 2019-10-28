@@ -898,13 +898,22 @@ class FriendRoom extends colyseus.Room {
               fullQuestionList: this.state.getQuestionProps()
             })
           }, 1000)
-          // Like always there is a delay to show the answers
-          setTimeout(() => {
-            this.state.changeStateInformation('match-finished')
-            this.isMatchFinished = true
-            // We save the results after the match is finished
-            this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
-          }, 5000)
+          // Sending the friend info to the user
+          getUser(this.state.getMatchInformation().friendId).then(friendInfo => {
+            this.send(client, {
+              action: 'save-friend-infos',
+              friendUsername: friendInfo.username,
+              friendProfilePicture: friendInfo.profilePicture
+            })
+
+            // Like always there is a delay to show the answers
+            setTimeout(() => {
+              this.state.changeStateInformation('match-finished-user')
+              this.isMatchFinished = true
+              // We save the results after the match is finished
+              this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+            }, 5000)
+          })
           break
         }
         this.state.changeStateInformation('show-results')
