@@ -25,11 +25,11 @@ module.exports = ({
         })
         .then(data => {
           res.status(Status.OK).json(Success(data))
-            .catch((error) => {
-              logger.error(error.stack) // we still need to log every error for debugging
-              res.status(Status.BAD_REQUEST).json(
-                Fail(error.message))
-            })
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
         })
     })
 
