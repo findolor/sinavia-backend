@@ -21,6 +21,8 @@ const {
 } = require('./helper')
 const cronJob = require('../../../infra/cron')
 const nodeCache = require('../../../infra/cache')
+let fcmService = require('../../../infra/pushNotifications')
+fcmService = fcmService({ config })
 
 // A placeholder variable for the empty option
 const emptyAnswer = 6
@@ -411,11 +413,18 @@ class FriendGame {
     // After posting the statistics
     // We update the ongoing game userResult field with the id from statistic
     postMatchResultsSolo(playerList).then(data => {
+      const answerList = []
+
+      playerProps[this.getPlayerId(1)].answers.forEach(answer => {
+        answerList.push(JSON.stringify(answer))
+      })
+
       updateOngoingMatch({
         id: soloGameDatabaseId,
-        userResults: data.id
+        userResults: data.id,
+        userAnswers: answerList
       }).then(ongoingMatch => {
-        cronJob({ logger, nodeCache }).stopOngoingMatchCron(ongoingMatch.id, true)
+        cronJob({ logger, nodeCache, fcmService }).stopOngoingMatchCron(ongoingMatch.id, true)
       })
     })
   }
@@ -889,13 +898,22 @@ class FriendRoom extends colyseus.Room {
               fullQuestionList: this.state.getQuestionProps()
             })
           }, 1000)
-          // Like always there is a delay to show the answers
-          setTimeout(() => {
-            this.state.changeStateInformation('match-finished')
-            this.isMatchFinished = true
-            // We save the results after the match is finished
-            this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
-          }, 5000)
+          // Sending the friend info to the user
+          getUser(this.state.getMatchInformation().friendId).then(friendInfo => {
+            this.send(client, {
+              action: 'save-friend-infos',
+              friendUsername: friendInfo.username,
+              friendProfilePicture: friendInfo.profilePicture
+            })
+
+            // Like always there is a delay to show the answers
+            setTimeout(() => {
+              this.state.changeStateInformation('match-finished-user')
+              this.isMatchFinished = true
+              // We save the results after the match is finished
+              this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+            }, 5000)
+          })
           break
         }
         this.state.changeStateInformation('show-results')
@@ -1022,7 +1040,7 @@ class FriendRoom extends colyseus.Room {
         // We start a cron job for this solo friend game
         // We send a notification to the other user
         // When the match resolves we will delete this cron later
-        cronJob({ logger, nodeCache }).makeFriendGameCronJob(
+        cronJob({ logger, nodeCache, fcmService }).makeFriendGameCronJob(
           matchInformation.userId,
           matchInformation.friendId,
           questionsJSON,

@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.NUMBER,
       allowNull: true
     },
+    userAnswers: {
+      type: DataTypes.ARRAY(DataTypes.JSON),
+      allowNull: true
+    },
     questionList: {
       type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false

@@ -40,6 +40,10 @@ module.exports = {
           key: 'id'
         }
       },
+      userAnswers: {
+        type: Sequelize.ARRAY(Sequelize.JSONB),
+        allowNull: true
+      },
       endDate: {
         type: Sequelize.DATE,
         allowNull: false

@@ -43,6 +43,7 @@ module.exports = ({
             res.status(Status.BAD_REQUEST).json(Fail('Requested user has already requested a friendship'))
             return
           }
+          // TODO Think about the structure here
           getUserUseCase
             .getOne({ id: req.body.friendId })
             .then(userData => {
@@ -50,12 +51,12 @@ module.exports = ({
               postUseCase
                 .create({ body: req.body })
                 .then(data => {
-                  fcmService.sendDataMessage(
+                  fcmService.sendNotificationDataMessage(
                     dataValues.fcmToken,
-                    /* {
+                    {
                       title: 'Arkadaş İsteği!',
                       body: `${req.body.username} seni arkadaş olarak ekledi.`
-                    }, */
+                    },
                     {
                       type: 'friendRequest',
                       userId: req.body.userId,
@@ -148,10 +149,17 @@ module.exports = ({
                 }),
                 userId: req.body.userId
               }
-
+              // TODO Think about the structure here
               postNotificationUseCase
                 .create({ body: notificationBody })
                 .then(notification => {
+                  fcmService.sendNotificationOnlyMessage(
+                    dataValues.fcmToken,
+                    {
+                      title: 'Arkadaş İsteği!',
+                      body: `${req.body.username} arkadaşlık isteğini kabul etti.`
+                    }
+                  )
                   fcmService.sendDataMessage(
                     dataValues.fcmToken,
                     {

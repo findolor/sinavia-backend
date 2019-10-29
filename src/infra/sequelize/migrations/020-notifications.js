@@ -17,7 +17,7 @@ module.exports = {
         }
       },
       notificationType: {
-        type: Sequelize.ENUM('friendshipAccepted', 'gameRequest'),
+        type: Sequelize.ENUM('friendshipAccepted', 'friendMatchResult', 'gameRequest'),
         allowNull: false
       },
       notificationData: {
