@@ -7,7 +7,8 @@ module.exports = ({
   putUseCase,
   deleteUseCase,
   getFriendsMatchUseCase,
-  postGameEnergyUseCase,
+  // postGameEnergyUseCase,
+  postUserJokerUseCase,
   logger,
   auth,
   smtpService,
@@ -73,15 +74,15 @@ module.exports = ({
       postUseCase
         .create({ body: req.body })
         .then(data => {
-          const gameEnergyEntity = {
+          // This will be used later on
+          /* const gameEnergyEntity = {
             userId: data.id,
             energyAmount: 6,
             energyUsed: 0,
             shouldRenew: false,
             dateRenewed: new Date()
-          }
-
-          postGameEnergyUseCase
+          } */
+          /* postGameEnergyUseCase
             .create({ body: gameEnergyEntity })
             .then(() => {
               res.status(Status.OK).json(Success(data))
@@ -90,7 +91,21 @@ module.exports = ({
               logger.error(error.stack) // we still need to log every error for debugging
               res.status(Status.BAD_REQUEST).json(
                 Fail(error.message))
-            })
+            }) */
+
+          for (let i = 1; i < 4; i++) {
+            postUserJokerUseCase
+              .createUserJoker({ userJokerEntity: {
+                userId: data.id,
+                jokerId: i,
+                amount: 10,
+                amountUsed: 0,
+                shouldRenew: false,
+                dateRenewed: new Date()
+              } })
+          }
+
+          res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
