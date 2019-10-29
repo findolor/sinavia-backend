@@ -3,17 +3,20 @@ module.exports = ({ leaderboardRepository }) => {
     return Promise
       .resolve()
       .then(() => {
+        // We parse the variables because they arrive as strings
         const queryOptions = {
           where: {
-            examId: examId
+            examId: parseInt(examId, 10),
+            courseId: null,
+            subjectId: null
           }
         }
 
         if (courseId) {
           if (subjectId) {
-            queryOptions.where.courseId = courseId
-            queryOptions.where.subjectId = subjectId
-          } else queryOptions.where.courseId = courseId
+            queryOptions.where.courseId = parseInt(courseId, 10)
+            queryOptions.where.subjectId = parseInt(subjectId, 10)
+          } else queryOptions.where.courseId = parseInt(courseId, 10)
         }
 
         return leaderboardRepository.findOne(queryOptions)
