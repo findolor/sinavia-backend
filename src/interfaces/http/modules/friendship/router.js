@@ -63,7 +63,9 @@ module.exports = ({
                       title: 'Arkadaş İsteği!',
                       body: `${req.body.username} seni arkadaş olarak ekledi.`
                     }
-                  )
+                  ).catch(error => {
+                    logger.error(error)
+                  })
                   res.status(Status.OK).json(Success(data))
                 })
                 .catch((error) => {
@@ -153,22 +155,26 @@ module.exports = ({
               postNotificationUseCase
                 .create({ body: notificationBody })
                 .then(notification => {
-                  fcmService.sendNotificationOnlyMessage(
-                    dataValues.fcmToken,
-                    {
-                      title: 'Arkadaş İsteği!',
-                      body: `${req.body.username} arkadaşlık isteğini kabul etti.`
-                    }
-                  )
-                  fcmService.sendDataMessage(
-                    dataValues.fcmToken,
-                    {
-                      type: 'friendApproved',
-                      title: 'Arkadaş İsteği!',
-                      body: `${req.body.username} arkadaşlık isteğini kabul etti.`,
-                      userId: req.body.friendId
-                    }
-                  )
+                  try {
+                    fcmService.sendNotificationOnlyMessage(
+                      dataValues.fcmToken,
+                      {
+                        title: 'Arkadaş İsteği!',
+                        body: `${req.body.username} arkadaşlık isteğini kabul etti.`
+                      }
+                    )
+                    fcmService.sendDataMessage(
+                      dataValues.fcmToken,
+                      {
+                        type: 'friendApproved',
+                        title: 'Arkadaş İsteği!',
+                        body: `${req.body.username} arkadaşlık isteğini kabul etti.`,
+                        userId: req.body.friendId
+                      }
+                    )
+                  } catch (error) {
+                    logger.error(error)
+                  }
                   res.status(Status.OK).json(Success(data))
                 })
             })
