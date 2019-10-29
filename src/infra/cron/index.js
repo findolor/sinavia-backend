@@ -183,6 +183,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
           updateStatistic(data.ongoingMatchFriendStatistics).then(() => {
             // Getting the friend matches for notification
             getFriendMatches(data.ongoingMatchUser.id, data.ongoingMatchFriend.id).then(friendMatches => {
+              // TODO ADD NOTIFICATIONS TO THE NORMAL CRON FINISH
               // Adding the notification to our db and then sending the notification to the user
               const notificationBody = {
                 notificationType: 'friendMatchResult',

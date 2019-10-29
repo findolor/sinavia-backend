@@ -136,6 +136,10 @@ class FriendSoloGame {
     return this.friendState.playerProps
   }
 
+  setPlayerPropsMatchInformation (matchInformation) {
+    this.friendState.playerProps.matchInformation = matchInformation
+  }
+
   getPlayerId (playerNumber) {
     switch (playerNumber) {
       case 1:
@@ -386,6 +390,8 @@ class FriendSoloRoom extends colyseus.Room {
       ongoingMatchId: options.ongoingMatchId
     }
 
+    this.state.setPlayerPropsMatchInformation(matchInformation)
+
     getOngoingMatchInfo(options.ongoingMatchId).then(data => {
       const questionList = []
       const questionProps = []
@@ -441,14 +447,22 @@ class FriendSoloRoom extends colyseus.Room {
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
           this.state.changeStateInformation('show-results')
+          // Sending the questions in full for favouriting
+          this.clock.setTimeout(() => {
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+          }, 1000)
+          // Getting the relevant friend match infos from db
           getOngoingMatchInfo(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
             getFriendMatches(ongoingMatch.ongoingMatchUser.dataValues.id, ongoingMatch.ongoingMatchFriend.dataValues.id).then(friendMatches => {
               this.send(client, {
                 action: 'save-user-infos',
                 userUsername: ongoingMatch.ongoingMatchUser.dataValues.username,
                 userProfilePicture: ongoingMatch.ongoingMatchUser.dataValues.profilePicture,
-                userStatistics: ongoingMatch.ongoingMatchUserStatistics.dataValues,
-                friendMatches: friendMatches
+                userStatistics: ongoingMatch.ongoingMatchUserStatistics !== null ? ongoingMatch.ongoingMatchUserStatistics.dataValues : null,
+                friendMatches: ongoingMatch.ongoingMatchUserStatistics !== null ? friendMatches : null
               })
             })
 
