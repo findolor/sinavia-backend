@@ -196,13 +196,17 @@ module.exports = ({
           deleteUseCase
             .deleteFriendship({ userId: req.query.userId, friendId: req.query.friendId })
             .then(data => {
-              fcmService.sendDataMessage(
-                userData.fcmToken,
-                {
-                  type: 'friendDeleted',
-                  userId: isClientUser === true ? req.query.userId : req.query.friendId
-                }
-              )
+              try {
+                fcmService.sendDataMessage(
+                  userData.fcmToken,
+                  {
+                    type: 'friendDeleted',
+                    userId: isClientUser === true ? req.query.userId : req.query.friendId
+                  }
+                )
+              } catch (error) {
+                logger.error(error.stack)
+              }
               res.status(Status.OK).json(Success(data))
             })
             .catch((error) => {
