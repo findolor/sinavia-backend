@@ -819,13 +819,15 @@ class RankedRoom extends colyseus.Room {
                 // We save the results after the match is finished
                 this.state.saveMatchResults(this.roomId, this.userScores, this.userJokers, this.userInformations)
 
-                let clientLeaveTimer = Math.floor((Math.random() * 5000) + 1500)
+                if (this.isBotGame) {
+                  let clientLeaveTimer = Math.floor((Math.random() * 5000) + 1500)
 
-                this.clock.setTimeout(() => {
-                  this.send(client, {
-                    action: 'client-leaving'
-                  })
-                }, clientLeaveTimer)
+                  this.clock.setTimeout(() => {
+                    this.broadcast({
+                      action: 'client-leaving'
+                    })
+                  }, clientLeaveTimer)
+                }
               }, 5000)
               break
             }
