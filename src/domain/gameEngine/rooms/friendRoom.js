@@ -10,7 +10,7 @@ const {
   getUserJoker,
   putUserJoker,
   updateOngoingMatch,
-  getUserScore,
+  getUserScoreMultipleIds,
   putUserScore,
   postUserScore,
   getFriendMatches
@@ -645,21 +645,21 @@ function updateUserJoker (userJokerEntity) {
   }
 }
 
-function fetchUserScore (
-  userId,
+function fetchUserScoreMultipleIds (
+  idList,
   examId,
   courseId,
   subjectId
 ) {
   try {
-    return getUserScore(
-      userId,
+    return getUserScoreMultipleIds(
+      idList,
       examId,
       courseId,
       subjectId
     )
   } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+    logger.error('GAME ENGINE INTERFACE => Cannot get userScores')
     logger.error(error.stack)
   }
 }
@@ -703,7 +703,7 @@ class FriendRoom extends colyseus.Room {
     this.soloGameDBId = 0
   }
 
-  onInit (options) {
+  async onInit (options) {
     // We initialize our game here
     this.setState(new FriendGame())
 
@@ -741,6 +741,16 @@ class FriendRoom extends colyseus.Room {
     }).catch(error => {
       logger.error(error.stack)
     })
+
+    // We fetch the user scores when the room is created
+    // Then map it with the client id in onJoin function
+    const userScores = await fetchUserScoreMultipleIds(
+      [options.userId, options.friendId],
+      options.examId,
+      options.courseId,
+      options.subjectId
+    )
+    this.userScores.scoreList = userScores
   }
 
   // If this room is full new users will join another room
@@ -768,7 +778,12 @@ class FriendRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
-    const matchInformation = this.state.getMatchInformation()
+    // Sending the scores to the users
+    this.send(client, {
+      action: 'save-user-points',
+      userScores: this.userScores.scoreList
+    })
+
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
@@ -787,27 +802,18 @@ class FriendRoom extends colyseus.Room {
       } else this.userJokers[client.id] = null
     })
 
-    // We get the user score from database
-    // Check if it exists; if it is null we set shouldUpdate false, otherwise true
-    // When the game ends we save it to db accordingly
-    fetchUserScore(
-      options.databaseId,
-      matchInformation.examId,
-      matchInformation.courseId,
-      matchInformation.subjectId
-    ).then(userScore => {
-      if (userScore === null) {
-        this.userScores[client.id] = {
-          shouldUpdate: false,
-          userScore: userScore
-        }
-      } else {
-        this.userScores[client.id] = {
-          shouldUpdate: true,
-          userScore: userScore
-        }
+    const index = this.userScores.scoreList.findIndex(x => x.userId === options.databaseId)
+    if (index !== -1) {
+      this.userScores[client.id] = {
+        shouldUpdate: true,
+        userScore: this.userScores.scoreList[index]
       }
-    })
+    } else {
+      this.userScores[client.id] = {
+        shouldUpdate: false,
+        userScore: null
+      }
+    }
 
     // Getting user information from database
     getUser(options.databaseId).then(userInformation => {
@@ -818,6 +824,7 @@ class FriendRoom extends colyseus.Room {
       this.state.addPlayer(client.id, userInformation, options.databaseId)
 
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        delete this.userScores.scoreList
         // If we have reached the maxClients, we lock the room for unexpected things
         this.lock()
         // We send the clients player information
@@ -1024,6 +1031,7 @@ class FriendRoom extends colyseus.Room {
         // TODO Make the cron here
       case 'start-ahead':
         this.isSoloGame = true
+        delete this.userScores.scoreList
         this.lock()
         logger.info(`Friend solo game starts with player: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} roomId: ${this.roomId}`)
 

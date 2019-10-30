@@ -46,6 +46,15 @@ exports.putUserScore = (userScoreEntity) => {
   return engineInterface().putUserScoreUseCase.updateUserScore({ userScoreEntity: userScoreEntity })
 }
 
+exports.getUserScoreMultipleIds = (idList, examId, courseId, subjectId) => {
+  return engineInterface().getUserScoreUseCase.getMultipleIds({
+    idList: idList,
+    examId: examId,
+    courseId: courseId,
+    subjectId: subjectId
+  })
+}
+
 exports.getUserJoker = (userId) => {
   return engineInterface().getUserJokerUseCase.getJokers({ userId: userId })
 }

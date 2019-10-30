@@ -17,6 +17,22 @@ module.exports = ({ userScoreRepository, database, Sequelize }) => {
       })
   }
 
+  const getMultipleIds = ({ idList, examId, courseId, subjectId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const userScore = userScoreRepository.findAll({
+          where: {
+            userId: idList,
+            examId: examId,
+            courseId: courseId,
+            subjectId: subjectId
+          }
+        })
+        return userScore
+      })
+  }
+
   const getBatch = ({ examId, courseId, subjectId }) => {
     return Promise
       .resolve()
@@ -71,6 +87,7 @@ module.exports = ({ userScoreRepository, database, Sequelize }) => {
   return {
     getOne,
     getBatch,
-    getFriendScores
+    getFriendScores,
+    getMultipleIds
   }
 }

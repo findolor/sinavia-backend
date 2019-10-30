@@ -66,14 +66,14 @@ class RankedGame {
   }
 
   // Adds the player to our room state
-  addPlayer (clientId, userInformation) {
+  addPlayer (clientId, userInformation, userScores) {
     this.rankedState.playerProps[clientId] = {
       username: userInformation.username,
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
       coverPicture: userInformation.coverPicture,
-      totalPoints: userInformation.totalPoints
+      totalPoints: userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
     }
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
@@ -681,28 +681,6 @@ class RankedRoom extends colyseus.Room {
 
   onJoin (client, options) {
     try {
-      // We get the user score from database
-      // Check if it exists; if it is null we set shouldUpdate false, otherwise true
-      // When the game ends we save it to db accordingly
-      fetchUserScore(
-        options.databaseId,
-        options.examId,
-        options.courseId,
-        options.subjectId
-      ).then(userScore => {
-        if (userScore === null) {
-          this.userScores[client.id] = {
-            shouldUpdate: false,
-            userScore: userScore
-          }
-        } else {
-          this.userScores[client.id] = {
-            shouldUpdate: true,
-            userScore: userScore
-          }
-        }
-      })
-
       // We get user jokers from database
       // Later on we send all the joker names and ids to the client
       // If the client doesnt have a joker it will be blacked out
@@ -725,18 +703,41 @@ class RankedRoom extends colyseus.Room {
         userInformation = dataValues
         this.userInformations[client.id] = userInformation
         this.fetchedUserInfoNumber++
-        // Finally adding the player to our room state
-        this.state.addPlayer(client.id, userInformation)
 
-        if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        // We get the user score from database
+        // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+        // When the game ends we save it to db accordingly
+        fetchUserScore(
+          options.databaseId,
+          options.examId,
+          options.courseId,
+          options.subjectId
+        ).then(userScore => {
+          if (userScore === null) {
+            this.userScores[client.id] = {
+              shouldUpdate: false,
+              userScore: userScore
+            }
+          } else {
+            this.userScores[client.id] = {
+              shouldUpdate: true,
+              userScore: userScore
+            }
+          }
+
+          // Finally adding the player to our room state
+          this.state.addPlayer(client.id, userInformation, this.userScores)
+
+          if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
           // If we have reached the maxClients, we lock the room for unexpected things
-          this.lock()
-          // We send the clients player information
-          this.clock.setTimeout(() => {
-            this.broadcast(this.state.getPlayerProps())
-          }, 500)
-          logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
-        }
+            this.lock()
+            // We send the clients player information
+            this.clock.setTimeout(() => {
+              this.broadcast(this.state.getPlayerProps())
+            }, 500)
+            logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+          }
+        })
       }).catch(error => {
         logger.error(error.stack)
       })
