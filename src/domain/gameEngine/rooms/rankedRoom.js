@@ -66,15 +66,30 @@ class RankedGame {
   }
 
   // Adds the player to our room state
-  addPlayer (clientId, userInformation, userScores) {
+  addPlayer (clientId, userInformation, userScores, isBot) {
     this.rankedState.playerProps[clientId] = {
       username: userInformation.username,
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
-      coverPicture: userInformation.coverPicture,
-      totalPoints: userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
+      coverPicture: userInformation.coverPicture
     }
+
+    if (!isBot) this.rankedState.playerProps[clientId].totalPoints = userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
+    else {
+      // We randomize a point based on the clients points
+      const pointDifference = Math.floor(Math.random() * this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1)
+      let addOrSubtract
+      // We get true/false for adding or subtracting
+      // This is with a probability of 25%
+      (function () {
+        addOrSubtract = Math.random() <= 0.25
+      })()
+      // Then we either add it or subtract it
+      if (addOrSubtract) this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 2500
+      else this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints - pointDifference
+    }
+
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
   }
 
@@ -726,7 +741,7 @@ class RankedRoom extends colyseus.Room {
           }
 
           // Finally adding the player to our room state
-          this.state.addPlayer(client.id, userInformation, this.userScores)
+          this.state.addPlayer(client.id, userInformation, this.userScores, false)
 
           if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
           // If we have reached the maxClients, we lock the room for unexpected things
@@ -803,6 +818,14 @@ class RankedRoom extends colyseus.Room {
                 this.isMatchFinished = true
                 // We save the results after the match is finished
                 this.state.saveMatchResults(this.roomId, this.userScores, this.userJokers, this.userInformations)
+
+                let clientLeaveTimer = Math.floor((Math.random() * 5000) + 1500)
+
+                this.clock.setTimeout(() => {
+                  this.send(client, {
+                    action: 'client-leaving'
+                  })
+                }, clientLeaveTimer)
               }, 5000)
               break
             }
@@ -940,7 +963,7 @@ class RankedRoom extends colyseus.Room {
           // Some field picture
           userInformation.coverPicture = BOT_COVER_PICTURE
           // Adding the bot to our props
-          this.state.addPlayer(BOT_CLIENT_ID, userInformation)
+          this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
 
           // Lock the room as usual and broadcast the props
           this.lock()
