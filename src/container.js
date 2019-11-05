@@ -17,6 +17,7 @@ const fcm = require('./infra/pushNotifications')
 const cron = require('./infra/cron')
 const nodeCache = require('./infra/cache')
 const smtp = require('./infra/smtp')
+const reverseProxy = require('./interfaces/reverseProxy')
 
 const container = createContainer()
 
@@ -39,7 +40,8 @@ container
     fcmService: asFunction(fcm).singleton(),
     cronJob: asFunction(cron).singleton(),
     nodeCache: asFunction(nodeCache).singleton(),
-    smtpService: asFunction(smtp).singleton()
+    smtpService: asFunction(smtp).singleton(),
+    reverseProxy: asFunction(reverseProxy).singleton()
   })
 
 module.exports = container

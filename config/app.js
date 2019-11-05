@@ -11,6 +11,7 @@ module.exports = {
   authSession: {
     session: false
   },
-  gameEnginePort: process.env.GAME_ENGINE_PORT,
-  isProxyEnabled: process.env.IS_PROXY_ENABLED === 'true'
+  isProxyEnabled: process.env.IS_PROXY_ENABLED === 'true',
+  reverseProxyPort: process.env.REVERSE_PROXY_PORT,
+  apiUrl: process.env.API_URL
 }

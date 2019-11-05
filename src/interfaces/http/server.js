@@ -23,9 +23,8 @@ module.exports = ({ config, router, logger, auth }) => {
   return {
     app,
     start: () => new Promise((resolve) => {
-      const http = app.listen(port, () => {
-        const { port } = http.address()
-        logger.info(`🤘 API - Port ${port}`)
+      app.listen(port, () => {
+        // logger.info(`🤘 API - Port ${port} ---> Cannot access normally. Only from our reverse proxy`)
         resolve(app)
       })
     })

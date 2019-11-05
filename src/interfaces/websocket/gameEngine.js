@@ -6,8 +6,8 @@ const roomRegisterService = require('../../domain/gameEngine')
 module.exports = ({ logger, config }) => {
   let port
 
-  if (config.isProxyEnabled) port = Number(config.gameEnginePort) + Number(process.env.NODE_APP_INSTANCE)
-  else port = config.gameEnginePort
+  if (config.isProxyEnabled) port = Number(config.reverseProxyPort) + Number(process.env.NODE_APP_INSTANCE)
+  else port = config.reverseProxyPort
 
   return {
     start: (app) => new Promise((resolve) => {
@@ -31,7 +31,8 @@ module.exports = ({ logger, config }) => {
       app.use('/colyseus', monitor(registeredGameEngine))
 
       registeredGameEngine.listen(port)
-      logger.info(`Game Engine - Port ${port}`)
+      logger.info(`🤘 Reverse Proxy - Port ${port}`)
+      // logger.info(`Game Engine - Port ${port}`)
       resolve()
     })
   }
