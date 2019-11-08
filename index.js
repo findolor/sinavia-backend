@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const container = require('src/container')
 const app = container.resolve('app')
 

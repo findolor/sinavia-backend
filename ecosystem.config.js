@@ -1,15 +1,12 @@
-const os = require('os')
 module.exports = {
   apps: [
     {
-      name: 'backend_app',
+      name: 'sinavia_app',
       script: 'index.js', // your entrypoint file
-      watch: true, // optional
-      instances: os.cpus().length,
+      instances: 1,
       exec_mode: 'fork', // Must be fork!!
       env: {
-        DEBUG: 'colyseus:errors',
-        NODE_ENV: 'local',
+        NODE_ENV: process.env.NODE_ENV,
         NODE_PATH: '.'
       }
     }
