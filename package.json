@@ -29,7 +29,7 @@
     "db:refresh-test": "sequelize db:migrate:undo:all --env test && sequelize db:migrate --env test",
     "migrate": "cross-env NODE_PATH=. sequelize db:migrate",
     "migrate:test": "cross-env NODE_PATH=. sequelize db:migrate --env test",
-    "seed": "cross-env NODE_ENV=local NODE_PATH=. sequelize db:seed:all --seeders-path=./src/infra/sequelize/seeders/local",
+    "seed": "NODE_ENV=test NODE_PATH=. sequelize db:seed:all --seeders-path=./src/infra/sequelize/seeders/test",
     "seed:test": "cross-env NODE_ENV=test NODE_PATH=. sequelize db:seed:all --env test --seeders-path=./src/infra/sequelize/seeders/test",
     "lint": "standard --verbose | snazzy",
     "lint:fix": "standard --fix",
