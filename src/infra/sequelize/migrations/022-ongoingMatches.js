@@ -76,6 +76,10 @@ module.exports = {
           key: 'id'
         }
       },
+      roomCode: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

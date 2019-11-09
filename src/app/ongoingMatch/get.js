@@ -37,8 +37,22 @@ module.exports = ({ ongoingMatchRepository, database }) => {
       })
   }
 
+  const checkOngoingMatch = ({ userId, roomCode }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        return ongoingMatchRepository.findOne({
+          where: {
+            userId: userId,
+            roomCode: roomCode
+          }
+        })
+      })
+  }
+
   return {
     getOne,
-    getAll
+    getAll,
+    checkOngoingMatch
   }
 }

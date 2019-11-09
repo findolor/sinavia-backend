@@ -3,6 +3,7 @@ const { Router } = require('express')
 
 module.exports = ({
   fcmService,
+  getOngoingMatchUseCase,
   logger,
   auth,
   response: { Success, Fail },
@@ -33,6 +34,21 @@ module.exports = ({
       )
         .then(() => {
           res.status(Status.OK).json(Success(true))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
+    .get('/check/:userId', (req, res) => {
+      getOngoingMatchUseCase
+        .checkOngoingMatch({ userId: req.params.userId, roomCode: req.query.roomCode })
+        .then(data => {
+          if (data !== null) res.status(Status.OK).json(Success(true))
+          else res.status(Status.OK).json(Success(false))
         })
         .catch((error) => {
           logger.error(error.stack)
