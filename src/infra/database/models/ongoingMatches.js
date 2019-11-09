@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
     subjectId: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    roomCode: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     freezeTableName: true,

@@ -1061,7 +1061,8 @@ class FriendRoom extends colyseus.Room {
             examName: matchInformation.examName,
             courseName: matchInformation.courseName,
             subjectName: matchInformation.subjectName
-          }
+          },
+          matchInformation.roomCode
         ).then(data => {
           // We save the id for ongoing game to update it later
           this.soloGameDBId = data
