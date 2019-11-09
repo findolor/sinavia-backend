@@ -16,6 +16,7 @@ const OngoingMatch = t.struct({
   examId: t.maybe(t.Number),
   courseId: t.maybe(t.Number),
   subjectId: t.maybe(t.Number),
+  roomCode: t.maybe(t.String),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })
