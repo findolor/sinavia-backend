@@ -15,7 +15,11 @@ module.exports = ({ model }) => {
 
   const findOne = (...args) =>
     model.findOne(...args)
-      .then(({ dataValues }) => dataValues)
+      .then((dataValues) => {
+        let returnValue = null
+        if (dataValues) returnValue = dataValues.dataValues
+        return returnValue
+      })
       .catch((error) => { throw new Error(error) })
 
   const findAll = (...args) =>

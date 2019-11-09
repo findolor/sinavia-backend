@@ -1,7 +1,7 @@
 const { OngoingMatch } = require('src/domain/ongoingMatch')
 
 module.exports = ({ ongoingMatchRepository }) => {
-  const create = ({ userId, friendId, endDate, questionList, examId, courseId, subjectId }) => {
+  const create = ({ userId, friendId, endDate, questionList, examId, courseId, subjectId, roomCode }) => {
     return Promise
       .resolve()
       .then(() => {
@@ -12,7 +12,8 @@ module.exports = ({ ongoingMatchRepository }) => {
           questionList: questionList,
           examId: examId,
           courseId: courseId,
-          subjectId: subjectId
+          subjectId: subjectId,
+          roomCode: roomCode
         })
         const ongoingMatch = OngoingMatch(entity)
 

@@ -87,8 +87,8 @@ exports.getOngoingMatch = (ongoingMatchId) => {
   return engineInterface().getOngoingMatchUseCase.getOne({ id: ongoingMatchId })
 }
 
-exports.createOngoingMatch = (userId, friendId, endDate, questionList, examId, courseId, subjectId) => {
-  return engineInterface().postOngoingMatchUseCase.create({ userId: userId, friendId: friendId, endDate: endDate, questionList: questionList, examId: examId, courseId: courseId, subjectId: subjectId })
+exports.createOngoingMatch = (userId, friendId, endDate, questionList, examId, courseId, subjectId, roomCode) => {
+  return engineInterface().postOngoingMatchUseCase.create({ userId: userId, friendId: friendId, endDate: endDate, questionList: questionList, examId: examId, courseId: courseId, subjectId: subjectId, roomCode: roomCode })
 }
 
 exports.deleteOngoingMatch = (ongoingMatchId) => {

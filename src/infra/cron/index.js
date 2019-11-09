@@ -356,7 +356,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
     // And it will delete the same row when the match ends
     // It will also add it to ongoing games list
     // If the friend plays the match normally, we just stop the cron and remove it from the list and db
-    makeFriendGameCronJob: (userId, friendId, questionList, examId, courseId, subjectId, userUsername, userProfilePicture, contentNames) => {
+    makeFriendGameCronJob: (userId, friendId, questionList, examId, courseId, subjectId, userUsername, userProfilePicture, contentNames, roomCode) => {
       return Promise
         .resolve()
         .then(async () => {
@@ -369,7 +369,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
           }
 
           // First create an ongoing match entry
-          const data = await createOngoingMatch(userId, friendId, endDate, questionList, examId, courseId, subjectId)
+          const data = await createOngoingMatch(userId, friendId, endDate, questionList, examId, courseId, subjectId, roomCode)
           friendGameCronJob.ongoingMatchId = data.id
 
           // Adding the notification to our db and then sending the notification to the user
