@@ -9,9 +9,9 @@ module.exports = ({ userRepository }) => {
       .resolve()
       .then(() => {
         body.profilePicture =
-            'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png'
+            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.png?alt=media&token=35aba6a0-0b4e-4721-a5f3-25468c89e9e7'
         body.coverPicture =
-            'https://assets.traveltriangle.com/blog/wp-content/uploads/2017/11/Hill-Stations-Near-Kolkata-cover1-400x267.jpg'
+            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.png?alt=media&token=0377e5ce-ed5a-45d4-b8a9-661961729d92'
         body.totalPoints = 0
         body.isPremium = true
         body.premiumEndDate = moment().add(1, 'weeks').toDate()
