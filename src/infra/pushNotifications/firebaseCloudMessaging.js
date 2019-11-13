@@ -43,15 +43,15 @@ module.exports = ({ config }) => {
         notification: {
           color: '#00D9EF',
           sound: 'default'
+        }
+      },
+      apns: {
+        headers: {
+          'apns-priority': '10'
         },
-        apns: {
-          headers: {
-            'apns-priority': '10'
-          },
-          payload: {
-            aps: {
-              sound: 'default'
-            }
+        payload: {
+          aps: {
+            sound: 'default'
           }
         }
       }

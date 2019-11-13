@@ -23,8 +23,7 @@ module.exports = ({
         },
         {
           type: 'friendGameRequest',
-          title: 'Arkadaş oyun isteği!',
-          body: `${req.body.username} seni oyuna çağırıyor!`,
+          username: req.body.username,
           userId: req.body.id,
           roomCode: req.body.roomCode,
           examId: req.body.matchInformation.examId.toString(),
