@@ -17,6 +17,8 @@ module.exports = ({ userRepository, webToken }) => {
         }
       })
 
+      if (userCredentials === null) throw new Error('Invalid User')
+
       const { dataValues } = userCredentials
       userCredentials = dataValues
 
