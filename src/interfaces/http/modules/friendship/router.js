@@ -146,7 +146,7 @@ module.exports = ({
                 notificationType: 'friendshipAccepted',
                 notificationData: JSON.stringify({
                   message: `${req.body.username} arkadaşlık isteğini kabul etti.`,
-                  profilePicture: dataValues.profilePicture,
+                  profilePicture: req.body.profilePicture,
                   userId: req.body.friendId
                 }),
                 userId: req.body.userId
@@ -167,8 +167,6 @@ module.exports = ({
                       dataValues.fcmToken,
                       {
                         type: 'friendApproved',
-                        title: 'Arkadaş İsteği!',
-                        body: `${req.body.username} arkadaşlık isteğini kabul etti.`,
                         userId: req.body.friendId
                       }
                     )

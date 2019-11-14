@@ -517,6 +517,11 @@ class GroupRoom extends colyseus.Room {
           action: 'player-props',
           playerProps: this.state.getPlayerProps()
         })
+        this.send(client, {
+          action: 'content-ids',
+          courseId: matchInformation.courseId,
+          subjectId: matchInformation.subjectId
+        })
       }, 500)
     }).catch(error => {
       logger.error(error.stack)

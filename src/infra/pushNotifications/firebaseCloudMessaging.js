@@ -21,9 +21,12 @@ module.exports = ({ config }) => {
         }
       },
       apns: {
+        headers: {
+          'apns-priority': '10'
+        },
         payload: {
           aps: {
-            badge: 42
+            sound: 'default'
           }
         }
       }
@@ -43,9 +46,12 @@ module.exports = ({ config }) => {
         }
       },
       apns: {
+        headers: {
+          'apns-priority': '10'
+        },
         payload: {
           aps: {
-            badge: 42
+            sound: 'default'
           }
         }
       }

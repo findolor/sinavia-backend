@@ -866,6 +866,12 @@ class FriendRoom extends colyseus.Room {
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
             this.state.changeStateInformation('show-results')
+            this.clock.setTimeout(() => {
+              this.broadcast({
+                action: 'save-questions',
+                fullQuestionList: this.state.getQuestionProps()
+              })
+            }, 1000)
             // Like always there is a delay to show the answers
             setTimeout(() => {
               getPlayedFriendMatches(
