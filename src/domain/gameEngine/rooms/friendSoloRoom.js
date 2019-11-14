@@ -373,7 +373,7 @@ class FriendSoloRoom extends colyseus.Room {
   constructor () {
     super()
     this.maxClients = 1
-    this.questionAmount = 3
+    this.questionAmount = null
     this.isMatchFinished = false
     this.fetchedUserInfoNumber = 0
     this.userJokers = {}
@@ -405,6 +405,7 @@ class FriendSoloRoom extends colyseus.Room {
       // Setting general match related info
       this.state.setQuestions(questionProps, questionList)
       this.state.setMatchInformation(matchInformation)
+      this.questionAmount = Object.keys(data.questionList).length
     })
   }
 
