@@ -325,7 +325,7 @@ class FriendGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  async saveMatchResults (friendRoomId, userJokers, userScores) {
+  async saveMatchResults (friendRoomId, userJokers, userScores, friendMatches) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -374,6 +374,7 @@ class FriendGame {
         friendMatchInformation.isMatchDraw = true
         break
     }
+    friendMatches.push(friendMatchInformation)
 
     logger.info(`Friend game ends with p1: ${winLoseDraw[0].status} and p2: ${winLoseDraw[1].status} roomId: ${friendRoomId}`)
 
@@ -542,16 +543,6 @@ class FriendGame {
   }
 }
 
-// Gets random numbers for given range and lenght
-function getRandomUniqueNumbers (uniqueItemNumber, topNumber) {
-  const arr = []
-  while (arr.length < uniqueItemNumber) {
-    const r = Math.floor(Math.random() * topNumber) + 1
-    if (arr.indexOf(r) === -1) arr.push(r)
-  }
-  return arr
-}
-
 // Gets questions based on given question amount
 function getQuestions (
   examId,
@@ -701,6 +692,7 @@ class FriendRoom extends colyseus.Room {
     this.userScores = {}
     this.isSoloGame = false
     this.soloGameDBId = 0
+    this.friendMatches = null
   }
 
   async onInit (options) {
@@ -751,6 +743,9 @@ class FriendRoom extends colyseus.Room {
       options.subjectId
     )
     this.userScores.scoreList = userScores
+
+    const friendMatches = await getPlayedFriendMatches(options.userId, options.friendId)
+    this.friendMatches = friendMatches
   }
 
   // If this room is full new users will join another room
@@ -783,12 +778,15 @@ class FriendRoom extends colyseus.Room {
       action: 'save-user-points',
       userScores: this.userScores.scoreList
     })
+    // Sending the friend matches to the users
+    this.send(client, {
+      action: 'friend-matches',
+      friendMatches: this.friendMatches
+    })
 
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
-    // TODO Send the joker names to our client
-    // SEND THIS WHEN THE APP OPENS
     fetchUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
       if (Object.keys(userJokers).length !== 0) {
@@ -824,11 +822,21 @@ class FriendRoom extends colyseus.Room {
       this.state.addPlayer(client.id, userInformation, options.databaseId)
 
       if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-        delete this.userScores.scoreList
         // If we have reached the maxClients, we lock the room for unexpected things
         this.lock()
         // We send the clients player information
         this.clock.setTimeout(() => {
+          // Sending the scores to the users
+          this.send(client, {
+            action: 'save-user-points',
+            userScores: this.userScores.scoreList
+          })
+          // Sending the friend matches to the users
+          this.send(client, {
+            action: 'friend-matches',
+            friendMatches: this.friendMatches
+          })
+
           this.broadcast(this.state.getPlayerProps())
         }, 500)
         logger.info(`Friend game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
@@ -874,20 +882,10 @@ class FriendRoom extends colyseus.Room {
             }, 1000)
             // Like always there is a delay to show the answers
             setTimeout(() => {
-              getPlayedFriendMatches(
-                this.state.getMatchInformation().userId,
-                this.state.getMatchInformation().friendId
-              ).then(friendMatches => {
-                this.broadcast({
-                  action: 'friend-matches',
-                  friendMatches: friendMatches
-                })
-
-                this.state.changeStateInformation('match-finished')
-                this.isMatchFinished = true
-                // We save the results after the match is finished
-                this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
-              })
+              this.state.changeStateInformation('match-finished')
+              this.isMatchFinished = true
+              // We save the results after the match is finished
+              this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores, this.friendMatches)
             }, 5000)
             break
           }
@@ -1002,6 +1000,10 @@ class FriendRoom extends colyseus.Room {
         }
         break
       case 'replay':
+        this.broadcast({
+          action: 'friend-matches',
+          friendMatches: this.friendMatches
+        })
         this.clients.forEach(element => {
           if (element.id !== client.id) {
             this.send(element, {
@@ -1011,19 +1013,19 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'reset-room':
-        // TODO USE THE NEW FUNCTIONS
         this.state.resetRoom()
 
-        this.questionAmount = 1
+        this.questionAmount = 3
         this.readyPlayerCount = 0
         this.finishedPlayerCount = 0
-        this.questionIdList = getRandomUniqueNumbers(this.questionAmount, 5)
         this.isMatchFinished = false
 
         // Fetching questions from database
         const questionProps = await getQuestions(
-          this.state.getMatchInformation(),
-          this.questionIdList
+          this.state.getMatchInformation().examId,
+          this.state.getMatchInformation().courseId,
+          this.state.getMatchInformation().subjectId,
+          this.questionAmount
         )
         const questionList = []
 
@@ -1075,17 +1077,11 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'leave-match':
-        getPlayedFriendMatches(
-          this.state.getMatchInformation().userId,
-          this.state.getMatchInformation().friendId
-        ).then(friendMatches => {
-          this.send(client, {
-            action: 'leave-match',
-            clientId: client.id,
-            playerProps: this.state.getPlayerProps(),
-            fullQuestionList: this.state.getQuestionProps(),
-            friendMatches: friendMatches
-          })
+        this.send(client, {
+          action: 'leave-match',
+          clientId: client.id,
+          playerProps: this.state.getPlayerProps(),
+          fullQuestionList: this.state.getQuestionProps()
         })
         break
     }
@@ -1103,14 +1099,11 @@ class FriendRoom extends colyseus.Room {
     if (this.clients.length !== 0) {
       const lastClient = this.clients[0]
 
-      getPlayedFriendMatches(this.state.getMatchInformation().userId, this.state.getMatchInformation().friendId).then(friendMatches => {
-        this.send(lastClient, {
-          action: 'client-leaving',
-          clientId: lastClient.id,
-          playerProps: this.state.getPlayerProps(),
-          fullQuestionList: this.state.getQuestionProps(),
-          friendMatches: friendMatches
-        })
+      this.send(lastClient, {
+        action: 'client-leaving',
+        clientId: lastClient.id,
+        playerProps: this.state.getPlayerProps(),
+        fullQuestionList: this.state.getQuestionProps()
       })
 
       // We save the leaving clients id to mark it as lost for later
