@@ -1,5 +1,6 @@
 const Status = require('http-status')
 const { Router } = require('express')
+const request = require('request')
 
 module.exports = ({
   getUseCase,
@@ -11,6 +12,7 @@ module.exports = ({
   logger,
   auth,
   fcmService,
+  config,
   response: { Success, Fail }
 }) => {
   const router = Router()
@@ -163,13 +165,27 @@ module.exports = ({
                         body: `${req.body.username} arkadaşlık isteğini kabul etti.`
                       }
                     )
-                    fcmService.sendDataMessage(
-                      dataValues.fcmToken,
-                      {
-                        type: 'friendApproved',
-                        userId: req.body.friendId
-                      }
-                    )
+                    // We have to use firebase legacy http api for sending data only messages
+                    // This is the only way it will work on iOS
+                    let requestOptions = {
+                      url: 'https://fcm.googleapis.com/fcm/send',
+                      headers: {
+                        'content-type': 'application/json',
+                        'authorization': 'key=' + config.fcmServerKey
+                      },
+                      method: 'POST',
+                      body: {
+                        'to': dataValues.fcmToken,
+                        'data': {
+                          'type': 'friendApproved',
+                          'userId': req.body.friendId
+                        }
+                      },
+                      json: true
+                    }
+                    request.post(requestOptions, (error, response, body) => {
+                      if (error) logger.error(error)
+                    })
                   } catch (error) {
                     logger.error(error)
                   }
@@ -195,13 +211,27 @@ module.exports = ({
             .deleteFriendship({ userId: req.query.userId, friendId: req.query.friendId })
             .then(data => {
               try {
-                fcmService.sendDataMessage(
-                  userData.fcmToken,
-                  {
-                    type: 'friendDeleted',
-                    userId: isClientUser === true ? req.query.userId : req.query.friendId
-                  }
-                )
+                // We have to use firebase legacy http api for sending data only messages
+                // This is the only way it will work on iOS
+                let requestOptions = {
+                  url: 'https://fcm.googleapis.com/fcm/send',
+                  headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'key=' + config.fcmServerKey
+                  },
+                  method: 'POST',
+                  body: {
+                    'to': userData.fcmToken,
+                    'data': {
+                      'type': 'friendDeleted',
+                      'userId': isClientUser === true ? req.query.userId : req.query.friendId
+                    }
+                  },
+                  json: true
+                }
+                request.post(requestOptions, (error, response, body) => {
+                  if (error) logger.error(error)
+                })
               } catch (error) {
                 logger.error(error.stack)
               }

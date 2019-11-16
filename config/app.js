@@ -12,5 +12,6 @@ module.exports = {
     session: false
   },
   gameEnginePort: process.env.GAME_ENGINE_PORT,
-  isProxyEnabled: process.env.IS_PROXY_ENABLED === 'true'
+  isProxyEnabled: process.env.IS_PROXY_ENABLED === 'true',
+  fcmServerKey: process.env.FCM_SERVER_KEY
 }
