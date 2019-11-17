@@ -126,10 +126,6 @@ class SoloModeGame {
     return this.soloModeState.playerProps
   }
 
-  setPlayerPropsMatchInformation (matchInformation) {
-    this.soloModeState.playerProps.matchInformation = matchInformation
-  }
-
   // Calculates the number of different answers and returns it
   getTotalResults () {
     // We send player and get back the results
@@ -332,8 +328,6 @@ class SoloModeRoom extends colyseus.Room {
         subjectId: options.subjectId
       }
 
-      this.state.setPlayerPropsMatchInformation(matchInformation)
-
       // Fetching questions from database
       getQuestions(
         options.examId,
@@ -477,7 +471,7 @@ class SoloModeRoom extends colyseus.Room {
             questionAnswer: questionAnswer
           })
           break
-        case 'reset-room':
+        case 'replay':
           this.state.resetRoom()
 
           this.isMatchFinished = false
@@ -497,11 +491,16 @@ class SoloModeRoom extends colyseus.Room {
             })
             // Setting general match related info
             this.state.setQuestions(questionProps, questionList)
+
+            logger.info(`Solo game replay with player: ${this.state.getPlayerProps().databaseId} roomId: ${this.roomId}`)
+            this.send(client, {
+              action: 'replay'
+            })
           })
           break
-        case 'leave-game':
+        case 'leave-match':
           this.send(client, {
-            action: 'client-leaving',
+            action: 'leave-match',
             clientId: client.id,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
