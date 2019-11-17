@@ -423,11 +423,11 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
         .resolve()
         .then(() => finishUpOngoingMatch(ongoingMatchId, isFromUser))
     },
-    // Calculating the leaderboards at 4 AM
+    // Calculating the leaderboards every 12 hours
     // Calculate this for every content we have
     // Right now its every hour
     // TODO CACHE EVERY LEADERBOARD INFORMATION FOR GETTING IT LATER ???
-    leaderboardCronJob: () => new CronJob('* * 4 * * *', () => {
+    leaderboardCronJob: () => new CronJob('0 0 */12 * * *', () => {
       getGameContent().then(gameContent => {
         // Recursively go through every content and calculate leaderboards
         gameContent.forEach(examEntity => {
@@ -443,7 +443,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
     }, null, true, 'Europe/Istanbul', null, true),
     // Gets all the game content from db
     // Saves it in cache every night at 4 AM
-    makeGameContentCronJob: () => new CronJob('* * 4 * * *', () => {
+    makeGameContentCronJob: () => new CronJob('0 0 4 * * *', () => {
       getGameContent().then(data => {
         nodeCache.setValue('gameContent', data).then(response => {
           if (response) logger.info(`Successfully set with the key "gameContent"`)
