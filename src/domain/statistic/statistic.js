@@ -13,6 +13,7 @@ const Statistic = t.struct({
   earnedPoints: t.maybe(t.Number),
   gameResult: t.maybe(t.String),
   userId: t.String,
+  gameModeType: t.String,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

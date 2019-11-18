@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    gameModeType: {
+      type: DataTypes.ENUM('ranked', 'friend', 'group', 'solo'),
+      allowNull: false
     }
   }, {
     freezeTableName: true,
