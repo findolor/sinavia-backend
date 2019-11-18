@@ -241,7 +241,8 @@ class FriendSoloGame {
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId
+        userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
+        gameModeType: 'friend'
       })
 
       this.decideUserJokers(userJokers, userId)

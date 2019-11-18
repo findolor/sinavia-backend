@@ -293,7 +293,8 @@ class FriendGame {
         unansweredNumber: results[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'friend'
       })
 
       this.decideUserJokers(userJokers, userId)
@@ -350,7 +351,8 @@ class FriendGame {
         unansweredNumber: results[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'friend'
       })
 
       this.decideUserJokers(userJokers, userId)
@@ -403,7 +405,8 @@ class FriendGame {
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'friend'
       })
 
       this.decideUserJokers(userJokers, userId)

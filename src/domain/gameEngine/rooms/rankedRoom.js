@@ -316,7 +316,8 @@ class RankedGame {
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'ranked'
       })
 
       if (userScores[userId] !== undefined) {
@@ -357,7 +358,8 @@ class RankedGame {
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'ranked'
       })
 
       if (userScores[userId] !== undefined) {

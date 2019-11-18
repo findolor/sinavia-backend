@@ -213,7 +213,8 @@ class SoloModeGame {
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
         // parseInt is used for converting '0' to 0
-        userId: playerProps.databaseId
+        userId: playerProps.databaseId,
+        gameModeType: 'solo'
       })
 
       this.decideUserJokers(userJokers)
