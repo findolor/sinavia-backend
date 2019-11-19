@@ -16,5 +16,5 @@ COPY . /usr/src/app/
 EXPOSE 4000
 EXPOSE 5000
 
-CMD ["export", "NODE_ENV=test"]
-CMD [ "npm", "run", "start"]
+CMD export NODE_ENV=test
+CMD npm run start
