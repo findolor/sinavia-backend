@@ -259,7 +259,8 @@ class GroupGame {
         correctNumber: results[key].correct,
         incorrectNumber: results[key].incorrect,
         unansweredNumber: results[key].unanswered,
-        userId: playerProps[userId].databaseId
+        userId: playerProps[userId].databaseId,
+        gameModeType: 'group'
       })
 
       this.decideUserJokers(userJokers, userId)
