@@ -7,8 +7,7 @@ WORKDIR /usr/src/app
 COPY package*.json /usr/src/app/
 COPY .env.test /usr/src/app/
 
-RUN npm install & \
-    npm rebuild bcrypt --build-from-source
+RUN npm install
 
 COPY . .
 
