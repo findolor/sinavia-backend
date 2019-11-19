@@ -1,4 +1,4 @@
-FROM node:10.7.0-alpine
+FROM node:10.17.0-alpine
 
 RUN mkdir -p /usr/src/app
 
