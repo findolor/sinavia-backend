@@ -14,5 +14,4 @@ COPY . .
 EXPOSE 4000
 EXPOSE 5000
 
-RUN export NODE_ENV=test
 CMD ["npm", "run", "start"]

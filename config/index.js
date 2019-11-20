@@ -86,7 +86,7 @@ if (!config.db) {
 if (!config.cache) {
   throw new Error('cache config file log not found')
 }
-if (!config.port) {
+if (!config.apiPort) {
   throw new Error('app config file log not found')
 }
 if (!config.aws) {

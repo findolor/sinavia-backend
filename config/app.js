@@ -1,6 +1,6 @@
 module.exports = {
   version: process.env.APP_VERSION,
-  port: process.env.PORT || 4000,
+  apiPort: process.env.API_PORT,
   timezone: process.env.TIMEZONE,
   logging: {
     maxsize: 100 * 1024, // 100mb

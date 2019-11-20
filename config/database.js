@@ -48,6 +48,7 @@ module.exports = {
         require: process.env.DATABASE_SSL_ENABLED === 'true',
         useUTC: false
       }
+      // socketPath: process.env.SOCKET_PATH
     }
   },
   production: {
