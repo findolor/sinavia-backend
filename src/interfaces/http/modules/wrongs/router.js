@@ -15,7 +15,8 @@ module.exports = ({
           userId: req.params.userId,
           examId: req.query.examId,
           courseId: req.query.courseId,
-          subjectId: req.query.subjectId
+          subjectId: req.query.subjectId,
+          questionAmount: 3
         })
         .then(data => {
           res.status(Status.OK).json(Success(data))

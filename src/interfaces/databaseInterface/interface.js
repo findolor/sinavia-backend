@@ -122,3 +122,21 @@ exports.updateNotification = (notificationEntity) => {
 exports.getFriendMatches = (userId, friendId) => {
   return engineInterface().getFriendsMatchUseCase.getMatches({ userId: userId, friendId: friendId })
 }
+
+exports.getWrongAnsweredQuestions = (userId, examId, courseId, subjectId, questionAmount) => {
+  return engineInterface().getWrongAnsweredQuestionUseCase.getBatch({
+    userId: userId,
+    examId: examId,
+    courseId: courseId,
+    subjectId: subjectId,
+    questionAmount: questionAmount
+  })
+}
+
+exports.createWrongAnsweredQuestion = (wrongAnsweredQuestionEntity) => {
+  return engineInterface().postWrongAnsweredQuestionUseCase.create({ wrongAnsweredQuestionEntity: wrongAnsweredQuestionEntity })
+}
+
+exports.deleteWrongAnsweredQuestion = (userId, questionId) => {
+  return engineInterface().deleteWrongAnsweredQuestionUseCase.destroy({ userId: userId, questionId: questionId })
+}

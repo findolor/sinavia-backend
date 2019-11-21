@@ -1,5 +1,5 @@
 module.exports = ({ wrongAnsweredQuestionRepository, database }) => {
-  const getBatch = ({ userId, examId, courseId, subjectId }) => {
+  const getBatch = ({ userId, examId, courseId, subjectId, questionAmount }) => {
     return Promise
       .resolve()
       .then(() => {
@@ -16,7 +16,9 @@ module.exports = ({ wrongAnsweredQuestionRepository, database }) => {
                 courseId: courseId
               }
             }
-          ]
+          ],
+          order: database.sequelize.random(),
+          limit: questionAmount
         })
         return wrongAnsweredQuestions
       })
