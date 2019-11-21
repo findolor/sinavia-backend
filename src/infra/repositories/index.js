@@ -16,6 +16,7 @@ const Notification = require('./notification')
 const Leaderboard = require('./leaderboard')
 const OngoingMatch = require('./ongoingMatch')
 const GameEnergy = require('./gameEnergy')
+const WrongAnsweredQuestion = require('./wrongAnsweredQuestion')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -36,6 +37,7 @@ module.exports = ({ database }) => {
   const leaderboardModel = database.models.leaderboards
   const ongoingMatchModel = database.models.ongoingMatches
   const gameEnergyModel = database.models.gameEnergies
+  const wrongAnsweredQuestionModel = database.models.wrongAnsweredQuestions
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -150,6 +152,14 @@ module.exports = ({ database }) => {
   userModel.hasMany(gameEnergyModel, { foreignKey: 'userId' })
   gameEnergyModel.belongsTo(userModel, { foreignKey: 'userId' })
 
+  // WRONG_ANSWERED_QUESTION belongs to one user and question 1-1
+  // USER has many questions M-N
+  // QUESTION has many users M-N
+  userModel.belongsToMany(questionModel, { through: wrongAnsweredQuestionModel })
+  questionModel.belongsToMany(userModel, { through: wrongAnsweredQuestionModel })
+  wrongAnsweredQuestionModel.belongsTo(userModel)
+  wrongAnsweredQuestionModel.belongsTo(questionModel)
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -168,6 +178,7 @@ module.exports = ({ database }) => {
     notificationRepository: Notification({ model: notificationModel }),
     leaderboardRepository: Leaderboard({ model: leaderboardModel }),
     ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel }),
-    gameEnergyRepository: GameEnergy({ model: gameEnergyModel })
+    gameEnergyRepository: GameEnergy({ model: gameEnergyModel }),
+    wrongAnsweredQuestionRepository: WrongAnsweredQuestion({ model: wrongAnsweredQuestionModel })
   }
 }
