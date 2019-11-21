@@ -147,7 +147,8 @@ module.exports = ({
             friendWinCount: 0,
             friendLoseCount: 0,
             friendDrawCount: 0,
-            groupGameCount: 0
+            groupGameCount: 0,
+            soloGameCount: 0
           }
           const FRIENDMATCHES_WINNER = []
           const FRIENDMATCHES_LOSER = []
@@ -181,7 +182,8 @@ module.exports = ({
             STATISTICS.friendWinCount += userScore.dataValues.totalFriendWin
             STATISTICS.friendLoseCount += userScore.dataValues.totalFriendLose
             STATISTICS.friendDrawCount += userScore.dataValues.totalFriendDraw
-            STATISTICS.groupGameCount = userScore.dataValues.totalGroupGames
+            STATISTICS.groupGameCount += userScore.dataValues.totalGroupGames
+            STATISTICS.soloGameCount += userScore.dataValues.totalSoloGames
           })
 
           getFriendsMatchUseCase
