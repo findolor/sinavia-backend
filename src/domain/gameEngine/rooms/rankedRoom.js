@@ -703,15 +703,13 @@ class RankedRoom extends colyseus.Room {
       // If the client doesnt have a joker it will be blacked out
       fetchUserJoker(options.databaseId).then(userJokers => {
         this.userJokers[client.id] = []
-        if (Object.keys(userJokers).length !== 0) {
-          userJokers.forEach(userJoker => {
-            this.userJokers[client.id].push({
-              isUsed: false,
-              joker: userJoker,
-              id: userJoker.jokerId
-            })
+        userJokers.forEach(userJoker => {
+          this.userJokers[client.id].push({
+            isUsed: false,
+            joker: userJoker,
+            id: userJoker.jokerId
           })
-        } else this.userJokers[client.id] = null
+        })
       })
 
       // Getting user information from database
@@ -933,6 +931,14 @@ class RankedRoom extends colyseus.Room {
           break
         case 'reset-room':
           this.state.resetRoom()
+          // Becase we are playing again, we need to update userScores this match
+          // And we reset the used jokers
+          this.userScores.forEach(userId => {
+            this.userScores[userId].shouldUpdate = true
+          })
+          this.userJokers.forEach(userId => {
+            this.userJokers[userId].isUsed = false
+          })
 
           this.readyPlayerCount = 0
           this.finishedPlayerCount = 0

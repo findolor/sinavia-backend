@@ -7,7 +7,10 @@ const {
   postStatistic,
   getOneUser,
   getUserJoker,
-  putUserJoker
+  putUserJoker,
+  getUserScore,
+  putUserScore,
+  postUserScore
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -194,7 +197,7 @@ class SoloModeGame {
   }
 
   // This is called when the game ended normally without any clients leaving
-  saveMatchResults (soloModeRoomId, userJokers) {
+  saveMatchResults (soloModeRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
 
@@ -218,6 +221,7 @@ class SoloModeGame {
       })
 
       this.decideUserJokers(userJokers)
+      this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
     })
 
     logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
@@ -235,6 +239,22 @@ class SoloModeGame {
 
           updateUserJoker(userJoker.joker)
         }
+      })
+    }
+  }
+
+  decideUserScores (userScores, matchInformation, databaseId) {
+    if (userScores.shouldUpdate) {
+      userScores.userScore.totalSoloGames++
+      updateUserScore(userScores.userScore)
+    } else {
+      createUserScore({
+        userId: databaseId,
+        examId: matchInformation.examId,
+        subjectId: matchInformation.subjectId,
+        courseId: matchInformation.courseId,
+        totalPoints: 0,
+        totalSoloGames: 1
       })
     }
   }
@@ -309,6 +329,43 @@ function updateUserJoker (userJokerEntity) {
   }
 }
 
+function fetchUserScore (
+  userId,
+  examId,
+  courseId,
+  subjectId
+) {
+  try {
+    return getUserScore(
+      userId,
+      examId,
+      courseId,
+      subjectId
+    )
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+    logger.error(error.stack)
+  }
+}
+
+function createUserScore (userScoreEntity) {
+  try {
+    return postUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+    logger.error(error.stack)
+  }
+}
+
+function updateUserScore (userScoreEntity) {
+  try {
+    return putUserScore(userScoreEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+    logger.error(error.stack)
+  }
+}
+
 class SoloModeRoom extends colyseus.Room {
   constructor () {
     super()
@@ -316,6 +373,7 @@ class SoloModeRoom extends colyseus.Room {
     this.readyPlayerCount = 0
     this.questionAmount = 3
     this.userJokers = []
+    this.userScores = {}
   }
 
   onInit (options) {
@@ -359,15 +417,35 @@ class SoloModeRoom extends colyseus.Room {
       // Later on we send all the joker names and ids to the client
       // If the client doesnt have a joker it will be blacked out
       fetchUserJoker(options.databaseId).then(userJokers => {
-        if (Object.keys(userJokers).length !== 0) {
-          userJokers.forEach(userJoker => {
-            this.userJokers.push({
-              isUsed: false,
-              joker: userJoker,
-              id: userJoker.jokerId
-            })
+        userJokers.forEach(userJoker => {
+          this.userJokers.push({
+            isUsed: false,
+            joker: userJoker,
+            id: userJoker.jokerId
           })
-        } else this.userJokers = null
+        })
+      })
+
+      // We get the user score from database
+      // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+      // When the game ends we save it to db accordingly
+      fetchUserScore(
+        options.databaseId,
+        options.examId,
+        options.courseId,
+        options.subjectId
+      ).then(userScore => {
+        if (userScore === null) {
+          this.userScores = {
+            shouldUpdate: false,
+            userScore: userScore
+          }
+        } else {
+          this.userScores = {
+            shouldUpdate: true,
+            userScore: userScore
+          }
+        }
       })
 
       // Getting user information from database
@@ -414,7 +492,7 @@ class SoloModeRoom extends colyseus.Room {
               this.state.changeStateInformation('match-finished')
               this.isMatchFinished = true
               // We save the results after the match is finished
-              this.state.saveMatchResults(this.roomId, this.userJokers)
+              this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
             }, 5000)
             break
           }
@@ -474,6 +552,12 @@ class SoloModeRoom extends colyseus.Room {
           break
         case 'replay':
           this.state.resetRoom()
+          // Becase we are playing again, we need to update userScores this match
+          // And we reset the used jokers
+          this.userScores.shouldUpdate = true
+          this.userJokers.forEach(userJoker => {
+            userJoker.isUsed = false
+          })
 
           this.isMatchFinished = false
 
@@ -523,7 +607,7 @@ class SoloModeRoom extends colyseus.Room {
 
       // If the match was still going on
       if (!this.isMatchFinished) {
-        this.state.saveMatchResults(this.roomId, this.userJokers)
+        this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
       }
     } catch (error) {
       logger.error(error.stack)
