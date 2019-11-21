@@ -10,12 +10,11 @@ module.exports = {
       },
       userId: {
         type: Sequelize.UUID,
-        allowNull: false
-        // TODO MAKE THIS REFERENCED AGAIN
-        /* references: {
+        allowNull: false,
+        references: {
           model: 'users',
           key: 'id'
-        } */
+        }
       },
       examId: {
         type: Sequelize.INTEGER,
@@ -80,22 +79,11 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
-      /* totalWin: {
+      totalSoloGames: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
       },
-      totalLose: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      totalDraw: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      totalGames: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      }, */
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
