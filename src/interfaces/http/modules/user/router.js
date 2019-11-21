@@ -22,6 +22,10 @@ module.exports = ({
       getUseCase
         .getOneWithEmail({ email: req.body.email })
         .then(user => {
+          if (user === null) {
+            res.status(Status.BAD_REQUEST).json(Fail('Invalid User'))
+            return
+          }
           const { dataValues } = user
           user = dataValues
 
