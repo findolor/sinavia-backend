@@ -9,7 +9,7 @@ module.exports = ({ wrongAnsweredQuestionRepository, database }) => {
           },
           include: [
             {
-              model: database.models.wrongAnsweredQuestions,
+              model: database.models.questions,
               where: {
                 examId: examId,
                 subjectId: subjectId,

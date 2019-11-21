@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const WrongAnsweredQuestions = sequelize.define('wrongAnsweredQuestions', {
+  const WrongAnsweredQuestion = sequelize.define('wrongAnsweredQuestions', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
@@ -19,5 +19,5 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   })
 
-  return WrongAnsweredQuestions
+  return WrongAnsweredQuestion
 }
