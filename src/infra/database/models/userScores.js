@@ -60,23 +60,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.NUMBER,
       allowNull: false,
       defaultValue: 0
+    },
+    totalSoloGames: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue: 0
     }
-    /* totalWin: {
-      type: DataTypes.NUMBER,
-      allowNull: false
-    },
-    totalLose: {
-      type: DataTypes.NUMBER,
-      allowNull: false
-    },
-    totalDraw: {
-      type: DataTypes.NUMBER,
-      allowNull: false
-    },
-    totalGames: {
-      type: DataTypes.NUMBER,
-      allowNull: false
-    } */
   }, {
     freezeTableName: true,
     timestamps: false

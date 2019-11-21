@@ -792,15 +792,13 @@ class FriendRoom extends colyseus.Room {
     // If the client doesnt have a joker it will be blacked out
     fetchUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
-      if (Object.keys(userJokers).length !== 0) {
-        userJokers.forEach(userJoker => {
-          this.userJokers[client.id].push({
-            isUsed: false,
-            joker: userJoker,
-            id: userJoker.jokerId
-          })
+      userJokers.forEach(userJoker => {
+        this.userJokers[client.id].push({
+          isUsed: false,
+          joker: userJoker,
+          id: userJoker.jokerId
         })
-      } else this.userJokers[client.id] = null
+      })
     })
 
     const index = this.userScores.scoreList.findIndex(x => x.userId === options.databaseId)
@@ -1017,6 +1015,14 @@ class FriendRoom extends colyseus.Room {
         break
       case 'reset-room':
         this.state.resetRoom()
+        // Becase we are playing again, we need to update userScores this match
+        // And we reset the used jokers
+        this.userScores.forEach(userId => {
+          this.userScores[userId].shouldUpdate = true
+        })
+        this.userJokers.forEach(userId => {
+          this.userJokers[userId].isUsed = false
+        })
 
         this.questionAmount = 3
         this.readyPlayerCount = 0
@@ -1080,12 +1086,15 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'leave-match':
+        this.isMatchFinished = true
         this.send(client, {
           action: 'leave-match',
           clientId: client.id,
           playerProps: this.state.getPlayerProps(),
           fullQuestionList: this.state.getQuestionProps()
         })
+        if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+        else this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userJokers, this.userScores)
         break
     }
   }

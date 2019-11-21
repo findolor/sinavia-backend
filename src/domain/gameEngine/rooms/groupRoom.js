@@ -473,15 +473,13 @@ class GroupRoom extends colyseus.Room {
     // If the client doesnt have a joker it will be blacked out
     fetchUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
-      if (Object.keys(userJokers).length !== 0) {
-        userJokers.forEach(userJoker => {
-          this.userJokers[client.id].push({
-            isUsed: false,
-            joker: userJoker,
-            id: userJoker.jokerId
-          })
+      userJokers.forEach(userJoker => {
+        this.userJokers[client.id].push({
+          isUsed: false,
+          joker: userJoker,
+          id: userJoker.jokerId
         })
-      } else this.userJokers[client.id] = null
+      })
     })
 
     // We get the user score from database
