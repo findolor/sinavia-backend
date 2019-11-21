@@ -985,12 +985,14 @@ class RankedRoom extends colyseus.Room {
           logger.info(`Ranked game with bot starts with p: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId}`)
           break
         case 'leave-match':
+          this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
             clientId: client.id,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
+          this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
           break
       }
     } catch (error) {

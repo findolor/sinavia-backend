@@ -1086,12 +1086,15 @@ class FriendRoom extends colyseus.Room {
         })
         break
       case 'leave-match':
+        this.isMatchFinished = true
         this.send(client, {
           action: 'leave-match',
           clientId: client.id,
           playerProps: this.state.getPlayerProps(),
           fullQuestionList: this.state.getQuestionProps()
         })
+        if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
+        else this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userJokers, this.userScores)
         break
     }
   }

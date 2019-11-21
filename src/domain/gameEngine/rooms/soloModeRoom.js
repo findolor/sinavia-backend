@@ -584,12 +584,14 @@ class SoloModeRoom extends colyseus.Room {
           })
           break
         case 'leave-match':
+          this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
             clientId: client.id,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
+          this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
           break
       }
     } catch (error) {
