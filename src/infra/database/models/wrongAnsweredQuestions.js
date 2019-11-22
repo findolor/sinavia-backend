@@ -8,15 +8,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     questionId: {
       type: DataTypes.NUMBER,
-      allowNull: false
+      allowNull: false,
+      unique: true
     }
   }, {
     freezeTableName: true,
-    timestamps: false
+    timestamps: false,
+    indexes: [{ fields: ['userId', 'questionId'], unique: true }]
   })
 
   return WrongAnsweredQuestion

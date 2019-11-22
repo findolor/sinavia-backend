@@ -45,7 +45,7 @@ module.exports = () => {
     repository: {
       notificationRepository
     },
-    resository: {
+    repository: {
       wrongAnsweredQuestionRepository
     }
   } = container.cradle

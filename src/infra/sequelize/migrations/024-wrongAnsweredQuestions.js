@@ -14,7 +14,8 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        unique: 'unique_wrongs'
       },
       questionId: {
         type: Sequelize.INTEGER,
@@ -22,7 +23,8 @@ module.exports = {
         references: {
           model: 'questions',
           key: 'id'
-        }
+        },
+        unique: 'unique_wrongs'
       },
       createdAt: {
         allowNull: false,
@@ -33,6 +35,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.fn('NOW')
+      }
+    }, {
+      // This is for making the userId and questionId unique
+      // So that a user wont be able to add the same question to db
+      uniqueKeys: {
+        unique_tag: {
+          customIndex: true,
+          fields: ['userId', 'questionId']
+        }
       }
     })
   },
