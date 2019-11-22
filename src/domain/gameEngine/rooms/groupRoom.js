@@ -423,7 +423,7 @@ class GroupRoom extends colyseus.Room {
     this.maxClients = 30
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionAmount = 3
+    this.questionAmount = 5
     this.isMatchFinished = false
     this.isMatchStarted = false
     this.joinedPlayerNum = 0
@@ -525,6 +525,8 @@ class GroupRoom extends colyseus.Room {
     }).catch(error => {
       logger.error(error.stack)
     })
+
+    this.broadcast({ action: 'set-question-number', questionAmount: this.questionAmount })
 
     if (this._maxClientsReached) {
       // If we have reached the maxClients, we lock the room for unexpected things
@@ -697,6 +699,8 @@ class GroupRoom extends colyseus.Room {
       // The leader can choose from different number of question amounts.
       case 'set-question-number':
         this.questionAmount = data.questionAmount
+        this.broadcast({ action: 'set-question-number', questionAmount: data.questionAmount })
+        console.log(this.questionAmount)
         break
       case 'leave-match':
         this.send(client, {
