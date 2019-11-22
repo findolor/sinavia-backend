@@ -10,7 +10,8 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
+  createWrongAnsweredQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -130,11 +131,12 @@ class SoloModeGame {
   }
 
   // Calculates the number of different answers and returns it
+  // This function also returns wrong answered questions index
   getTotalResults () {
     // We send player and get back the results
-    const resultList = calculateResultsSolo(this.soloModeState.playerProps)
+    const returnData = calculateResultsSolo(this.soloModeState.playerProps)
 
-    return resultList
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -200,10 +202,11 @@ class SoloModeGame {
   saveMatchResults (soloModeRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
@@ -212,9 +215,9 @@ class SoloModeGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         // parseInt is used for converting '0' to 0
         userId: playerProps.databaseId,
         gameModeType: 'solo'
@@ -222,6 +225,15 @@ class SoloModeGame {
 
       this.decideUserJokers(userJokers)
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
+    })
+
+    results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
+      console.log(wrongQuestionIndex)
+      console.log(questionProps[wrongQuestionIndex])
+      createWrongAnswered({
+        userId: playerProps.databaseId,
+        questionId: questionProps[wrongQuestionIndex].id
+      })
     })
 
     logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
@@ -362,6 +374,15 @@ function updateUserScore (userScoreEntity) {
     return putUserScore(userScoreEntity)
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+    logger.error(error.stack)
+  }
+}
+
+function createWrongAnswered (wrongAnsweredQuestionEntity) {
+  try {
+    return createWrongAnsweredQuestion(wrongAnsweredQuestionEntity)
+  } catch (error) {
+    logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
     logger.error(error.stack)
   }
 }

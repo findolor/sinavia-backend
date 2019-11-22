@@ -3,6 +3,7 @@
 const calculateResults = (playerList) => {
   // Results are returned in this list
   const resultList = []
+  const wrongSolvedIndex = []
 
   let playerCorrect = 0
   let playerIncorrect = 0
@@ -11,7 +12,7 @@ const calculateResults = (playerList) => {
   // We iterate through players
   playerList.forEach(player => {
     // We iterate through answers
-    player.answers.forEach(answer => {
+    player.answers.forEach((answer, index) => {
       // If the user doesn't have any answers we just give him 0 answers
       if (Object.keys(answer).length === 0) {
         resultList.push({
@@ -30,6 +31,7 @@ const calculateResults = (playerList) => {
           break
         case false:
           playerIncorrect++
+          wrongSolvedIndex.push(index)
           break
       }
     })
@@ -44,19 +46,23 @@ const calculateResults = (playerList) => {
     playerUnanswered = 0
   })
 
-  return resultList
+  return {
+    resultList: resultList,
+    wrongSolvedIndex: wrongSolvedIndex
+  }
 }
 
 const calculateResultsSolo = (player) => {
   // Results are returned in this list
   const resultList = []
+  const wrongSolvedIndex = []
 
   let playerCorrect = 0
   let playerIncorrect = 0
   let playerUnanswered = 0
 
   // We iterate through answers
-  player.answers.forEach(answer => {
+  player.answers.forEach((answer, index) => {
     // If the user doesn't have any answers we just give him 0 answers
     if (Object.keys(answer).length === 0) {
       resultList.push({
@@ -75,6 +81,7 @@ const calculateResultsSolo = (player) => {
         break
       case false:
         playerIncorrect++
+        wrongSolvedIndex.push(index)
         break
     }
   })
@@ -88,7 +95,10 @@ const calculateResultsSolo = (player) => {
   playerIncorrect = 0
   playerUnanswered = 0
 
-  return resultList
+  return {
+    resultList: resultList,
+    wrongSolvedIndex: wrongSolvedIndex
+  }
 }
 
 module.exports = {
