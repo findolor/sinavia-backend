@@ -227,12 +227,16 @@ class SoloModeGame {
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
     })
 
+    // Adding the wrong solved questions to db
     results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
-      console.log(wrongQuestionIndex)
-      console.log(questionProps[wrongQuestionIndex])
-      createWrongAnswered({
+      createWrongAnsweredQuestion({
         userId: playerProps.databaseId,
         questionId: questionProps[wrongQuestionIndex].id
+      }).catch(error => {
+        if (error.message !== 'Validation error') {
+          logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+          logger.error(error.stack)
+        }
       })
     })
 
@@ -374,15 +378,6 @@ function updateUserScore (userScoreEntity) {
     return putUserScore(userScoreEntity)
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
-    logger.error(error.stack)
-  }
-}
-
-function createWrongAnswered (wrongAnsweredQuestionEntity) {
-  try {
-    return createWrongAnsweredQuestion(wrongAnsweredQuestionEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
     logger.error(error.stack)
   }
 }

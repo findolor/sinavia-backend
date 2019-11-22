@@ -133,7 +133,7 @@ exports.getWrongAnsweredQuestions = (userId, examId, courseId, subjectId, questi
   })
 }
 
-exports.createWrongAnsweredQuestion = (wrongAnsweredQuestionEntity) => {
+exports.createWrongAnsweredQuestion = async (wrongAnsweredQuestionEntity) => {
   return engineInterface().postWrongAnsweredQuestionUseCase.create({ wrongAnsweredQuestionEntity: wrongAnsweredQuestionEntity })
 }
 
