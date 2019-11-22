@@ -371,7 +371,7 @@ class SoloModeRoom extends colyseus.Room {
     super()
     this.maxClients = 1
     this.readyPlayerCount = 0
-    this.questionAmount = 3
+    this.questionAmount = null
     this.userJokers = []
     this.userScores = {}
   }
@@ -386,6 +386,8 @@ class SoloModeRoom extends colyseus.Room {
         courseId: options.courseId,
         subjectId: options.subjectId
       }
+
+      this.questionAmount = options.choosenQuestionAmount
 
       // Fetching questions from database
       getQuestions(
