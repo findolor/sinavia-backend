@@ -1,7 +1,7 @@
-module.exports = ({ wrongAnsweredQuestionRepository }) => {
+module.exports = ({ unsolvedQuestionRepository }) => {
   const destroy = ({ userId, questionId }) => {
     return Promise.resolve().then(() => {
-      return wrongAnsweredQuestionRepository.destroy({
+      return unsolvedQuestionRepository.destroy({
         where: {
           userId: userId,
           questionId: questionId

@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const WrongAnsweredQuestion = sequelize.define('wrongAnsweredQuestions', {
+  const UnsolvedQuestion = sequelize.define('unsolvedQuestions', {
     id: {
       type: DataTypes.NUMBER,
       autoIncrement: true,
@@ -22,5 +22,5 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [{ fields: ['userId', 'questionId'], unique: true }]
   })
 
-  return WrongAnsweredQuestion
+  return UnsolvedQuestion
 }

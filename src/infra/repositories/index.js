@@ -16,7 +16,7 @@ const Notification = require('./notification')
 const Leaderboard = require('./leaderboard')
 const OngoingMatch = require('./ongoingMatch')
 const GameEnergy = require('./gameEnergy')
-const WrongAnsweredQuestion = require('./wrongAnsweredQuestion')
+const UnsolvedQuestion = require('./unsolvedQuestion')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -37,7 +37,7 @@ module.exports = ({ database }) => {
   const leaderboardModel = database.models.leaderboards
   const ongoingMatchModel = database.models.ongoingMatches
   const gameEnergyModel = database.models.gameEnergies
-  const wrongAnsweredQuestionModel = database.models.wrongAnsweredQuestions
+  const unsolvedQuestionModel = database.models.unsolvedQuestions
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -155,10 +155,10 @@ module.exports = ({ database }) => {
   // WRONG_ANSWERED_QUESTION belongs to one user and question 1-1
   // USER has many questions M-N
   // QUESTION has many users M-N
-  userModel.belongsToMany(questionModel, { through: wrongAnsweredQuestionModel })
-  questionModel.belongsToMany(userModel, { through: wrongAnsweredQuestionModel })
-  wrongAnsweredQuestionModel.belongsTo(userModel)
-  wrongAnsweredQuestionModel.belongsTo(questionModel)
+  userModel.belongsToMany(questionModel, { through: unsolvedQuestionModel })
+  questionModel.belongsToMany(userModel, { through: unsolvedQuestionModel })
+  unsolvedQuestionModel.belongsTo(userModel)
+  unsolvedQuestionModel.belongsTo(questionModel)
 
   return {
     userRepository: User({ model: userModel }),
@@ -179,6 +179,6 @@ module.exports = ({ database }) => {
     leaderboardRepository: Leaderboard({ model: leaderboardModel }),
     ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel }),
     gameEnergyRepository: GameEnergy({ model: gameEnergyModel }),
-    wrongAnsweredQuestionRepository: WrongAnsweredQuestion({ model: wrongAnsweredQuestionModel })
+    unsolvedQuestionRepository: UnsolvedQuestion({ model: unsolvedQuestionModel })
   }
 }

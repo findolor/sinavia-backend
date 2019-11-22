@@ -10,7 +10,7 @@ const {
   updateOngoingMatch,
   getOngoingMatch,
   getFriendMatches,
-  createWrongAnsweredQuestion
+  postUnsolvedQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -245,13 +245,13 @@ class FriendSoloGame {
       this.decideUserJokers(userJokers, userId)
 
       // Adding the wrong solved questions to db
-      results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
-        createWrongAnsweredQuestion({
+      results.unsolvedIndex.forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
           userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
             logger.error(error.stack)
           }
         })

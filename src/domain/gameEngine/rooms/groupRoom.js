@@ -11,7 +11,7 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  createWrongAnsweredQuestion
+  postUnsolvedQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -264,13 +264,13 @@ class GroupGame {
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
 
       // Adding the wrong solved questions to db
-      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
-        createWrongAnsweredQuestion({
+      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
             logger.error(error.stack)
           }
         })

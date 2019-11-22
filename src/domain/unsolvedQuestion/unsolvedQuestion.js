@@ -2,7 +2,7 @@ const t = require('tcomb')
 const { compose } = require('ramda')
 const { cleanData } = require('../helper')
 
-const WrongAnsweredQuestion = t.struct({
+const UnsolvedQuestion = t.struct({
   id: t.maybe(t.Number),
   userId: t.String,
   questionId: t.Number,
@@ -12,5 +12,5 @@ const WrongAnsweredQuestion = t.struct({
 
 module.exports = compose(
   cleanData,
-  WrongAnsweredQuestion
+  UnsolvedQuestion
 )

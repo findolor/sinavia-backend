@@ -1,9 +1,9 @@
-module.exports = ({ wrongAnsweredQuestionRepository, database }) => {
+module.exports = ({ unsolvedQuestionRepository, database }) => {
   const getBatch = ({ userId, examId, courseId, subjectId, questionAmount }) => {
     return Promise
       .resolve()
       .then(() => {
-        const wrongAnsweredQuestions = wrongAnsweredQuestionRepository.findAll({
+        const unsolvedQuestions = unsolvedQuestionRepository.findAll({
           where: {
             userId: userId
           },
@@ -20,7 +20,7 @@ module.exports = ({ wrongAnsweredQuestionRepository, database }) => {
           order: database.sequelize.random(),
           limit: questionAmount
         })
-        return wrongAnsweredQuestions
+        return unsolvedQuestions
       })
   }
 

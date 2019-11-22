@@ -14,7 +14,7 @@ const {
   putUserScore,
   postUserScore,
   getFriendMatches,
-  createWrongAnsweredQuestion
+  postUnsolvedQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -293,13 +293,13 @@ class FriendGame {
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
 
       // Adding the wrong solved questions to db
-      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
-        createWrongAnsweredQuestion({
+      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -365,13 +365,13 @@ class FriendGame {
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
 
       // Adding the wrong solved questions to db
-      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
-        createWrongAnsweredQuestion({
+      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -432,13 +432,13 @@ class FriendGame {
       this.decideUserJokers(userJokers, userId)
 
       // Adding the wrong solved questions to db
-      results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
-        createWrongAnsweredQuestion({
+      results.unsolvedIndex.forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
             logger.error(error.stack)
           }
         })

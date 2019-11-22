@@ -123,8 +123,8 @@ exports.getFriendMatches = (userId, friendId) => {
   return engineInterface().getFriendsMatchUseCase.getMatches({ userId: userId, friendId: friendId })
 }
 
-exports.getWrongAnsweredQuestions = (userId, examId, courseId, subjectId, questionAmount) => {
-  return engineInterface().getWrongAnsweredQuestionUseCase.getBatch({
+exports.getUnsolvedQuestions = (userId, examId, courseId, subjectId, questionAmount) => {
+  return engineInterface().getUnsolvedQuestionUseCase.getBatch({
     userId: userId,
     examId: examId,
     courseId: courseId,
@@ -133,10 +133,10 @@ exports.getWrongAnsweredQuestions = (userId, examId, courseId, subjectId, questi
   })
 }
 
-exports.createWrongAnsweredQuestion = async (wrongAnsweredQuestionEntity) => {
-  return engineInterface().postWrongAnsweredQuestionUseCase.create({ wrongAnsweredQuestionEntity: wrongAnsweredQuestionEntity })
+exports.postUnsolvedQuestion = async (unsolvedQuestionEntity) => {
+  return engineInterface().postUnsolvedQuestionUseCase.create({ unsolvedQuestionEntity: unsolvedQuestionEntity })
 }
 
-exports.deleteWrongAnsweredQuestion = (userId, questionId) => {
-  return engineInterface().deleteWrongAnsweredQuestionUseCase.destroy({ userId: userId, questionId: questionId })
+exports.deleteUnsolvedQuestion = (userId, questionId) => {
+  return engineInterface().deleteUnsolvedQuestionUseCase.destroy({ userId: userId, questionId: questionId })
 }

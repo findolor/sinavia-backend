@@ -1,15 +1,15 @@
 const container = require('src/container') // we have to get the DI
-const { getWrongAnsweredQuestion } = require('src/app/wrongAnsweredQuestion')
+const { getUnsolvedQuestion } = require('src/app/unsolvedQuestion')
 
 module.exports = () => {
   const {
-    repository: { wrongAnsweredQuestionRepository },
+    repository: { unsolvedQuestionRepository },
     database
   } = container.cradle
 
-  const getWrongAnsweredQuestionUseCase = getWrongAnsweredQuestion({ wrongAnsweredQuestionRepository, database })
+  const getUnsolvedQuestionUseCase = getUnsolvedQuestion({ unsolvedQuestionRepository, database })
 
   return {
-    getWrongAnsweredQuestionUseCase
+    getUnsolvedQuestionUseCase
   }
 }

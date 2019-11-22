@@ -10,8 +10,9 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore,
-  postUnsolvedQuestion
+  postUserScore
+  /* deleteUnsolvedQuestion,
+  getUnsolvedQuestions */
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -20,7 +21,7 @@ const {
 // A placeholder variable for the empty option
 const emptyAnswer = 6
 
-class SoloModeState {
+class UnsolvedQuestionsState {
   constructor (
     playerId,
     questionProps,
@@ -40,9 +41,9 @@ class SoloModeState {
   }
 }
 
-class SoloModeGame {
+class UnsolvedQuestionsGame {
   constructor () {
-    this.soloModeState = new SoloModeState(
+    this.unsolvedQuestionsState = new UnsolvedQuestionsState(
       '', // player id
       [], // question props
       [], // question list
@@ -55,19 +56,19 @@ class SoloModeGame {
 
   // Adds the player to our room state
   addPlayer (clientId, userInformation) {
-    this.soloModeState.playerProps = {
+    this.unsolvedQuestionsState.playerProps = {
       username: userInformation.username,
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
       coverPicture: userInformation.coverPicture
     }
-    this.soloModeState.playerId = clientId
+    this.unsolvedQuestionsState.playerId = clientId
   }
 
   // Sets the player answers then sends a response to our client
   setPlayerAnswerResults (button) {
-    this.soloModeState.playerProps.answers.push({
+    this.unsolvedQuestionsState.playerProps.answers.push({
       answer: button,
       result: this.checkAnswer(button),
       correctAnswer: this.getQuestionAnswer()
@@ -78,7 +79,7 @@ class SoloModeGame {
 
   // Checks the players answer and returns the proper response
   checkAnswer (playerAnswer) {
-    const questionProps = this.soloModeState.questionProps[this.soloModeState.questionNumber]
+    const questionProps = this.unsolvedQuestionsState.questionProps[this.unsolvedQuestionsState.questionNumber]
 
     switch (playerAnswer) {
       // Question unanswered
@@ -94,47 +95,47 @@ class SoloModeGame {
   }
 
   setQuestions (questionProps, questionList) {
-    this.soloModeState.questionProps = questionProps
-    this.soloModeState.questionList = questionList
+    this.unsolvedQuestionsState.questionProps = questionProps
+    this.unsolvedQuestionsState.questionList = questionList
   }
 
   nextQuestion () {
-    this.soloModeState.questionNumber++
+    this.unsolvedQuestionsState.questionNumber++
   }
 
   setMatchInformation (matchInformation) {
-    this.soloModeState.matchInformation = matchInformation
+    this.unsolvedQuestionsState.matchInformation = matchInformation
   }
 
   getMatchInformation () {
-    return this.soloModeState.matchInformation
+    return this.unsolvedQuestionsState.matchInformation
   }
 
   changeStateInformation (state) {
-    this.soloModeState.stateInformation = state
+    this.unsolvedQuestionsState.stateInformation = state
   }
 
   getQuestionProps () {
-    return this.soloModeState.questionProps
+    return this.unsolvedQuestionsState.questionProps
   }
 
   getQuestionNumber () {
-    return this.soloModeState.questionNumber
+    return this.unsolvedQuestionsState.questionNumber
   }
 
   getQuestionAnswer () {
-    return this.soloModeState.questionProps[this.soloModeState.questionNumber].correctAnswer
+    return this.unsolvedQuestionsState.questionProps[this.unsolvedQuestionsState.questionNumber].correctAnswer
   }
 
   getPlayerProps () {
-    return this.soloModeState.playerProps
+    return this.unsolvedQuestionsState.playerProps
   }
 
   // Calculates the number of different answers and returns it
   // This function also returns wrong answered questions index
   getTotalResults () {
     // We send player and get back the results
-    const returnData = calculateResultsSolo(this.soloModeState.playerProps)
+    const returnData = calculateResultsSolo(this.unsolvedQuestionsState.playerProps)
 
     return returnData
   }
@@ -147,7 +148,7 @@ class SoloModeGame {
     // We check if the user has a disabled button. We don't include it if we have one
     alreadyDisabled === undefined ? disabledButton = true : disabledButton = alreadyDisabled
 
-    const examId = this.soloModeState.matchInformation.examId
+    const examId = this.unsolvedQuestionsState.matchInformation.examId
     const questionAnswer = this.getQuestionAnswer()
 
     const optionsToRemove = []
@@ -202,7 +203,6 @@ class SoloModeGame {
   saveMatchResults (soloModeRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
-    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -227,19 +227,6 @@ class SoloModeGame {
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
     })
 
-    // Adding the wrong solved questions to db
-    results.unsolvedIndex.forEach(wrongQuestionIndex => {
-      postUnsolvedQuestion({
-        userId: playerProps.databaseId,
-        questionId: questionProps[wrongQuestionIndex].id
-      }).catch(error => {
-        if (error.message !== 'Validation error') {
-          logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
-          logger.error(error.stack)
-        }
-      })
-    })
-
     logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
     postMatchResults(playerList)
@@ -253,7 +240,10 @@ class SoloModeGame {
           userJoker.joker.amountUsed++
           userJoker.joker.shouldRenew = true
 
-          updateUserJoker(userJoker.joker)
+          putUserJoker(userJoker.joker).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+            logger.error(error.stack)
+          })
         }
       })
     }
@@ -262,55 +252,31 @@ class SoloModeGame {
   decideUserScores (userScores, matchInformation, databaseId) {
     if (userScores.shouldUpdate) {
       userScores.userScore.totalSoloGames++
-      updateUserScore(userScores.userScore)
+      putUserScore(userScores.userScore).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+        logger.error(error.stack)
+      })
     } else {
-      createUserScore({
+      postUserScore({
         userId: databaseId,
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
         totalPoints: 0,
         totalSoloGames: 1
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+        logger.error(error.stack)
       })
     }
   }
 
   resetRoom () {
-    this.soloModeState.playerProps.answers = []
-    this.soloModeState.questionNumber = -1
-    this.soloModeState.questionProps = []
-    this.soloModeState.questionList = []
-    this.soloModeState.stateInformation = ''
-  }
-}
-
-// Gets questions based on given question amount
-function getQuestions (
-  examId,
-  courseId,
-  subjectId,
-  questionAmount
-) {
-  try {
-    return getMultipleQuestions(
-      examId,
-      courseId,
-      subjectId,
-      questionAmount
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
-    logger.error(error.stack)
-  }
-}
-
-// Gets the user information
-function getUser (id) {
-  try {
-    return getOneUser(id)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get user')
-    logger.error(error.stack)
+    this.unsolvedQuestionsState.playerProps.answers = []
+    this.unsolvedQuestionsState.questionNumber = -1
+    this.unsolvedQuestionsState.questionProps = []
+    this.unsolvedQuestionsState.questionList = []
+    this.unsolvedQuestionsState.stateInformation = ''
   }
 }
 
@@ -327,67 +293,12 @@ function postMatchResults (playerList) {
   }
 }
 
-function fetchUserJoker (userId) {
-  try {
-    return getUserJoker(userId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserJoker (userJokerEntity) {
-  try {
-    return putUserJoker(userJokerEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserScore (
-  userId,
-  examId,
-  courseId,
-  subjectId
-) {
-  try {
-    return getUserScore(
-      userId,
-      examId,
-      courseId,
-      subjectId
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
-    logger.error(error.stack)
-  }
-}
-
-function createUserScore (userScoreEntity) {
-  try {
-    return postUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserScore (userScoreEntity) {
-  try {
-    return putUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
-    logger.error(error.stack)
-  }
-}
-
-class SoloModeRoom extends colyseus.Room {
+class UnsolvedQuestionsRoom extends colyseus.Room {
   constructor () {
     super()
     this.maxClients = 1
     this.readyPlayerCount = 0
-    this.questionAmount = null
+    this.questionAmount = 5
     this.userJokers = []
     this.userScores = {}
   }
@@ -395,7 +306,7 @@ class SoloModeRoom extends colyseus.Room {
   onInit (options) {
     try {
       // We initialize our game here
-      this.setState(new SoloModeGame())
+      this.setState(new UnsolvedQuestionsGame())
 
       const matchInformation = {
         examId: options.examId,
@@ -403,10 +314,8 @@ class SoloModeRoom extends colyseus.Room {
         subjectId: options.subjectId
       }
 
-      this.questionAmount = options.choosenQuestionAmount
-
       // Fetching questions from database
-      getQuestions(
+      getMultipleQuestions(
         options.examId,
         options.courseId,
         options.subjectId,
@@ -422,6 +331,7 @@ class SoloModeRoom extends colyseus.Room {
         this.state.setQuestions(questionProps, questionList)
         this.state.setMatchInformation(matchInformation)
       }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get questions')
         logger.error(error.stack)
       })
     } catch (error) {
@@ -434,7 +344,7 @@ class SoloModeRoom extends colyseus.Room {
       // We get user jokers from database
       // Later on we send all the joker names and ids to the client
       // If the client doesnt have a joker it will be blacked out
-      fetchUserJoker(options.databaseId).then(userJokers => {
+      getUserJoker(options.databaseId).then(userJokers => {
         userJokers.forEach(userJoker => {
           this.userJokers.push({
             isUsed: false,
@@ -442,12 +352,15 @@ class SoloModeRoom extends colyseus.Room {
             id: userJoker.jokerId
           })
         })
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+        logger.error(error.stack)
       })
 
       // We get the user score from database
       // Check if it exists; if it is null we set shouldUpdate false, otherwise true
       // When the game ends we save it to db accordingly
-      fetchUserScore(
+      getUserScore(
         options.databaseId,
         options.examId,
         options.courseId,
@@ -464,17 +377,21 @@ class SoloModeRoom extends colyseus.Room {
             userScore: userScore
           }
         }
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+        logger.error(error.stack)
       })
 
       // Getting user information from database
-      getUser(options.databaseId).then(userInformation => {
+      getOneUser(options.databaseId).then(userInformation => {
         const { dataValues } = userInformation
         userInformation = dataValues
         // Finally adding the player to our room state
         this.state.addPlayer(client.id, userInformation)
 
-        logger.info(`Solo game starts with player: ${this.state.getPlayerProps().databaseId}`)
+        logger.info(`Wrong questions mode starts with player: ${this.state.getPlayerProps().databaseId}`)
       }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get user')
         logger.error(error.stack)
       })
     } catch (error) {
@@ -580,7 +497,7 @@ class SoloModeRoom extends colyseus.Room {
           this.isMatchFinished = false
 
           // Fetching questions from database
-          getQuestions(
+          getMultipleQuestions(
             this.state.getMatchInformation().examId,
             this.state.getMatchInformation().courseId,
             this.state.getMatchInformation().subjectId,
@@ -595,10 +512,13 @@ class SoloModeRoom extends colyseus.Room {
             // Setting general match related info
             this.state.setQuestions(questionProps, questionList)
 
-            logger.info(`Solo game replay with player: ${this.state.getPlayerProps().databaseId} roomId: ${this.roomId}`)
+            logger.info(`Wrong questions mode replay with player: ${this.state.getPlayerProps().databaseId} roomId: ${this.roomId}`)
             this.send(client, {
               action: 'replay'
             })
+          }).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot get questions')
+            logger.error(error.stack)
           })
           break
         case 'leave-match':
@@ -640,8 +560,8 @@ class SoloModeRoom extends colyseus.Room {
 }
 
 // We are not syncing questionProps to clients. This array contains question answers
-colyseus.nosync(SoloModeState.prototype, 'questionProps')
+colyseus.nosync(UnsolvedQuestionsState.prototype, 'questionProps')
 
-colyseus.serialize(colyseus.FossilDeltaSerializer)(SoloModeRoom)
+colyseus.serialize(colyseus.FossilDeltaSerializer)(UnsolvedQuestionsRoom)
 
-exports.soloModeRoom = SoloModeRoom
+exports.unsolvedQuestionsRoom = UnsolvedQuestionsRoom

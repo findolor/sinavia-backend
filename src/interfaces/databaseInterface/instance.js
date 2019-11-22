@@ -9,7 +9,7 @@ const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/lea
 const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch } = require('src/app/ongoingMatch')
 const { getExamEntity } = require('src/app/examEntity')
 const { postNotification, putNotification } = require('src/app/notification')
-const { getWrongAnsweredQuestion, postWrongAnsweredQuestion, deleteWrongAnsweredQuestion } = require('src/app/wrongAnsweredQuestion')
+const { getUnsolvedQuestion, postUnsolvedQuestion, deleteUnsolvedQuestion } = require('src/app/unsolvedQuestion')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -46,7 +46,7 @@ module.exports = () => {
       notificationRepository
     },
     repository: {
-      wrongAnsweredQuestionRepository
+      unsolvedQuestionRepository
     }
   } = container.cradle
 
@@ -72,9 +72,9 @@ module.exports = () => {
   const postNotificationUseCase = postNotification({ notificationRepository })
   const putNotificationUseCase = putNotification({ notificationRepository })
   const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository, Sequelize })
-  const getWrongAnsweredQuestionUseCase = getWrongAnsweredQuestion({ wrongAnsweredQuestionRepository, database })
-  const postWrongAnsweredQuestionUseCase = postWrongAnsweredQuestion({ wrongAnsweredQuestionRepository })
-  const deleteWrongAnsweredQuestionUseCase = deleteWrongAnsweredQuestion({ wrongAnsweredQuestionRepository })
+  const getUnsolvedQuestionUseCase = getUnsolvedQuestion({ unsolvedQuestionRepository, database })
+  const postUnsolvedQuestionUseCase = postUnsolvedQuestion({ unsolvedQuestionRepository })
+  const deleteUnsolvedQuestionUseCase = deleteUnsolvedQuestion({ unsolvedQuestionRepository })
 
   return {
     getQuestionUseCase,
@@ -99,8 +99,8 @@ module.exports = () => {
     postNotificationUseCase,
     putNotificationUseCase,
     getFriendsMatchUseCase,
-    getWrongAnsweredQuestionUseCase,
-    postWrongAnsweredQuestionUseCase,
-    deleteWrongAnsweredQuestionUseCase
+    getUnsolvedQuestionUseCase,
+    postUnsolvedQuestionUseCase,
+    deleteUnsolvedQuestionUseCase
   }
 }

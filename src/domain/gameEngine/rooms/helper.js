@@ -3,7 +3,7 @@
 const calculateResults = (playerList) => {
   // Results are returned in this list
   const resultList = []
-  const wrongSolvedIndex = []
+  const unsolvedIndex = []
 
   let playerCorrect = 0
   let playerIncorrect = 0
@@ -46,19 +46,19 @@ const calculateResults = (playerList) => {
     playerIncorrect = 0
     playerUnanswered = 0
     // We push wrongs
-    wrongSolvedIndex.push(tempList)
+    unsolvedIndex.push(tempList)
   })
 
   return {
     resultList: resultList,
-    wrongSolvedIndex: wrongSolvedIndex
+    unsolvedIndex: unsolvedIndex
   }
 }
 
 const calculateResultsSolo = (player) => {
   // Results are returned in this list
   const resultList = []
-  const wrongSolvedIndex = []
+  const unsolvedIndex = []
 
   let playerCorrect = 0
   let playerIncorrect = 0
@@ -84,7 +84,7 @@ const calculateResultsSolo = (player) => {
         break
       case false:
         playerIncorrect++
-        wrongSolvedIndex.push(index)
+        unsolvedIndex.push(index)
         break
     }
   })
@@ -100,7 +100,7 @@ const calculateResultsSolo = (player) => {
 
   return {
     resultList: resultList,
-    wrongSolvedIndex: wrongSolvedIndex
+    unsolvedIndex: unsolvedIndex
   }
 }
 

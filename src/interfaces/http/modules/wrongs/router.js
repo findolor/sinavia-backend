@@ -2,7 +2,7 @@ const Status = require('http-status')
 const { Router } = require('express')
 
 module.exports = ({
-  getWrongAnsweredQuestionUseCase,
+  getUnsolvedQuestionUseCase,
   logger,
   response: { Success, Fail }
 }) => {
@@ -10,7 +10,7 @@ module.exports = ({
 
   router
     .get('/:userId', (req, res) => {
-      getWrongAnsweredQuestionUseCase
+      getUnsolvedQuestionUseCase
         .getBatch({
           userId: req.params.userId,
           examId: req.query.examId,
