@@ -151,14 +151,9 @@ class FriendSoloGame {
 
   getTotalResultsSolo () {
     // We send playerList and get back the results
-    const resultList = calculateResultsSolo(this.friendState.playerProps[this.friendState.playerOneId])
-    const results = {}
+    const returnData = calculateResultsSolo(this.friendState.playerProps[this.friendState.playerOneId])
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -226,7 +221,7 @@ class FriendSoloGame {
 
     const results = this.getTotalResultsSolo()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
@@ -237,9 +232,9 @@ class FriendSoloGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         // parseInt is used for converting '0' to 0
         userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
         gameModeType: 'friend'

@@ -166,14 +166,9 @@ class GroupGame {
     })
 
     // We send playerList and get back the results
-    const resultList = calculateResults(playerList)
-    const results = {}
+    const returnData = calculateResults(playerList)
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -243,7 +238,7 @@ class GroupGame {
 
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
@@ -256,9 +251,9 @@ class GroupGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         userId: playerProps[userId].databaseId,
         gameModeType: 'group'
       })

@@ -179,14 +179,9 @@ class RankedGame {
     ]
 
     // We send playerList and get back the results
-    const resultList = calculateResults(playerList)
-    const results = {}
+    const returnData = calculateResults(playerList)
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -256,12 +251,12 @@ class RankedGame {
     // Result has two items. [0] is playerOne, [1] is playerTwo
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
     // We get the results and points as normal
-    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results.resultList, resultsKeys, matchInformation.examId)
 
     // We subtract finished match point
     winLoseDrawAndPoints[0].points -= FINISH_MATCH_POINT
@@ -310,9 +305,9 @@ class RankedGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0
@@ -339,11 +334,11 @@ class RankedGame {
 
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
-    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results, resultsKeys, matchInformation.examId)
+    const winLoseDrawAndPoints = this.decideWinLoseDrawAndPoints(results.resultList, resultsKeys, matchInformation.examId)
 
     resultsKeys.forEach(key => {
       let userId = this.getPlayerId(parseInt(key, 10) + 1)
@@ -352,9 +347,9 @@ class RankedGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         gameResult: winLoseDrawAndPoints[key].status,
         earnedPoints: winLoseDrawAndPoints[key].points,
         // parseInt is used for converting '0' to 0

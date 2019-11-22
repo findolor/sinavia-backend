@@ -161,26 +161,16 @@ class FriendGame {
     ]
 
     // We send playerList and get back the results
-    const resultList = calculateResults(playerList)
-    const results = {}
+    const returnData = calculateResults(playerList)
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   getTotalResultsSolo () {
     // We send playerList and get back the results
-    const resultList = calculateResultsSolo(this.friendState.playerProps[this.friendState.playerOneId])
-    const results = {}
+    const returnData = calculateResultsSolo(this.friendState.playerProps[this.friendState.playerOneId])
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -250,13 +240,13 @@ class FriendGame {
     // Result has two items. [0] is playerOne, [1] is playerTwo
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
     const friendMatchInformation = {}
 
     // We get the results as normal
-    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examId)
+    const winLoseDraw = this.decideWinLoseDraw(results.resultList, resultsKeys, matchInformation.examId)
 
     // We check if the leaving client is the first client
     if (leavingClientId === this.friendState.playerOneId) {
@@ -288,9 +278,9 @@ class FriendGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
         userId: playerProps[userId].databaseId,
@@ -332,12 +322,12 @@ class FriendGame {
 
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
     const friendMatchInformation = {}
 
-    const winLoseDraw = this.decideWinLoseDraw(results, resultsKeys, matchInformation.examId)
+    const winLoseDraw = this.decideWinLoseDraw(results.resultList, resultsKeys, matchInformation.examId)
 
     resultsKeys.forEach(key => {
       let userId = this.getPlayerId(parseInt(key, 10) + 1)
@@ -346,9 +336,9 @@ class FriendGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         gameResult: winLoseDraw[key].status,
         // parseInt is used for converting '0' to 0
         userId: playerProps[userId].databaseId,
@@ -390,7 +380,7 @@ class FriendGame {
 
     const results = this.getTotalResultsSolo()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
@@ -401,9 +391,9 @@ class FriendGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         // parseInt is used for converting '0' to 0
         userId: playerProps[userId].databaseId,
         gameModeType: 'friend'
