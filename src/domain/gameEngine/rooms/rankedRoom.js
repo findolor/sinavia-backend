@@ -928,10 +928,10 @@ class RankedRoom extends colyseus.Room {
           this.state.resetRoom()
           // Becase we are playing again, we need to update userScores this match
           // And we reset the used jokers
-          this.userScores.forEach(userId => {
+          Object.keys(this.userScores).forEach(userId => {
             this.userScores[userId].shouldUpdate = true
           })
-          this.userJokers.forEach(userId => {
+          Object.keys(this.userJokers).forEach(userId => {
             this.userJokers[userId].isUsed = false
           })
 
