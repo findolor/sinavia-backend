@@ -10,7 +10,8 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
+  createWrongAnsweredQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -235,6 +236,7 @@ class GroupGame {
   saveMatchResults (groupRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -260,6 +262,19 @@ class GroupGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)

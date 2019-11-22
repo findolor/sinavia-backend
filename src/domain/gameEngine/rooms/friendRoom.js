@@ -13,7 +13,8 @@ const {
   getUserScoreMultipleIds,
   putUserScore,
   postUserScore,
-  getFriendMatches
+  getFriendMatches,
+  createWrongAnsweredQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -236,6 +237,7 @@ class FriendGame {
   async saveUnfinishedMatchResults (leavingClientId, friendRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     // Result has two items. [0] is playerOne, [1] is playerTwo
     const results = this.getTotalResults()
@@ -289,6 +291,19 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     switch (winLoseDraw[0].status) {
@@ -319,6 +334,7 @@ class FriendGame {
   async saveMatchResults (friendRoomId, userJokers, userScores, friendMatches) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -347,6 +363,19 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     switch (winLoseDraw[0].status) {
@@ -377,6 +406,7 @@ class FriendGame {
   saveSoloMatchResults (friendRoomId, userJokers, soloGameDatabaseId) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResultsSolo()
 
@@ -400,6 +430,19 @@ class FriendGame {
       })
 
       this.decideUserJokers(userJokers, userId)
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Friend solo game ends roomId: ${friendRoomId}`)

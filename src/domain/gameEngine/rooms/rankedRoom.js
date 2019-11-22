@@ -11,7 +11,8 @@ const {
   putUserScore,
   getUserJoker,
   putUserJoker,
-  updateUserTotalPoints
+  updateUserTotalPoints,
+  createWrongAnsweredQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -247,6 +248,7 @@ class RankedGame {
   saveUnfinishedMatchResults (leavingClientId, rankedRoomId, userScores, userJokers, userInformations) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     // Result has two items. [0] is playerOne, [1] is playerTwo
     const results = this.getTotalResults()
@@ -320,6 +322,19 @@ class RankedGame {
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
       } else playerList.pop()
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -331,6 +346,7 @@ class RankedGame {
   saveMatchResults (rankedRoomId, userScores, userJokers, userInformations) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -362,6 +378,19 @@ class RankedGame {
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
       } else playerList.pop()
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex[key].forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)

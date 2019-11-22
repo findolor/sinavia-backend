@@ -9,7 +9,8 @@ const {
   putUserJoker,
   updateOngoingMatch,
   getOngoingMatch,
-  getFriendMatches
+  getFriendMatches,
+  createWrongAnsweredQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -218,6 +219,7 @@ class FriendSoloGame {
   saveSoloMatchResults (friendRoomId, userJokers) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResultsSolo()
 
@@ -241,6 +243,19 @@ class FriendSoloGame {
       })
 
       this.decideUserJokers(userJokers, userId)
+
+      // Adding the wrong solved questions to db
+      results.wrongSolvedIndex.forEach(wrongQuestionIndex => {
+        createWrongAnsweredQuestion({
+          userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot create wrongAnsweredQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Friend solo game ends roomId: ${friendRoomId}`)
