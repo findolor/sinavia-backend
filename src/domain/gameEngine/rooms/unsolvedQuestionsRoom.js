@@ -227,7 +227,7 @@ class UnsolvedQuestionsGame {
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
     })
 
-    logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
+    logger.info(`Unsolved questions mode ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
     postMatchResults(playerList)
   }
@@ -389,7 +389,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
         // Finally adding the player to our room state
         this.state.addPlayer(client.id, userInformation)
 
-        logger.info(`Wrong questions mode starts with player: ${this.state.getPlayerProps().databaseId}`)
+        logger.info(`Unsolved questions mode starts with player: ${this.state.getPlayerProps().databaseId}`)
       }).catch(error => {
         logger.error('GAME ENGINE INTERFACE => Cannot get user')
         logger.error(error.stack)
