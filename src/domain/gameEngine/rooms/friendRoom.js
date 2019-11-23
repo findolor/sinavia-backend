@@ -299,7 +299,7 @@ class FriendGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -327,7 +327,10 @@ class FriendGame {
     logger.info(`Friend game ends with p1: ${winLoseDraw[0].status} and p2: ${winLoseDraw[1].status} roomId: ${friendRoomId}`)
 
     await postMatchResults(playerList)
-    await postFriendMatchResults(friendMatchInformation)
+    postFriendGameMatchResult(friendMatchInformation).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot post friend match information')
+      logger.error(error.stack)
+    })
   }
 
   // This is called when the game ended normally without any clients leaving
@@ -371,7 +374,7 @@ class FriendGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -400,7 +403,10 @@ class FriendGame {
     logger.info(`Friend game ends with p1: ${winLoseDraw[0].status} and p2: ${winLoseDraw[1].status} roomId: ${friendRoomId}`)
 
     await postMatchResults(playerList)
-    await postFriendMatchResults(friendMatchInformation)
+    postFriendGameMatchResult(friendMatchInformation).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot post friend match information')
+      logger.error(error.stack)
+    })
   }
 
   saveSoloMatchResults (friendRoomId, userJokers, soloGameDatabaseId) {
@@ -438,7 +444,7 @@ class FriendGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -474,7 +480,10 @@ class FriendGame {
           userJoker.joker.amountUsed++
           userJoker.joker.shouldRenew = true
 
-          updateUserJoker(userJoker.joker)
+          putUserJoker(userJoker.joker).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+            logger.error(error.stack)
+          })
         }
       })
     }
@@ -493,7 +502,10 @@ class FriendGame {
           userScores[userId].userScore.totalFriendDraw++
           break
       }
-      updateUserScore(userScores[userId].userScore)
+      putUserScore(userScores[userId].userScore).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+        logger.error(error.stack)
+      })
     } else {
       let win = 0
       let lose = 0
@@ -509,7 +521,7 @@ class FriendGame {
           draw = 1
           break
       }
-      createUserScore({
+      postUserScore({
         userId: databaseId,
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
@@ -518,6 +530,9 @@ class FriendGame {
         totalFriendWin: win,
         totalFriendLose: lose,
         totalFriendDraw: draw
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+        logger.error(error.stack)
       })
     }
   }
@@ -579,36 +594,6 @@ class FriendGame {
   }
 }
 
-// Gets questions based on given question amount
-function getQuestions (
-  examId,
-  courseId,
-  subjectId,
-  questionAmount
-) {
-  try {
-    return getMultipleQuestions(
-      examId,
-      courseId,
-      subjectId,
-      questionAmount
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
-    logger.error(error.stack)
-  }
-}
-
-// Gets the user information
-function getUser (id) {
-  try {
-    return getOneUser(id)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get user')
-    logger.error(error.stack)
-  }
-}
-
 // Saves the results to the database
 function postMatchResults (playerList) {
   try {
@@ -631,80 +616,6 @@ function postMatchResultsSolo (playerList) {
       })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
-    logger.error(error.stack)
-  }
-}
-
-// Saves the friend game match results to the database
-function postFriendMatchResults (friendMatchInformation) {
-  try {
-    return postFriendGameMatchResult(friendMatchInformation)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot post friend match information')
-    logger.error(error.stack)
-  }
-}
-
-function getPlayedFriendMatches (userId, friendId) {
-  try {
-    return getFriendMatches(userId, friendId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get friend match information')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserJoker (userId) {
-  try {
-    return getUserJoker(userId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserJoker (userJokerEntity) {
-  try {
-    return putUserJoker(userJokerEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserScoreMultipleIds (
-  idList,
-  examId,
-  courseId,
-  subjectId
-) {
-  try {
-    return getUserScoreMultipleIds(
-      idList,
-      examId,
-      courseId,
-      subjectId
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userScores')
-    logger.error(error.stack)
-  }
-}
-
-function createUserScore (userScoreEntity) {
-  try {
-    return postUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserScore (userScoreEntity) {
-  try {
-    return putUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
     logger.error(error.stack)
   }
 }
@@ -752,7 +663,7 @@ class FriendRoom extends colyseus.Room {
     this.state.setPlayerPropsMatchInformation(matchInformation)
 
     // Fetching questions from database
-    getQuestions(
+    getMultipleQuestions(
       options.examId,
       options.courseId,
       options.subjectId,
@@ -767,21 +678,32 @@ class FriendRoom extends colyseus.Room {
       // Setting general match related info
       this.state.setQuestions(questionProps, questionList)
     }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get questions')
       logger.error(error.stack)
     })
 
+    try {
     // We fetch the user scores when the room is created
     // Then map it with the client id in onJoin function
-    const userScores = await fetchUserScoreMultipleIds(
-      [options.userId, options.friendId],
-      options.examId,
-      options.courseId,
-      options.subjectId
-    )
-    this.userScores.scoreList = userScores
+      const userScores = await getUserScoreMultipleIds(
+        [options.userId, options.friendId],
+        options.examId,
+        options.courseId,
+        options.subjectId
+      )
+      this.userScores.scoreList = userScores
+    } catch (error) {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userScores')
+      logger.error(error.stack)
+    }
 
-    const friendMatches = await getPlayedFriendMatches(options.userId, options.friendId)
-    this.friendMatches = friendMatches
+    try {
+      const friendMatches = await getFriendMatches(options.userId, options.friendId)
+      this.friendMatches = friendMatches
+    } catch (error) {
+      logger.error('GAME ENGINE INTERFACE => Cannot get friend match information')
+      logger.error(error.stack)
+    }
   }
 
   // If this room is full new users will join another room
@@ -823,7 +745,7 @@ class FriendRoom extends colyseus.Room {
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
-    fetchUserJoker(options.databaseId).then(userJokers => {
+    getUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
       userJokers.forEach(userJoker => {
         this.userJokers[client.id].push({
@@ -832,6 +754,9 @@ class FriendRoom extends colyseus.Room {
           id: userJoker.jokerId
         })
       })
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+      logger.error(error.stack)
     })
 
     const index = this.userScores.scoreList.findIndex(x => x.userId === options.databaseId)
@@ -848,7 +773,7 @@ class FriendRoom extends colyseus.Room {
     }
 
     // Getting user information from database
-    getUser(options.databaseId).then(userInformation => {
+    getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
       this.fetchedUserInfoNumber++
@@ -876,6 +801,7 @@ class FriendRoom extends colyseus.Room {
         logger.info(`Friend game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId} roomId: ${this.roomId}`)
       }
     }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get user')
       logger.error(error.stack)
     })
   }
@@ -944,7 +870,7 @@ class FriendRoom extends colyseus.Room {
             })
           }, 1000)
           // Sending the friend info to the user
-          getUser(this.state.getMatchInformation().friendId).then(friendInfo => {
+          getOneUser(this.state.getMatchInformation().friendId).then(friendInfo => {
             this.send(client, {
               action: 'save-friend-infos',
               friendUsername: friendInfo.username,
@@ -958,6 +884,9 @@ class FriendRoom extends colyseus.Room {
               // We save the results after the match is finished
               this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
             }, 5000)
+          }).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot get user')
+            logger.error(error.stack)
           })
           break
         }
@@ -1062,21 +991,27 @@ class FriendRoom extends colyseus.Room {
         this.finishedPlayerCount = 0
         this.isMatchFinished = false
 
-        // Fetching questions from database
-        const questionProps = await getQuestions(
-          this.state.getMatchInformation().examId,
-          this.state.getMatchInformation().courseId,
-          this.state.getMatchInformation().subjectId,
-          this.questionAmount
-        )
-        const questionList = []
+        try {
+          // Fetching questions from database
+          const questionProps = await getMultipleQuestions(
+            this.state.getMatchInformation().examId,
+            this.state.getMatchInformation().courseId,
+            this.state.getMatchInformation().subjectId,
+            this.questionAmount
+          )
 
-        // Getting only the question links
-        questionProps.forEach(element => {
-          questionList.push(element.questionLink)
-        })
-        // Setting general match related info
-        this.state.setQuestions(questionProps, questionList)
+          const questionList = []
+
+          // Getting only the question links
+          questionProps.forEach(element => {
+            questionList.push(element.questionLink)
+          })
+          // Setting general match related info
+          this.state.setQuestions(questionProps, questionList)
+        } catch (error) {
+          logger.error('GAME ENGINE INTERFACE => Cannot get questions')
+          logger.error(error.stack)
+        }
         break
         // TODO Make the cron here
       case 'start-ahead':

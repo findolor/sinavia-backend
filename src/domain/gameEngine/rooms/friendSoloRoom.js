@@ -251,7 +251,7 @@ class FriendSoloGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -280,7 +280,10 @@ class FriendSoloGame {
           userJoker.joker.amountUsed++
           userJoker.joker.shouldRenew = true
 
-          updateUserJoker(userJoker.joker)
+          putUserJoker(userJoker.joker).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+            logger.error(error.stack)
+          })
         }
       })
     }
@@ -330,16 +333,6 @@ class FriendSoloGame {
   }
 }
 
-// Gets the user information
-function getUser (id) {
-  try {
-    return getOneUser(id)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get user')
-    logger.error(error.stack)
-  }
-}
-
 function postMatchResultsSolo (playerList) {
   try {
     return Promise
@@ -349,33 +342,6 @@ function postMatchResultsSolo (playerList) {
       })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserJoker (userId) {
-  try {
-    return getUserJoker(userId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserJoker (userJokerEntity) {
-  try {
-    return putUserJoker(userJokerEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function getOngoingMatchInfo (ongoingMatchId) {
-  try {
-    return getOngoingMatch(ongoingMatchId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get ongoingMatch')
     logger.error(error.stack)
   }
 }
@@ -403,7 +369,7 @@ class FriendSoloRoom extends colyseus.Room {
 
     this.state.setPlayerPropsMatchInformation(matchInformation)
 
-    getOngoingMatchInfo(options.ongoingMatchId).then(data => {
+    getOngoingMatch(options.ongoingMatchId).then(data => {
       const questionList = []
       const questionProps = []
 
@@ -417,6 +383,9 @@ class FriendSoloRoom extends colyseus.Room {
       this.state.setQuestions(questionProps, questionList)
       this.state.setMatchInformation(matchInformation)
       this.questionAmount = Object.keys(data.questionList).length
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get ongoingMatch')
+      logger.error(error.stack)
     })
   }
 
@@ -424,7 +393,7 @@ class FriendSoloRoom extends colyseus.Room {
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
-    fetchUserJoker(options.databaseId).then(userJokers => {
+    getUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
       userJokers.forEach(userJoker => {
         this.userJokers[client.id].push({
@@ -433,15 +402,21 @@ class FriendSoloRoom extends colyseus.Room {
           id: userJoker.jokerId
         })
       })
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+      logger.error(error.stack)
     })
 
     // Getting user information from database
-    getUser(options.databaseId).then(userInformation => {
+    getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
       this.fetchedUserInfoNumber++
       // Finally adding the player to our room state
       this.state.addPlayer(client.id, userInformation, options.databaseId)
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get user')
+      logger.error(error.stack)
     })
   }
 
@@ -465,7 +440,7 @@ class FriendSoloRoom extends colyseus.Room {
             })
           }, 1000)
           // Getting the relevant friend match infos from db
-          getOngoingMatchInfo(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
+          getOngoingMatch(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
             getFriendMatches(ongoingMatch.ongoingMatchUser.dataValues.id, ongoingMatch.ongoingMatchFriend.dataValues.id).then(friendMatches => {
               this.send(client, {
                 action: 'save-user-infos',
@@ -483,6 +458,9 @@ class FriendSoloRoom extends colyseus.Room {
               // We save the results after the match is finished
               this.state.saveSoloMatchResults(this.roomId, this.userJokers)
             }, 5000)
+          }).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot get ongoingMatch')
+            logger.error(error.stack)
           })
           break
         }

@@ -13,23 +13,23 @@ exports.getMultipleQuestions = async (examId, courseId, subjectId, questionAmoun
   })
 }
 
-exports.postStatistic = (gameResults) => {
+exports.postStatistic = async (gameResults) => {
   return engineInterface().postStatisticUseCase.createStat({ gameResults: gameResults })
 }
 
-exports.getMultipleUsers = (idList) => {
+exports.getMultipleUsers = async (idList) => {
   return engineInterface().getUserUseCase.getMultiple({ idList: idList })
 }
 
-exports.getOneUser = (id) => {
+exports.getOneUser = async (id) => {
   return engineInterface().getUserUseCase.getOne({ id: id })
 }
 
-exports.postFriendGameMatchResult = (gameInformation) => {
+exports.postFriendGameMatchResult = async (gameInformation) => {
   return engineInterface().postFriendsMatchUseCase.create({ gameInformation: gameInformation })
 }
 
-exports.getUserScore = (userId, examId, courseId, subjectId) => {
+exports.getUserScore = async (userId, examId, courseId, subjectId) => {
   return engineInterface().getUserScoreUseCase.getOne({
     userId: userId,
     examId: examId,
@@ -38,15 +38,15 @@ exports.getUserScore = (userId, examId, courseId, subjectId) => {
   })
 }
 
-exports.postUserScore = (userScoreEntity) => {
+exports.postUserScore = async (userScoreEntity) => {
   return engineInterface().postUserScoreUseCase.createUserScore({ userScoreEntity: userScoreEntity })
 }
 
-exports.putUserScore = (userScoreEntity) => {
+exports.putUserScore = async (userScoreEntity) => {
   return engineInterface().putUserScoreUseCase.updateUserScore({ userScoreEntity: userScoreEntity })
 }
 
-exports.getUserScoreMultipleIds = (idList, examId, courseId, subjectId) => {
+exports.getUserScoreMultipleIds = async (idList, examId, courseId, subjectId) => {
   return engineInterface().getUserScoreUseCase.getMultipleIds({
     idList: idList,
     examId: examId,
@@ -55,75 +55,75 @@ exports.getUserScoreMultipleIds = (idList, examId, courseId, subjectId) => {
   })
 }
 
-exports.getUserJoker = (userId) => {
+exports.getUserJoker = async (userId) => {
   return engineInterface().getUserJokerUseCase.getJokers({ userId: userId })
 }
 
-exports.putUserJoker = (userJokerEntity) => {
+exports.putUserJoker = async (userJokerEntity) => {
   return engineInterface().putUserJokerUseCase.updateUserJoker({ userJokerEntity: userJokerEntity })
 }
 
-exports.updateUserTotalPoints = (userEntity) => {
+exports.updateUserTotalPoints = async (userEntity) => {
   return engineInterface().putUserUseCase.updateUser({ id: userEntity.id, body: userEntity })
 }
 
-exports.getAllScores = (examId, courseId, subjectId) => {
+exports.getAllScores = async (examId, courseId, subjectId) => {
   return engineInterface().getUserScoreUseCase.getBatch({ examId: examId, courseId: courseId, subjectId: subjectId })
 }
 
-exports.makeLeaderboards = (leaderboardEntity) => {
+exports.makeLeaderboards = async (leaderboardEntity) => {
   return engineInterface().postLeaderboardUseCase.create({ leaderboardEntity: leaderboardEntity })
 }
 
-exports.checkLeaderboard = (examId, courseId, subjectId) => {
+exports.checkLeaderboard = async (examId, courseId, subjectId) => {
   return engineInterface().getLeaderboardUseCase.checkOne({ examId: examId, courseId: courseId, subjectId: subjectId })
 }
 
-exports.updateLeaderboard = (leaderboardEntity) => {
+exports.updateLeaderboard = async (leaderboardEntity) => {
   return engineInterface().putLeaderboardUseCase.update({ leaderboardEntity: leaderboardEntity })
 }
 
-exports.getOngoingMatch = (ongoingMatchId) => {
+exports.getOngoingMatch = async (ongoingMatchId) => {
   return engineInterface().getOngoingMatchUseCase.getOne({ id: ongoingMatchId })
 }
 
-exports.createOngoingMatch = (userId, friendId, endDate, questionList, examId, courseId, subjectId, roomCode) => {
+exports.createOngoingMatch = async (userId, friendId, endDate, questionList, examId, courseId, subjectId, roomCode) => {
   return engineInterface().postOngoingMatchUseCase.create({ userId: userId, friendId: friendId, endDate: endDate, questionList: questionList, examId: examId, courseId: courseId, subjectId: subjectId, roomCode: roomCode })
 }
 
-exports.deleteOngoingMatch = (ongoingMatchId) => {
+exports.deleteOngoingMatch = async (ongoingMatchId) => {
   return engineInterface().deleteOngoingMatchUseCase.remove({ id: ongoingMatchId })
 }
 
-exports.updateOngoingMatch = (ongoingMatchEntity) => {
+exports.updateOngoingMatch = async (ongoingMatchEntity) => {
   return engineInterface().putOngoingMatchUseCase.update({ ongoingMatchEntity: ongoingMatchEntity })
 }
 
-exports.getAllOngoingMatches = () => {
+exports.getAllOngoingMatches = async () => {
   return engineInterface().getOngoingMatchUseCase.getAll()
 }
 
-exports.updateStatistic = (statisticEntity) => {
+exports.updateStatistic = async (statisticEntity) => {
   return engineInterface().putStatisticUseCase.update({ statisticEntity: statisticEntity })
 }
 
-exports.getGameContent = () => {
+exports.getGameContent = async () => {
   return engineInterface().getExamEntityUseCase.getAll()
 }
 
-exports.createNotification = (notificationEntity) => {
+exports.createNotification = async (notificationEntity) => {
   return engineInterface().postNotificationUseCase.create({ body: notificationEntity })
 }
 
-exports.updateNotification = (notificationEntity) => {
+exports.updateNotification = async (notificationEntity) => {
   return engineInterface().putNotificationUseCase.update({ notificationEntity: notificationEntity })
 }
 
-exports.getFriendMatches = (userId, friendId) => {
+exports.getFriendMatches = async (userId, friendId) => {
   return engineInterface().getFriendsMatchUseCase.getMatches({ userId: userId, friendId: friendId })
 }
 
-exports.getUnsolvedQuestions = (userId, examId, courseId, subjectId, questionAmount) => {
+exports.getUnsolvedQuestions = async (userId, examId, courseId, subjectId, questionAmount) => {
   return engineInterface().getUnsolvedQuestionUseCase.getBatch({
     userId: userId,
     examId: examId,
@@ -137,6 +137,6 @@ exports.postUnsolvedQuestion = async (unsolvedQuestionEntity) => {
   return engineInterface().postUnsolvedQuestionUseCase.create({ unsolvedQuestionEntity: unsolvedQuestionEntity })
 }
 
-exports.deleteUnsolvedQuestion = (userId, questionId) => {
+exports.deleteUnsolvedQuestion = async (userId, questionId) => {
   return engineInterface().deleteUnsolvedQuestionUseCase.destroy({ userId: userId, questionId: questionId })
 }

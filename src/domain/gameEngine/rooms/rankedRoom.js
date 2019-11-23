@@ -330,7 +330,7 @@ class RankedGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -386,7 +386,7 @@ class RankedGame {
           questionId: questionProps[wrongQuestionIndex].id
         }).catch(error => {
           if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot create unsolvedQuestion')
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
             logger.error(error.stack)
           }
         })
@@ -412,7 +412,10 @@ class RankedGame {
           userScores[userId].userScore.totalRankedDraw++
           break
       }
-      updateUserScore(userScores[userId].userScore)
+      putUserScore(userScores[userId].userScore).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+        logger.error(error.stack)
+      })
     } else {
       let win = 0
       let lose = 0
@@ -428,7 +431,7 @@ class RankedGame {
           draw = 1
           break
       }
-      createUserScore({
+      postUserScore({
         userId: databaseId,
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
@@ -437,6 +440,9 @@ class RankedGame {
         totalRankedWin: win,
         totalRankedLose: lose,
         totalRankedDraw: draw
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+        logger.error(error.stack)
       })
     }
   }
@@ -449,7 +455,10 @@ class RankedGame {
           userJoker.joker.amountUsed++
           userJoker.joker.shouldRenew = true
 
-          updateUserJoker(userJoker.joker)
+          putUserJoker(userJoker.joker).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+            logger.error(error.stack)
+          })
         }
       })
     }
@@ -458,7 +467,10 @@ class RankedGame {
   decideUserInformationTotalPoints (userInformation, earnedPoints) {
     if (earnedPoints === 0) return
     userInformation.totalPoints += earnedPoints
-    updateUserPoints(userInformation)
+    updateUserTotalPoints(userInformation).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot put user')
+      logger.error(error.stack)
+    })
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses and calculates their points
@@ -528,36 +540,6 @@ class RankedGame {
   }
 }
 
-// Gets questions based on given question amount
-function getQuestions (
-  examId,
-  courseId,
-  subjectId,
-  questionAmount
-) {
-  try {
-    return getMultipleQuestions(
-      examId,
-      courseId,
-      subjectId,
-      questionAmount
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
-    logger.error(error.stack)
-  }
-}
-
-// Gets the user information
-function getUser (id) {
-  try {
-    return getOneUser(id)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get user')
-    logger.error(error.stack)
-  }
-}
-
 // Saves the results to the database
 function postMatchResults (playerList) {
   try {
@@ -567,70 +549,6 @@ function postMatchResults (playerList) {
     })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserScore (
-  userId,
-  examId,
-  courseId,
-  subjectId
-) {
-  try {
-    return getUserScore(
-      userId,
-      examId,
-      courseId,
-      subjectId
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
-    logger.error(error.stack)
-  }
-}
-
-function createUserScore (userScoreEntity) {
-  try {
-    return postUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserScore (userScoreEntity) {
-  try {
-    return putUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserJoker (userId) {
-  try {
-    return getUserJoker(userId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserJoker (userJokerEntity) {
-  try {
-    return putUserJoker(userJokerEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserPoints (userEntity) {
-  try {
-    return updateUserTotalPoints(userEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put user')
     logger.error(error.stack)
   }
 }
@@ -697,7 +615,7 @@ class RankedRoom extends colyseus.Room {
       this.state.setPlayerPropsMatchInformation(matchInformation)
 
       // Fetching questions from database
-      getQuestions(
+      getMultipleQuestions(
         options.examId,
         options.courseId,
         options.subjectId,
@@ -713,6 +631,7 @@ class RankedRoom extends colyseus.Room {
         this.state.setQuestions(questionProps, questionList)
         this.state.setMatchInformation(matchInformation)
       }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get questions')
         logger.error(error.stack)
       })
     } catch (error) {
@@ -721,68 +640,71 @@ class RankedRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
-    try {
-      // We get user jokers from database
-      // Later on we send all the joker names and ids to the client
-      // If the client doesnt have a joker it will be blacked out
-      fetchUserJoker(options.databaseId).then(userJokers => {
-        this.userJokers[client.id] = []
-        userJokers.forEach(userJoker => {
-          this.userJokers[client.id].push({
-            isUsed: false,
-            joker: userJoker,
-            id: userJoker.jokerId
-          })
+    // We get user jokers from database
+    // Later on we send all the joker names and ids to the client
+    // If the client doesnt have a joker it will be blacked out
+    getUserJoker(options.databaseId).then(userJokers => {
+      this.userJokers[client.id] = []
+      userJokers.forEach(userJoker => {
+        this.userJokers[client.id].push({
+          isUsed: false,
+          joker: userJoker,
+          id: userJoker.jokerId
         })
       })
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+      logger.error(error.stack)
+    })
 
-      // Getting user information from database
-      getUser(options.databaseId).then(userInformation => {
-        const { dataValues } = userInformation
-        userInformation = dataValues
-        this.userInformations[client.id] = userInformation
-        this.fetchedUserInfoNumber++
+    // Getting user information from database
+    getOneUser(options.databaseId).then(userInformation => {
+      const { dataValues } = userInformation
+      userInformation = dataValues
+      this.userInformations[client.id] = userInformation
+      this.fetchedUserInfoNumber++
 
-        // We get the user score from database
-        // Check if it exists; if it is null we set shouldUpdate false, otherwise true
-        // When the game ends we save it to db accordingly
-        fetchUserScore(
-          options.databaseId,
-          options.examId,
-          options.courseId,
-          options.subjectId
-        ).then(userScore => {
-          if (userScore === null) {
-            this.userScores[client.id] = {
-              shouldUpdate: false,
-              userScore: userScore
-            }
-          } else {
-            this.userScores[client.id] = {
-              shouldUpdate: true,
-              userScore: userScore
-            }
+      // We get the user score from database
+      // Check if it exists; if it is null we set shouldUpdate false, otherwise true
+      // When the game ends we save it to db accordingly
+      getUserScore(
+        options.databaseId,
+        options.examId,
+        options.courseId,
+        options.subjectId
+      ).then(userScore => {
+        if (userScore === null) {
+          this.userScores[client.id] = {
+            shouldUpdate: false,
+            userScore: userScore
           }
+        } else {
+          this.userScores[client.id] = {
+            shouldUpdate: true,
+            userScore: userScore
+          }
+        }
 
-          // Finally adding the player to our room state
-          this.state.addPlayer(client.id, userInformation, this.userScores, false)
+        // Finally adding the player to our room state
+        this.state.addPlayer(client.id, userInformation, this.userScores, false)
 
-          if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
+        if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
           // If we have reached the maxClients, we lock the room for unexpected things
-            this.lock()
-            // We send the clients player information
-            this.clock.setTimeout(() => {
-              this.broadcast(this.state.getPlayerProps())
-            }, 500)
-            logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
-          }
-        })
+          this.lock()
+          // We send the clients player information
+          this.clock.setTimeout(() => {
+            this.broadcast(this.state.getPlayerProps())
+          }, 500)
+          logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
+        }
       }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
         logger.error(error.stack)
       })
-    } catch (error) {
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get user')
       logger.error(error.stack)
-    }
+    })
   }
 
   // TODO Move the actions into their own functions
@@ -969,7 +891,7 @@ class RankedRoom extends colyseus.Room {
           this.isMatchFinished = false
 
           // Fetching questions from database
-          getQuestions(
+          getMultipleQuestions(
             this.state.getMatchInformation().examId,
             this.state.getMatchInformation().courseId,
             this.state.getMatchInformation().subjectId,
@@ -983,6 +905,9 @@ class RankedRoom extends colyseus.Room {
             })
             // Setting general match related info
             this.state.setQuestions(questionProps, questionList)
+          }).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot get questions')
+            logger.error(error.stack)
           })
           break
         case 'start-with-bot':
