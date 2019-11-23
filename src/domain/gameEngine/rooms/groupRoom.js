@@ -10,7 +10,8 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
+  postUnsolvedQuestion
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -166,14 +167,9 @@ class GroupGame {
     })
 
     // We send playerList and get back the results
-    const resultList = calculateResults(playerList)
-    const results = {}
+    const returnData = calculateResults(playerList)
 
-    resultList.forEach((player, index) => {
-      results[index] = player
-    })
-
-    return results
+    return returnData
   }
 
   // This function is used for the remove options joker
@@ -240,10 +236,11 @@ class GroupGame {
   saveMatchResults (groupRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
-    const resultsKeys = Object.keys(results)
+    const resultsKeys = Object.keys(results.resultList)
 
     const playerList = []
 
@@ -256,15 +253,28 @@ class GroupGame {
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
-        correctNumber: results[key].correct,
-        incorrectNumber: results[key].incorrect,
-        unansweredNumber: results[key].unanswered,
+        correctNumber: results.resultList[key].correct,
+        incorrectNumber: results.resultList[key].incorrect,
+        unansweredNumber: results.resultList[key].unanswered,
         userId: playerProps[userId].databaseId,
         gameModeType: 'group'
       })
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
+
+      // Adding the wrong solved questions to db
+      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
+          userId: playerProps[userId].databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+            logger.error(error.stack)
+          }
+        })
+      })
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
@@ -280,7 +290,10 @@ class GroupGame {
           userJoker.joker.amountUsed++
           userJoker.joker.shouldRenew = true
 
-          updateUserJoker(userJoker.joker)
+          putUserJoker(userJoker.joker).catch(error => {
+            logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
+            logger.error(error.stack)
+          })
         }
       })
     }
@@ -289,15 +302,21 @@ class GroupGame {
   decideUserScores (userScores, matchInformation, userId, databaseId) {
     if (userScores[userId].shouldUpdate) {
       userScores[userId].userScore.totalGroupGames++
-      updateUserScore(userScores[userId].userScore)
+      putUserScore(userScores[userId].userScore).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
+        logger.error(error.stack)
+      })
     } else {
-      createUserScore({
+      postUserScore({
         userId: databaseId,
         examId: matchInformation.examId,
         subjectId: matchInformation.subjectId,
         courseId: matchInformation.courseId,
         totalPoints: 0,
         totalGroupGames: 1
+      }).catch(error => {
+        logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
+        logger.error(error.stack)
       })
     }
   }
@@ -319,36 +338,6 @@ class GroupGame {
   }
 }
 
-// Gets questions based on given question amount
-function getQuestions (
-  examId,
-  courseId,
-  subjectId,
-  questionAmount
-) {
-  try {
-    return getMultipleQuestions(
-      examId,
-      courseId,
-      subjectId,
-      questionAmount
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get questions')
-    logger.error(error.stack)
-  }
-}
-
-// Gets the user information
-function getUser (id) {
-  try {
-    return getOneUser(id)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get user')
-    logger.error(error.stack)
-  }
-}
-
 // Saves the results to the database
 function postMatchResults (playerList) {
   try {
@@ -358,61 +347,6 @@ function postMatchResults (playerList) {
     })
   } catch (error) {
     logger.error('GAME ENGINE INTERFACE => Cannot post statistics')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserJoker (userId) {
-  try {
-    return getUserJoker(userId)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserJoker (userJokerEntity) {
-  try {
-    return putUserJoker(userJokerEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userJoker')
-    logger.error(error.stack)
-  }
-}
-
-function fetchUserScore (
-  userId,
-  examId,
-  courseId,
-  subjectId
-) {
-  try {
-    return getUserScore(
-      userId,
-      examId,
-      courseId,
-      subjectId
-    )
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
-    logger.error(error.stack)
-  }
-}
-
-function createUserScore (userScoreEntity) {
-  try {
-    return postUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot post userScore')
-    logger.error(error.stack)
-  }
-}
-
-function updateUserScore (userScoreEntity) {
-  try {
-    return putUserScore(userScoreEntity)
-  } catch (error) {
-    logger.error('GAME ENGINE INTERFACE => Cannot put userScore')
     logger.error(error.stack)
   }
 }
@@ -471,7 +405,7 @@ class GroupRoom extends colyseus.Room {
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
-    fetchUserJoker(options.databaseId).then(userJokers => {
+    getUserJoker(options.databaseId).then(userJokers => {
       this.userJokers[client.id] = []
       userJokers.forEach(userJoker => {
         this.userJokers[client.id].push({
@@ -480,12 +414,15 @@ class GroupRoom extends colyseus.Room {
           id: userJoker.jokerId
         })
       })
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userJoker')
+      logger.error(error.stack)
     })
 
     // We get the user score from database
     // Check if it exists; if it is null we set shouldUpdate false, otherwise true
     // When the game ends we save it to db accordingly
-    fetchUserScore(
+    getUserScore(
       options.databaseId,
       matchInformation.examId,
       matchInformation.courseId,
@@ -502,10 +439,13 @@ class GroupRoom extends colyseus.Room {
           userScore: userScore
         }
       }
+    }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get userScore')
+      logger.error(error.stack)
     })
 
     // Getting user information from database
-    getUser(options.databaseId).then(userInformation => {
+    getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
       // Finally adding the player to our room state
@@ -523,6 +463,7 @@ class GroupRoom extends colyseus.Room {
         })
       }, 500)
     }).catch(error => {
+      logger.error('GAME ENGINE INTERFACE => Cannot get user')
       logger.error(error.stack)
     })
 
@@ -660,7 +601,7 @@ class GroupRoom extends colyseus.Room {
         const matchInformation = this.state.getMatchInformation()
 
         // Fetching questions from database
-        getQuestions(
+        getMultipleQuestions(
           matchInformation.examId,
           matchInformation.courseId,
           matchInformation.subjectId,
@@ -678,6 +619,7 @@ class GroupRoom extends colyseus.Room {
 
           this.state.setPlayerPropsMatchInformation(matchInformation)
         }).catch(error => {
+          logger.error('GAME ENGINE INTERFACE => Cannot get questions')
           logger.error(error.stack)
         })
 
@@ -700,7 +642,6 @@ class GroupRoom extends colyseus.Room {
       case 'set-question-number':
         this.questionAmount = data.questionAmount
         this.broadcast({ action: 'set-question-number', questionAmount: data.questionAmount })
-        console.log(this.questionAmount)
         break
       case 'leave-match':
         this.send(client, {
