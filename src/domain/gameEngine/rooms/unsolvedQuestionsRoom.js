@@ -61,7 +61,8 @@ class UnsolvedQuestionsGame {
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
-      coverPicture: userInformation.coverPicture
+      coverPicture: userInformation.coverPicture,
+      examId: this.unsolvedQuestionsState.matchInformation.examId
     }
     this.unsolvedQuestionsState.playerId = clientId
   }
