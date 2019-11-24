@@ -26,8 +26,8 @@ const CORRECT_ANSWER_MULTIPLIER = 20
 const DRAW_MATCH_POINT = 50
 const BOT_CLIENT_ID = 'bot_client_id'
 const BOT_USERNAME = 'BOT'
-const BOT_PROFILE_PICTURE = 'https://pbs.twimg.com/profile_images/740159807211114496/BC9W_CDf.jpg'
-const BOT_COVER_PICTURE = 'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80'
+const BOT_COVER_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.jpg?alt=media&token=146b2665-502d-4d0e-b83f-94557731da56'
+const BOT_PROFILE_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.jpg?alt=media&token=1f12dcc9-2b87-48b9-b374-de6d93cd4cd1'
 const BOT_ID = 'bot_id'
 
 class RankedState {
@@ -325,6 +325,7 @@ class RankedGame {
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        if (playerProps[userId].databaseId === 'bot_id') return
         postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
@@ -381,6 +382,7 @@ class RankedGame {
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+        if (playerProps[userId].databaseId === 'bot_id') return
         postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
