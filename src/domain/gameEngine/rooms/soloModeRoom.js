@@ -60,7 +60,8 @@ class SoloModeGame {
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
-      coverPicture: userInformation.coverPicture
+      coverPicture: userInformation.coverPicture,
+      examId: this.soloModeState.matchInformation.examId
     }
     this.soloModeState.playerId = clientId
   }
