@@ -9,6 +9,7 @@ const { postLeaderboard, getLeaderboard, putLeaderboard } = require('src/app/lea
 const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch } = require('src/app/ongoingMatch')
 const { getExamEntity } = require('src/app/examEntity')
 const { postNotification, putNotification } = require('src/app/notification')
+const { getUnsolvedQuestion, postUnsolvedQuestion, deleteUnsolvedQuestion } = require('src/app/unsolvedQuestion')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -43,6 +44,9 @@ module.exports = () => {
     },
     repository: {
       notificationRepository
+    },
+    repository: {
+      unsolvedQuestionRepository
     }
   } = container.cradle
 
@@ -68,6 +72,9 @@ module.exports = () => {
   const postNotificationUseCase = postNotification({ notificationRepository })
   const putNotificationUseCase = putNotification({ notificationRepository })
   const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository, Sequelize })
+  const getUnsolvedQuestionUseCase = getUnsolvedQuestion({ unsolvedQuestionRepository, database })
+  const postUnsolvedQuestionUseCase = postUnsolvedQuestion({ unsolvedQuestionRepository })
+  const deleteUnsolvedQuestionUseCase = deleteUnsolvedQuestion({ unsolvedQuestionRepository })
 
   return {
     getQuestionUseCase,
@@ -91,6 +98,9 @@ module.exports = () => {
     getExamEntityUseCase,
     postNotificationUseCase,
     putNotificationUseCase,
-    getFriendsMatchUseCase
+    getFriendsMatchUseCase,
+    getUnsolvedQuestionUseCase,
+    postUnsolvedQuestionUseCase,
+    deleteUnsolvedQuestionUseCase
   }
 }
