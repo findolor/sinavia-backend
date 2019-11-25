@@ -16,10 +16,7 @@ const UserScore = t.struct({
   totalRankedDraw: t.maybe(t.Number),
   totalFriendDraw: t.maybe(t.Number),
   totalGroupGames: t.maybe(t.Number),
-  /* totalWin: t.Number,
-  totalLose: t.Number,
-  totalDraw: t.Number,
-  totalGames: t.Number, */
+  totalSoloGames: t.maybe(t.Number),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })

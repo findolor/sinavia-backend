@@ -33,6 +33,7 @@ module.exports = ({
           const userList = {}
 
           data.forEach(userScore => {
+            if (userScore.totalPoints === 0) return
             const leaderboardEntity = {
               totalPoints: null,
               username: null,

@@ -60,6 +60,10 @@ module.exports = {
           key: 'id'
         }
       },
+      gameModeType: {
+        type: Sequelize.ENUM('ranked', 'friend', 'group', 'solo'),
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

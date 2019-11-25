@@ -2,8 +2,8 @@ const { encryptPassword } = require('src/infra/encryption')
 const moment = require('moment')
 moment.locale('tr')
 
-const coverPicture = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.png?alt=media&token=0377e5ce-ed5a-45d4-b8a9-661961729d92'
-const profilePicture = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.png?alt=media&token=35aba6a0-0b4e-4721-a5f3-25468c89e9e7'
+const coverPicture = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.jpg?alt=media&token=146b2665-502d-4d0e-b83f-94557731da56'
+const profilePicture = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.jpg?alt=media&token=1f12dcc9-2b87-48b9-b374-de6d93cd4cd1'
 
 module.exports = () => {
   const password = encryptPassword('password')
