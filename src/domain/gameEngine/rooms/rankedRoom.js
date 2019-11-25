@@ -642,6 +642,10 @@ class RankedRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    if (this._maxClientsReached) {
+      // If we have reached the maxClients, we lock the room for unexpected things
+      this.lock()
+    }
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
@@ -691,8 +695,6 @@ class RankedRoom extends colyseus.Room {
         this.state.addPlayer(client.id, userInformation, this.userScores, false)
 
         if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-          // If we have reached the maxClients, we lock the room for unexpected things
-          this.lock()
           // We send the clients player information
           this.clock.setTimeout(() => {
             this.broadcast(this.state.getPlayerProps())
