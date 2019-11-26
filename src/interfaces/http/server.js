@@ -17,8 +17,8 @@ module.exports = ({ config, router, logger, auth }) => {
 
   let port = 0
 
-  if (config.isProxyEnabled) port = Number(config.port) + Number(process.env.NODE_APP_INSTANCE)
-  else port = config.port
+  if (config.isProxyEnabled) port = Number(config.apiPort) + Number(process.env.NODE_APP_INSTANCE)
+  else port = config.apiPort
 
   return {
     app,

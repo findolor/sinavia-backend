@@ -352,7 +352,6 @@ class FriendSoloRoom extends colyseus.Room {
     this.maxClients = 1
     this.questionAmount = null
     this.isMatchFinished = false
-    this.fetchedUserInfoNumber = 0
     this.userJokers = {}
   }
 
@@ -411,7 +410,7 @@ class FriendSoloRoom extends colyseus.Room {
     getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
-      this.fetchedUserInfoNumber++
+
       // Finally adding the player to our room state
       this.state.addPlayer(client.id, userInformation, options.databaseId)
     }).catch(error => {

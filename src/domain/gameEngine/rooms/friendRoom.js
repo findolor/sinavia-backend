@@ -74,6 +74,8 @@ class FriendGame {
       coverPicture: userInformation.coverPicture
     }
     this.friendState.playerOneId === '' ? this.friendState.playerOneId = clientId : this.friendState.playerTwoId = clientId
+
+    return true
   }
 
   // Sets the players answers then sends a response to our client
@@ -634,7 +636,7 @@ class FriendRoom extends colyseus.Room {
     this.isMatchFinished = false
     this.leavingClientId = null
     this.joinedPlayerNum = 0
-    this.fetchedUserInfoNumber = 0
+    this.addedUserNumber = 0
     this.userJokers = {}
     this.userScores = {}
     this.isSoloGame = false
@@ -731,6 +733,9 @@ class FriendRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    // If we have reached the maxClients, we lock the room for unexpected things
+    if (this._maxClientsReached) { this.lock() }
+
     // Sending the scores to the users
     this.send(client, {
       action: 'save-user-points',
@@ -776,13 +781,11 @@ class FriendRoom extends colyseus.Room {
     getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
-      this.fetchedUserInfoNumber++
-      // Finally adding the player to our room state
-      this.state.addPlayer(client.id, userInformation, options.databaseId)
 
-      if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-        // If we have reached the maxClients, we lock the room for unexpected things
-        this.lock()
+      // Finally adding the player to our room state
+      if (this.state.addPlayer(client.id, userInformation, options.databaseId)) this.addedUserNumber++
+
+      if (this.addedUserNumber === 2) {
         // We send the clients player information
         this.clock.setTimeout(() => {
           // Sending the scores to the users
