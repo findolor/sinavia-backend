@@ -19,7 +19,7 @@ module.exports = ({ config, logger, database }) => {
   }
 
   /* istanbul ignore if */
-  if (config.env !== 'test') {
+  if (config.env !== 'production') {
     router.use(httpLogger(logger))
   }
 
