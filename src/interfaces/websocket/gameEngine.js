@@ -1,7 +1,6 @@
 const http = require('http')
 const colyseus = require('colyseus')
 const roomRegisterService = require('../../domain/gameEngine')
-const express = require('express')
 
 module.exports = ({ logger, config }) => {
   let port
@@ -11,8 +10,7 @@ module.exports = ({ logger, config }) => {
 
   return {
     start: () => new Promise((resolve) => {
-      const app = express()
-      const server = http.createServer(app)
+      const server = http.createServer()
       const gameEngine = new colyseus.Server({
         server: server
         /* presence: new colyseus.RedisPresence({
