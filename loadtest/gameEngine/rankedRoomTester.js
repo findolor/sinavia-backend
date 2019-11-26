@@ -3,7 +3,7 @@ const Colyseus = require('colyseus.js')
 const shellBreaker = '72b6fa48-94c0-4691-8ac9-db679a67a9b3'
 const marmelade = '08f228a0-443b-4003-8b17-efe835cf6916'
 
-let iterationCount = 1000
+let iterationCount = 2000
 let rooms = [iterationCount]
 let clients = [iterationCount]
 let joinOptions
@@ -13,7 +13,7 @@ let joined = 0
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    clients[i] = new Colyseus.Client('http://35.246.252.239/engine')
+    clients[i] = new Colyseus.Client('http://35.246.252.239:5000')
     // clients[i] = new Colyseus.Client('http://localhost:5000')
 
     // console.log(i % 2)

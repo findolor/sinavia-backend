@@ -18,10 +18,7 @@ module.exports = ({ config, logger, database }) => {
     router.use(statusMonitor())
   }
 
-  /* istanbul ignore if */
-  if (config.env !== 'test') {
-    router.use(httpLogger(logger))
-  }
+  router.use(httpLogger(logger))
 
   const apiRouter = Router()
 
