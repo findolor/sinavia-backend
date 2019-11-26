@@ -7,7 +7,7 @@ module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
         // Loads the ongoing matches from database
         .then(cronJob.loadOngoingMatchCrons)
         .then(server.start)
-        .then(app => gameEngine.start(app))
+        .then(gameEngine.start)
         // Gets the whole game content from db at 4 AM and puts it in cache
         .then(cronJob.makeGameContentCronJob)
         // Leaderboard cron job that runs at 4 AM

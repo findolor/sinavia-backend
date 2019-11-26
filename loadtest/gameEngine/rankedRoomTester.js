@@ -70,7 +70,7 @@ for (let i = 0; i < iterationCount; i++) {
     clients[i].onError.add(error => {
       console.error(error)
     })
-  }, Math.floor(Math.random() * 60000) + 5000)
+  }, Math.floor(Math.random() * 180000) + 5000)
 }
 
 function answerQuestion (room) {
