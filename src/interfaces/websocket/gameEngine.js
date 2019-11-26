@@ -11,19 +11,12 @@ module.exports = ({ logger, config }) => {
   return {
     start: () => new Promise((resolve) => {
       const server = http.createServer()
-      const gameEngine = new colyseus.Server({
+      /* const gameEngine = new colyseus.Server({
         server: server
-        /* presence: new colyseus.RedisPresence({
-          url: "redis://127.0.0.1:6379/0"
-        }) */
-        // TODO migrate colyseus
-        /* presence: new colyseus.RedisPresence({
-          host: config.cache.host,
-          port: config.cache.port,
-          db: config.cache.db
-        }), */
-        // express: app
-      })
+      }) */
+      const gameEngine = new colyseus.Server()
+
+      gameEngine.attach({ server: server })
 
       const registeredGameEngine = roomRegisterService(gameEngine)
 
