@@ -92,6 +92,8 @@ class RankedGame {
     }
 
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
+
+    return true
   }
 
   // Sets the players answers then sends a response to our client
@@ -565,30 +567,18 @@ class RankedRoom extends colyseus.Room {
     this.isMatchFinished = false
     this.leavingClientId = null
     this.joinedPlayerNum = 0
-    this.fetchedUserInfoNumber = 0
+    this.addedUserNumber = 0
     this.userScores = {}
     this.userJokers = {}
     this.userInformations = {}
     this.isBotGame = false
-    /* this.fetchedUserInfoInterval = this.clock.setInterval(() => {
-      if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-        // If we have reached the maxClients, we lock the room for unexpected things
-          this.lock()
-          // We send the clients player information
-          setTimeout(() => {
-            this.broadcast(this.state.getPlayerProps())
-          }, 500)
-          logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
-          this.fetchedUserInfoInterval.clear()
-        }
-    }, 2000) */
   }
 
   // If this room is full new users will join another room
   // TODO DEPRECATED IN 0.10.8
   requestJoin (options, isNew) {
     if (isNew) {
-      return (options.create && isNew) || this.clients.length > 0
+      return (options.create && isNew)
     } else {
       const matchInformation = this.state.getMatchInformation()
       const ROOM_AVAILABILITY_CHECK = (options.create && isNew) || this.clients.length > 0
@@ -642,6 +632,9 @@ class RankedRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    // If we have reached the maxClients, we lock the room for unexpected things
+    if (this._maxClientsReached) { this.lock() }
+
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
@@ -664,7 +657,6 @@ class RankedRoom extends colyseus.Room {
       const { dataValues } = userInformation
       userInformation = dataValues
       this.userInformations[client.id] = userInformation
-      this.fetchedUserInfoNumber++
 
       // We get the user score from database
       // Check if it exists; if it is null we set shouldUpdate false, otherwise true
@@ -688,14 +680,15 @@ class RankedRoom extends colyseus.Room {
         }
 
         // Finally adding the player to our room state
-        this.state.addPlayer(client.id, userInformation, this.userScores, false)
+        if (this.state.addPlayer(client.id, userInformation, this.userScores, false)) this.addedUserNumber++
 
-        if (this._maxClientsReached && this.fetchedUserInfoNumber === 2) {
-          // If we have reached the maxClients, we lock the room for unexpected things
-          this.lock()
+        if (this.addedUserNumber === 2) {
           // We send the clients player information
           this.clock.setTimeout(() => {
-            this.broadcast(this.state.getPlayerProps())
+            this.broadcast({
+              action: 'game-init',
+              res: this.state.getPlayerProps()
+            })
           }, 500)
           logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
         }
