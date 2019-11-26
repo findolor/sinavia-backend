@@ -13,8 +13,8 @@ let joined = 0
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    // clients[i] = new Colyseus.Client('http://35.246.252.239/engine')
-    clients[i] = new Colyseus.Client('http://localhost:5000')
+    clients[i] = new Colyseus.Client('http://35.246.252.239/engine')
+    // clients[i] = new Colyseus.Client('http://localhost:5000')
 
     // console.log(i % 2)
     joinOptions = {

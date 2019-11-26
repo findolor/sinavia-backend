@@ -9,14 +9,21 @@ module.exports = ({ logger, config }) => {
   else port = config.gameEnginePort
 
   return {
-    start: () => new Promise((resolve) => {
-      const server = http.createServer()
-      /* const gameEngine = new colyseus.Server({
+    start: (app) => new Promise((resolve) => {
+      const server = http.createServer(app)
+      const gameEngine = new colyseus.Server({
         server: server
-      }) */
-      const gameEngine = new colyseus.Server()
-
-      gameEngine.attach({ server: server })
+        /* presence: new colyseus.RedisPresence({
+          url: "redis://127.0.0.1:6379/0"
+        }) */
+        // TODO migrate colyseus
+        /* presence: new colyseus.RedisPresence({
+          host: config.cache.host,
+          port: config.cache.port,
+          db: config.cache.db
+        }), */
+        // express: app
+      })
 
       const registeredGameEngine = roomRegisterService(gameEngine)
 
