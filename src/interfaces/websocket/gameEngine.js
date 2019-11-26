@@ -1,6 +1,5 @@
 const http = require('http')
 const colyseus = require('colyseus')
-const monitor = require('@colyseus/monitor').monitor
 const roomRegisterService = require('../../domain/gameEngine')
 
 module.exports = ({ logger, config }) => {
@@ -27,8 +26,6 @@ module.exports = ({ logger, config }) => {
       })
 
       const registeredGameEngine = roomRegisterService(gameEngine)
-
-      app.use('/colyseus', monitor(registeredGameEngine))
 
       registeredGameEngine.listen(port)
       logger.info(`Game Engine - Port ${port}`)
