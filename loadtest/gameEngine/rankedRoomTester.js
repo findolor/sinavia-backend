@@ -3,7 +3,7 @@ const Colyseus = require('colyseus.js')
 const shellBreaker = '72b6fa48-94c0-4691-8ac9-db679a67a9b3'
 const marmelade = '08f228a0-443b-4003-8b17-efe835cf6916'
 
-let iterationCount = 2000
+let iterationCount = 1000
 let rooms = [iterationCount]
 let clients = [iterationCount]
 let joinOptions
@@ -30,7 +30,7 @@ for (let i = 0; i < iterationCount; i++) {
       rooms[i] = clients[i].join('rankedRoom', joinOptions)
 
       rooms[i].onJoin.add(() => {
-        console.log(++joined)
+        console.log(++joined, 'join count')
         // console.log(clients[i])
 
         // Game state coming from server
@@ -43,8 +43,7 @@ for (let i = 0; i < iterationCount; i++) {
               }, Math.floor(Math.random() * 3000) + 1)
               break
             case 'match-finished':
-              console.log(`Successfully finished match -- BOT  ===>  ${i}`)
-              console.log(++finishCount)
+              console.log(++finishCount, 'finish count')
               rooms[i].leave()
               break
           }
@@ -70,7 +69,7 @@ for (let i = 0; i < iterationCount; i++) {
     clients[i].onError.add(error => {
       console.error(error)
     })
-  }, Math.floor(Math.random() * 60000) + 5000)
+  }, Math.floor(Math.random() * 30000) + 5000)
 }
 
 function answerQuestion (room) {

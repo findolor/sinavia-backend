@@ -385,6 +385,9 @@ class RankedGame {
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
         if (playerProps[userId].databaseId === 'bot_id') return
+        // TODO DELETE HERE
+        console.log(wrongQuestionIndex)
+        console.log(questionProps)
         postUnsolvedQuestion({
           userId: playerProps[userId].databaseId,
           questionId: questionProps[wrongQuestionIndex].id
