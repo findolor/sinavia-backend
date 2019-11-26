@@ -401,6 +401,8 @@ class GroupRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    if (this._maxClientsReached) this.lock()
+
     const matchInformation = this.state.getMatchInformation()
     // We get user jokers from database
     // Later on we send all the joker names and ids to the client
