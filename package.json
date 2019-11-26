@@ -35,7 +35,7 @@
     "lint:fix": "standard --fix",
     "lint:staged": "lint-staged",
     "fresh-install": "rm -rf node_modules && npm cache clean --force && npm install",
-    "test:ranked": "node loadtest/gameEngine/rankedRoomTest.js",
+    "test:ranked": "node loadtest/gameEngine/rankedRoomTester.js",
     "test:ranked-bot": "node loadtest/gameEngine/rankedRoomWithBotTest.js",
     "test:friend": "node loadtest/gameEngine/friendRoomTest.js",
     "engine-loadtest": "colyseus-loadtest loadtest/gameEngine/rankedLoadtest.js --endpoint http://localhost:5000 --room rankedRoom --numClients 2"
