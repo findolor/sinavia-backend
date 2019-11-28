@@ -9,9 +9,9 @@ module.exports = ({ userRepository }) => {
       .resolve()
       .then(() => {
         body.profilePicture =
-            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.png?alt=media&token=35aba6a0-0b4e-4721-a5f3-25468c89e9e7'
+            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.png?alt=media&token=48e536e2-a937-4734-871f-d7d982c663cf'
         body.coverPicture =
-            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.png?alt=media&token=0377e5ce-ed5a-45d4-b8a9-661961729d92'
+            'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.jpg?alt=media&token=146b2665-502d-4d0e-b83f-94557731da56'
         body.totalPoints = 0
         body.isPremium = true
         body.premiumEndDate = moment().add(1, 'weeks').toDate()
