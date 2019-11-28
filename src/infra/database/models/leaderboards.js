@@ -21,6 +21,14 @@ module.exports = (sequelize, DataTypes) => {
     userList: {
       type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     }
   }, {
     freezeTableName: true,
