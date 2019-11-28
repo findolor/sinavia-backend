@@ -14,7 +14,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       loserId: {
         type: Sequelize.UUID,
@@ -22,7 +24,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       isMatchDraw: {
         type: Sequelize.BOOLEAN,

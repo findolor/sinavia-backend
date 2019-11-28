@@ -26,7 +26,9 @@ module.exports = {
         references: {
           model: 'courseEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       subjectId: {
         type: Sequelize.INTEGER,
@@ -34,7 +36,9 @@ module.exports = {
         references: {
           model: 'subjectEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       userList: {
         type: Sequelize.ARRAY(Sequelize.JSONB),

@@ -18,7 +18,9 @@ module.exports = {
         references: {
           model: 'courseEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

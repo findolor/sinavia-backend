@@ -14,7 +14,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       friendId: {
         type: Sequelize.UUID,
@@ -22,7 +24,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       userResults: {
         type: Sequelize.INTEGER,
@@ -30,7 +34,9 @@ module.exports = {
         references: {
           model: 'statistics',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       friendResults: {
         type: Sequelize.INTEGER,
@@ -38,7 +44,9 @@ module.exports = {
         references: {
           model: 'statistics',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       userAnswers: {
         type: Sequelize.ARRAY(Sequelize.JSONB),
@@ -58,7 +66,9 @@ module.exports = {
         references: {
           model: 'examEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       courseId: {
         type: Sequelize.INTEGER,
@@ -66,7 +76,9 @@ module.exports = {
         references: {
           model: 'courseEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       subjectId: {
         type: Sequelize.INTEGER,
@@ -74,7 +86,9 @@ module.exports = {
         references: {
           model: 'subjectEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       roomCode: {
         type: Sequelize.STRING,
