@@ -109,6 +109,9 @@ module.exports = ({
               } })
           }
 
+          delete data.createdAt
+          delete data.updatedAt
+
           res.status(Status.OK).json(Success(data))
         })
         .catch((error) => {
