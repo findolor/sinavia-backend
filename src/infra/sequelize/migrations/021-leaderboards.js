@@ -26,7 +26,9 @@ module.exports = {
         references: {
           model: 'courseEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       subjectId: {
         type: Sequelize.INTEGER,
@@ -34,21 +36,21 @@ module.exports = {
         references: {
           model: 'subjectEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       userList: {
         type: Sequelize.ARRAY(Sequelize.JSONB),
         allowNull: false
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
+        allowNull: true,
+        type: Sequelize.DATE
       },
       updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
+        allowNull: true,
+        type: Sequelize.DATE
       }
     })
   },

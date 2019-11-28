@@ -14,7 +14,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       badgeId: {
         type: Sequelize.INTEGER,
@@ -22,7 +24,9 @@ module.exports = {
         references: {
           model: 'badges',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

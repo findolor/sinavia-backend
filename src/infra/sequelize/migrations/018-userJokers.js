@@ -14,7 +14,9 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       jokerId: {
         type: Sequelize.INTEGER,
@@ -22,7 +24,9 @@ module.exports = {
         references: {
           model: 'jokers',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       amount: {
         type: Sequelize.INTEGER,
