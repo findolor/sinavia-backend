@@ -14,7 +14,9 @@ module.exports = {
         references: {
           model: 'examEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       courseId: {
         type: Sequelize.INTEGER,
@@ -22,7 +24,9 @@ module.exports = {
         references: {
           model: 'courseEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       subjectId: {
         type: Sequelize.INTEGER,
@@ -30,7 +34,9 @@ module.exports = {
         references: {
           model: 'subjectEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       questionLink: {
         type: Sequelize.STRING,

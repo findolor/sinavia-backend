@@ -22,7 +22,9 @@ module.exports = {
         references: {
           model: 'examEntities',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

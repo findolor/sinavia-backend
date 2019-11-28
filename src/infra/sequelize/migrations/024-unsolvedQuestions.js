@@ -15,7 +15,9 @@ module.exports = {
           model: 'users',
           key: 'id'
         },
-        unique: 'unique_wrongs'
+        unique: 'unique_wrongs',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       questionId: {
         type: Sequelize.INTEGER,
@@ -24,7 +26,9 @@ module.exports = {
           model: 'questions',
           key: 'id'
         },
-        unique: 'unique_wrongs'
+        unique: 'unique_wrongs',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
