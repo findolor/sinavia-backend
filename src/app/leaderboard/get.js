@@ -9,7 +9,8 @@ module.exports = ({ leaderboardRepository }) => {
             examId: parseInt(examId, 10),
             courseId: null,
             subjectId: null
-          }
+          },
+          attributes: { include: ['updatedAt'] }
         }
 
         if (courseId) {

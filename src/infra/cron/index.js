@@ -425,8 +425,6 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
     },
     // Calculating the leaderboards every 12 hours
     // Calculate this for every content we have
-    // Right now its every hour
-    // TODO CACHE EVERY LEADERBOARD INFORMATION FOR GETTING IT LATER ???
     leaderboardCronJob: () => new CronJob('0 0 */12 * * *', () => {
       getGameContent().then(gameContent => {
         // Recursively go through every content and calculate leaderboards

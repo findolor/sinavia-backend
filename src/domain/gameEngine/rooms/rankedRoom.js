@@ -28,6 +28,7 @@ const BOT_CLIENT_ID = 'bot_client_id'
 const BOT_USERNAME = 'BOT'
 const BOT_COVER_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.jpg?alt=media&token=146b2665-502d-4d0e-b83f-94557731da56'
 const BOT_PROFILE_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.jpg?alt=media&token=1f12dcc9-2b87-48b9-b374-de6d93cd4cd1'
+const BOT_CITY = 'İzmir'
 const BOT_ID = 'bot_id'
 
 class RankedState {
@@ -73,7 +74,8 @@ class RankedGame {
       answers: [],
       databaseId: userInformation.id,
       profilePicture: userInformation.profilePicture,
-      coverPicture: userInformation.coverPicture
+      coverPicture: userInformation.coverPicture,
+      city: userInformation.city
     }
 
     if (!isBot) this.rankedState.playerProps[clientId].totalPoints = userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
@@ -909,10 +911,9 @@ class RankedRoom extends colyseus.Room {
           const userInformation = {}
           userInformation.username = BOT_USERNAME
           userInformation.id = BOT_ID
-          // Some egg picture
           userInformation.profilePicture = BOT_PROFILE_PICTURE
-          // Some field picture
           userInformation.coverPicture = BOT_COVER_PICTURE
+          userInformation.coverPicture = BOT_CITY
           // Adding the bot to our props
           this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
 
