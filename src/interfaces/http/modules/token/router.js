@@ -25,16 +25,6 @@ module.exports = ({
         })
     })
 
-  router
-    .post('/email', (req, res) => {
-      smtpService.sendEmail(
-        'anakisci@gmail.com',
-        'Sınavia şifre değişimi'
-      )
-
-      res.status(Status.OK).json(Success(true))
-    })
-
   router.use(auth.authenticate())
 
   // If the token is not valid, user sends a post request to /token to get a valid token
