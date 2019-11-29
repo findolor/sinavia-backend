@@ -67,7 +67,8 @@ module.exports = ({ userScoreRepository, database, Sequelize }) => {
 
         const queryOptions = {
           where: {
-            examId: examId
+            examId: examId,
+            userId: userIdList
           },
           order: [['totalPoints', 'DESC']],
           include: [database.models.users]
