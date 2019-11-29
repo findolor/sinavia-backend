@@ -425,7 +425,7 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
     },
     // Calculating the leaderboards every 12 hours
     // Calculate this for every content we have
-    leaderboardCronJob: () => new CronJob('0 0 */12 * * *', () => {
+    leaderboardCronJob: () => new CronJob('0 0 5,11,18 * * *', () => {
       getGameContent().then(gameContent => {
         // Recursively go through every content and calculate leaderboards
         gameContent.forEach(examEntity => {
