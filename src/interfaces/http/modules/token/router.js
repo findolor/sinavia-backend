@@ -26,7 +26,7 @@ module.exports = ({
     })
 
   router
-    .post('/', (req, res) => {
+    .post('/email', (req, res) => {
       smtpService.sendEmail(
         req.body.email,
         'Sınavia şifre değişimi'
