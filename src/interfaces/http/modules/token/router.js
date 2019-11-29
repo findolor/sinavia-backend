@@ -6,6 +6,7 @@ module.exports = ({
   getUserUseCase,
   logger,
   auth,
+  smtpService,
   response: { Success, Fail }
 }) => {
   const router = Router()
@@ -22,6 +23,16 @@ module.exports = ({
           res.status(Status.BAD_REQUEST).json(
             Fail(error.message))
         })
+    })
+
+  router
+    .post('/', (req, res) => {
+      smtpService.sendEmail(
+        req.body.email,
+        'Sınavia şifre değişimi'
+      )
+
+      res.status(Status.OK).json(Success(true))
     })
 
   router.use(auth.authenticate())
