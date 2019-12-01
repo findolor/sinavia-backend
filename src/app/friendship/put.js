@@ -11,14 +11,14 @@ module.exports = ({ friendshipRepository }) => {
         })
         const friendship = Friendship(entity)
 
-        await friendshipRepository.update(friendship, {
+        const response = await friendshipRepository.update(friendship, {
           where: {
             userId: body.userId,
             friendId: body.friendId
           }
         })
-
-        resolve(friendship)
+        if (response[0] === 0) reject(new Error('Friendship does not exist'))
+        else resolve(friendship)
       } catch (error) {
         reject(error)
       }
