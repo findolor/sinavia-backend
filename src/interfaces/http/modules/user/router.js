@@ -23,7 +23,25 @@ module.exports = ({
         .getOneWithEmail({ email: req.body.email })
         .then(user => {
           if (user === null) {
-            res.status(Status.BAD_REQUEST).json(Fail('Invalid User'))
+            config.fcm.firebaseAdmin.auth().getUserByEmail(req.body.email).then(firebaseUser => {
+              if (!firebaseUser.emailVerified) {
+                config.fcm.firebaseAdmin.auth().generateEmailVerificationLink(req.body.email).then(link => {
+                  smtpService.sendEmail(
+                    req.body.email,
+                    'Sınavia e-posta onayi',
+                    `Onaylama linki ${link}`
+                  )
+                  res.status(Status.BAD_REQUEST).json(Fail('Verify Email'))
+                })
+                  .catch(error => {
+                    logger.error(error.stack)
+                    res.status(Status.BAD_REQUEST).json(Fail('link-error'))
+                  })
+              }
+            }).catch(error => {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(Fail('Invalid User'))
+            })
             return
           }
           const { dataValues } = user
@@ -78,25 +96,6 @@ module.exports = ({
       postUseCase
         .create({ body: req.body })
         .then(data => {
-          // This will be used later on
-          /* const gameEnergyEntity = {
-            userId: data.id,
-            energyAmount: 6,
-            energyUsed: 0,
-            shouldRenew: false,
-            dateRenewed: new Date()
-          } */
-          /* postGameEnergyUseCase
-            .create({ body: gameEnergyEntity })
-            .then(() => {
-              res.status(Status.OK).json(Success(data))
-            })
-            .catch((error) => {
-              logger.error(error.stack) // we still need to log every error for debugging
-              res.status(Status.BAD_REQUEST).json(
-                Fail(error.message))
-            }) */
-
           for (let i = 1; i < 4; i++) {
             postUserJokerUseCase
               .createUserJoker({ userJokerEntity: {
