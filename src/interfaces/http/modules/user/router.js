@@ -115,8 +115,13 @@ module.exports = ({
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+          if (error.message.includes('Validation error')) {
+            res.status(Status.BAD_REQUEST).json(
+              Fail('existing-information'))
+          } else {
+            res.status(Status.BAD_REQUEST).json(
+              Fail(error.message))
+          }
         })
     })
 
@@ -250,8 +255,13 @@ module.exports = ({
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+          if (error.message.includes('SequelizeUniqueConstraintError')) {
+            res.status(Status.BAD_REQUEST).json(
+              Fail('existing-information'))
+          } else {
+            res.status(Status.BAD_REQUEST).json(
+              Fail(error.message))
+          }
         })
     })
 
