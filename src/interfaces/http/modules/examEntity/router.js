@@ -61,7 +61,8 @@ module.exports = ({
         data.forEach(examEntity => {
           gameContentMap.exams.push({
             id: examEntity.id,
-            name: examEntity.name
+            name: examEntity.name,
+            examDate: examEntity.examDate
           })
           examEntity.courseEntities.sort((a, b) => a.id - b.id)
           examEntity.courseEntities.forEach(courseEntity => {
