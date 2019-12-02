@@ -115,8 +115,13 @@ module.exports = ({
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+          if (error.message.includes('Validation error')) {
+            res.status(Status.BAD_REQUEST).json(
+              Fail('existing-information'))
+          } else {
+            res.status(Status.BAD_REQUEST).json(
+              Fail(error.message))
+          }
         })
     })
 
@@ -128,7 +133,17 @@ module.exports = ({
         .getOne({ id: req.params.id })
         .then(data => {
           const { dataValues } = data
-          res.status(Status.OK).json(Success(dataValues))
+
+          if (dataValues.isPremium && new Date(dataValues.premiumEndDate) < new Date()) {
+            dataValues.premiumEndDate = null
+            dataValues.isPremium = false
+
+            putUseCase
+              .updateUser({ id: dataValues.id, body: dataValues })
+              .then(() => {
+                res.status(Status.OK).json(Success(dataValues))
+              })
+          } else res.status(Status.OK).json(Success(dataValues))
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
@@ -250,8 +265,13 @@ module.exports = ({
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging
-          res.status(Status.BAD_REQUEST).json(
-            Fail(error.message))
+          if (error.message.includes('SequelizeUniqueConstraintError')) {
+            res.status(Status.BAD_REQUEST).json(
+              Fail('existing-information'))
+          } else {
+            res.status(Status.BAD_REQUEST).json(
+              Fail(error.message))
+          }
         })
     })
 
