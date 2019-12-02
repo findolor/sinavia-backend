@@ -336,19 +336,23 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
         }
 
         data.forEach(ongoingMatch => {
-          // We set up a cron job for each ongoing match
-          const ongoingMatchCron = new CronJob(ongoingMatch.endDate, () => {
-            const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === ongoingMatch.id)
-            ongoingMatchesList.splice(index, 1)
+          try {
+            // We set up a cron job for each ongoing match
+            const ongoingMatchCron = new CronJob(ongoingMatch.endDate, () => {
+              const index = ongoingMatchesList.findIndex(x => x.ongoingMatchId === ongoingMatch.id)
+              ongoingMatchesList.splice(index, 1)
 
-            finishUpOngoingMatch(ongoingMatch.id, false)
-          }, null, false, 'Europe/Istanbul')
+              finishUpOngoingMatch(ongoingMatch.id, false)
+            }, null, false, 'Europe/Istanbul')
 
-          // Adding the cron to the list and starting it again
-          friendGameCronJob.cronJob = ongoingMatchCron
-          friendGameCronJob.ongoingMatchId = ongoingMatch.id
-          ongoingMatchesList.push(friendGameCronJob)
-          ongoingMatchCron.start()
+            // Adding the cron to the list and starting it again
+            friendGameCronJob.cronJob = ongoingMatchCron
+            friendGameCronJob.ongoingMatchId = ongoingMatch.id
+            ongoingMatchesList.push(friendGameCronJob)
+            ongoingMatchCron.start()
+          } catch (error) {
+            logger.error(error.stack)
+          }
         })
       })
     },
