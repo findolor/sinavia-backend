@@ -352,6 +352,9 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
             ongoingMatchCron.start()
           } catch (error) {
             logger.error(error.stack)
+            if (error.message.includes('Date in past. Will never be fired.')) {
+              deleteOngoingMatch(ongoingMatch.id)
+            }
           }
         })
       })
