@@ -644,7 +644,16 @@ class FriendRoom extends colyseus.Room {
     this.friendMatches = null
   }
 
-  async onInit (options) {
+  onAuth (client, options, request) {
+    if (options.rejectGame) {
+      this.broadcast({
+        action: 'game-reject'
+      })
+      this.disconnect()
+    } else return true
+  }
+
+  async onCreate (options) {
     // We initialize our game here
     this.setState(new FriendGame())
 
@@ -708,30 +717,6 @@ class FriendRoom extends colyseus.Room {
     }
   }
 
-  // If this room is full new users will join another room
-  requestJoin (options, isNew) {
-    if (options.rejectGame) {
-      this.broadcast({
-        action: 'game-reject'
-      })
-      this.disconnect()
-    }
-    if (isNew) {
-      if (options.create) return true
-      else return false
-    } else {
-      const matchInformation = this.state.getMatchInformation()
-      const ROOM_CODE_CHECK = (options.roomCode === matchInformation.roomCode)
-
-      // We check if the room code is valid
-      if (ROOM_CODE_CHECK) {
-        // User can join the room
-        return true
-        // Failed room code check
-      } else { return false }
-    }
-  }
-
   onJoin (client, options) {
     // If we have reached the maxClients, we lock the room for unexpected things
     if (this._maxClientsReached) { this.lock() }
@@ -751,9 +736,9 @@ class FriendRoom extends colyseus.Room {
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
     getUserJoker(options.databaseId).then(userJokers => {
-      this.userJokers[client.id] = []
+      this.userJokers[client.sessionId] = []
       userJokers.forEach(userJoker => {
-        this.userJokers[client.id].push({
+        this.userJokers[client.sessionId].push({
           isUsed: false,
           joker: userJoker,
           id: userJoker.jokerId
@@ -766,12 +751,12 @@ class FriendRoom extends colyseus.Room {
 
     const index = this.userScores.scoreList.findIndex(x => x.userId === options.databaseId)
     if (index !== -1) {
-      this.userScores[client.id] = {
+      this.userScores[client.sessionId] = {
         shouldUpdate: true,
         userScore: this.userScores.scoreList[index]
       }
     } else {
-      this.userScores[client.id] = {
+      this.userScores[client.sessionId] = {
         shouldUpdate: false,
         userScore: null
       }
@@ -783,7 +768,7 @@ class FriendRoom extends colyseus.Room {
       userInformation = dataValues
 
       // Finally adding the player to our room state
-      if (this.state.addPlayer(client.id, userInformation, options.databaseId)) this.addedUserNumber++
+      if (this.state.addPlayer(client.sessionId, userInformation, options.databaseId)) this.addedUserNumber++
 
       if (this.addedUserNumber === 2) {
         // We send the clients player information
@@ -902,19 +887,19 @@ class FriendRoom extends colyseus.Room {
         break
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
-        this.state.setPlayerAnswerResults(client.id, data.button)
+        this.state.setPlayerAnswerResults(client.sessionId, data.button)
         break
       case 'remove-options-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         let optionsToRemove
@@ -929,15 +914,15 @@ class FriendRoom extends colyseus.Room {
         break
       case 'second-chance-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         const questionAnswer = this.state.getQuestionAnswer()
@@ -950,15 +935,15 @@ class FriendRoom extends colyseus.Room {
         break
       case 'see-opponent-answer-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
 
           this.send(client, {
             action: 'see-opponent-answer-joker'
@@ -971,7 +956,7 @@ class FriendRoom extends colyseus.Room {
           friendMatches: this.friendMatches
         })
         this.clients.forEach(element => {
-          if (element.id !== client.id) {
+          if (element.id !== client.sessionId) {
             this.send(element, {
               action: 'replay'
             })
@@ -1060,12 +1045,12 @@ class FriendRoom extends colyseus.Room {
         this.isMatchFinished = true
         this.send(client, {
           action: 'leave-match',
-          clientId: client.id,
+          clientId: client.sessionId,
           playerProps: this.state.getPlayerProps(),
           fullQuestionList: this.state.getQuestionProps()
         })
         if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
-        else this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userJokers, this.userScores)
+        else this.state.saveUnfinishedMatchResults(client.sessionId, this.roomId, this.userJokers, this.userScores)
         break
     }
   }
@@ -1073,7 +1058,7 @@ class FriendRoom extends colyseus.Room {
   onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
-      clientId: client.id,
+      clientId: client.sessionId,
       consented: consented
     })
 
@@ -1084,13 +1069,13 @@ class FriendRoom extends colyseus.Room {
 
       this.send(lastClient, {
         action: 'client-leaving',
-        clientId: lastClient.id,
+        clientId: lastClient.sessionId,
         playerProps: this.state.getPlayerProps(),
         fullQuestionList: this.state.getQuestionProps()
       })
 
       // We save the leaving clients id to mark it as lost for later
-      this.leavingClientId = client.id
+      this.leavingClientId = client.sessionId
 
       // If the match was still going on
       if (!this.isMatchFinished) {

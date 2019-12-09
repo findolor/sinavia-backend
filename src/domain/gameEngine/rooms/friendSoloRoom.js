@@ -355,7 +355,7 @@ class FriendSoloRoom extends colyseus.Room {
     this.userJokers = {}
   }
 
-  onInit (options) {
+  onCreate (options) {
     // We initialize our game here
     this.setState(new FriendSoloGame())
 
@@ -393,9 +393,9 @@ class FriendSoloRoom extends colyseus.Room {
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
     getUserJoker(options.databaseId).then(userJokers => {
-      this.userJokers[client.id] = []
+      this.userJokers[client.sessionId] = []
       userJokers.forEach(userJoker => {
-        this.userJokers[client.id].push({
+        this.userJokers[client.sessionId].push({
           isUsed: false,
           joker: userJoker,
           id: userJoker.jokerId
@@ -412,7 +412,7 @@ class FriendSoloRoom extends colyseus.Room {
       userInformation = dataValues
 
       // Finally adding the player to our room state
-      this.state.addPlayer(client.id, userInformation, options.databaseId)
+      this.state.addPlayer(client.sessionId, userInformation, options.databaseId)
     }).catch(error => {
       logger.error('GAME ENGINE INTERFACE => Cannot get user')
       logger.error(error.stack)
@@ -472,19 +472,19 @@ class FriendSoloRoom extends colyseus.Room {
         break
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
-        this.state.setPlayerAnswerResults(client.id, data.button)
+        this.state.setPlayerAnswerResults(client.sessionId, data.button)
         break
       case 'remove-options-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         let optionsToRemove
@@ -499,15 +499,15 @@ class FriendSoloRoom extends colyseus.Room {
         break
       case 'second-chance-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         const questionAnswer = this.state.getQuestionAnswer()
@@ -524,7 +524,7 @@ class FriendSoloRoom extends colyseus.Room {
   async onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
-      clientId: client.id,
+      clientId: client.sessionId,
       consented: consented
     })
 
