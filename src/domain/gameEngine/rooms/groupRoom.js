@@ -20,7 +20,6 @@ const {
 // A placeholder variable for the empty option
 const emptyAnswer = 6
 
-// TODO add log to all events
 class GroupState {
   constructor (
     playerIdList,
@@ -365,8 +364,7 @@ class GroupRoom extends colyseus.Room {
     this.userScores = {}
   }
 
-  // TODO USE THE NEW FUNCTIONS
-  onInit (options) {
+  onCreate (options) {
     // We initialize our game here
     this.setState(new GroupGame())
 
@@ -378,26 +376,6 @@ class GroupRoom extends colyseus.Room {
     }
 
     this.state.setMatchInformation(matchInformation)
-  }
-
-  // If this room is full new users will join another room
-  // There is only a room code check here
-  // No need to check for exam/subject/course names
-  requestJoin (options, isNew) {
-    if (isNew) {
-      if (options.create) return true
-      else return false
-    } else {
-      const matchInformation = this.state.getMatchInformation()
-      const ROOM_CODE_CHECK = (options.roomCode === matchInformation.roomCode)
-
-      // We check if the room code is valid
-      if (ROOM_CODE_CHECK) {
-        // User can join the room
-        return true
-        // Failed room code check
-      } else { return false }
-    }
   }
 
   onJoin (client, options) {
