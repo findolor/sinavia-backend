@@ -653,6 +653,9 @@ class GroupRoom extends colyseus.Room {
           fullQuestionList: this.state.getQuestionProps()
         })
         break
+      case 'ping':
+        this.send(client, { action: 'ping' })
+        break
     }
   }
 
