@@ -453,11 +453,11 @@ class GroupRoom extends colyseus.Room {
       // Finally adding the player to our room state
       this.state.addPlayer(client.id, userInformation, options.databaseId)
       // We send the clients player information
+      this.broadcast({
+        action: 'player-props',
+        playerProps: this.state.getPlayerProps()
+      })
       setTimeout(() => {
-        this.broadcast({
-          action: 'player-props',
-          playerProps: this.state.getPlayerProps()
-        })
         this.send(client, {
           action: 'content-ids',
           courseId: matchInformation.courseId,
