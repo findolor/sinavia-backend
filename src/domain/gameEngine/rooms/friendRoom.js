@@ -1067,6 +1067,9 @@ class FriendRoom extends colyseus.Room {
         if (this.isSoloGame) this.state.saveSoloMatchResults(this.roomId, this.userJokers, this.soloGameDBId)
         else this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userJokers, this.userScores)
         break
+      case 'ping':
+        this.send(client, { action: 'ping' })
+        break
     }
   }
 
