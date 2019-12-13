@@ -518,6 +518,9 @@ class FriendSoloRoom extends colyseus.Room {
           questionAnswer: questionAnswer
         })
         break
+      case 'ping':
+        this.send(client, { action: 'ping' })
+        break
     }
   }
 

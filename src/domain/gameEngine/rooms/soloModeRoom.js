@@ -539,6 +539,9 @@ class SoloModeRoom extends colyseus.Room {
           })
           this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
           break
+        case 'ping':
+          this.send(client, { action: 'ping' })
+          break
       }
     } catch (error) {
       logger.error(error.stack)
