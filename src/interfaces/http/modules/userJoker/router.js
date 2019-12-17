@@ -45,6 +45,15 @@ module.exports = ({
                     logger.error(error.stack)
                     res.status(Status.BAD_REQUEST).json(Fail(error.message))
                   })
+              } else {
+                userJoker.dateRenewed = new Date()
+
+                putUserJokerUseCase
+                  .updateUserJoker({ userJokerEntity: userJoker })
+                  .catch(error => {
+                    logger.error(error.stack)
+                    res.status(Status.BAD_REQUEST).json(Fail(error.message))
+                  })
               }
             }
           })
