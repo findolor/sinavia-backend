@@ -71,15 +71,15 @@ module.exports = ({
       getUserJokerUseCase
         .getJokers({ userId: req.params.userId })
         .then(data => {
-                      data.forEach(userJoker => {
+          data.forEach(userJoker => {
             userJoker.amount += 2
 
             putUserJokerUseCase
-            .updateUserJoker({ userJokerEntity: userJoker })
-            .catch(error => {
-              logger.error(error.stack)
-              res.status(Status.BAD_REQUEST).json(Fail(error.message))
-            })
+              .updateUserJoker({ userJokerEntity: userJoker })
+              .catch(error => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(Fail(error.message))
+              })
           })
           res.status(Status.OK).json(Success(data))
         })
