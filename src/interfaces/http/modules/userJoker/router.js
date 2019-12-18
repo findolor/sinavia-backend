@@ -66,5 +66,29 @@ module.exports = ({
         })
     })
 
+  router
+    .put('/reward/all/:userId', (req, res) => {
+      getUserJokerUseCase
+        .getJokers({ userId: req.params.userId })
+        .then(data => {
+                      data.forEach(userJoker => {
+            userJoker.amount += 2
+
+            putUserJokerUseCase
+            .updateUserJoker({ userJokerEntity: userJoker })
+            .catch(error => {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(Fail(error.message))
+            })
+          })
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
   return router
 }
