@@ -203,16 +203,20 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
               // Creating the notification
               createNotification(notificationBody).then(() => {
               // Sending the notification
-                fcmService.sendNotificationDataMessage(
-                  data.ongoingMatchUser.fcmToken,
-                  {
-                    title: 'Arkadaş oyunu!',
-                    body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
-                  },
-                  {
-                    type: 'friendMatchResult'
-                  }
-                )
+                try {
+                  fcmService.sendNotificationDataMessage(
+                    data.ongoingMatchUser.fcmToken,
+                    {
+                      title: 'Arkadaş oyunu!',
+                      body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
+                    },
+                    {
+                      type: 'friendMatchResult'
+                    }
+                  )
+                } catch (error) {
+                  logger.error(error.stack)
+                }
 
                 // Stopping ongoing match cron
                 findAndStopMatchCron(ongoingMatchId)
