@@ -937,7 +937,6 @@ class RankedRoom extends colyseus.Room {
           this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
           break
         case 'ping':
-          console.log('hrere')
           this.send(client, { action: 'ping' })
           break
       }
