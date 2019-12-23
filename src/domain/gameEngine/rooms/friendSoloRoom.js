@@ -10,7 +10,9 @@ const {
   updateOngoingMatch,
   getOngoingMatch,
   getFriendMatches,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -243,6 +245,7 @@ class FriendSoloGame {
       })
 
       this.decideUserJokers(userJokers, userId)
+      this.decideUserGoals(playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex.forEach(wrongQuestionIndex => {
@@ -287,6 +290,17 @@ class FriendSoloGame {
         }
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses

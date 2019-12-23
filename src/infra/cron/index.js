@@ -18,7 +18,8 @@ const {
   postUserScore,
   putUserScore,
   createNotification,
-  updateNotification
+  updateNotification,
+  deleteAllUserGoals
 } = require('../../interfaces/databaseInterface/interface')
 
 const ongoingMatchesList = []
@@ -461,6 +462,11 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
             logger.error(error.stack)
           })
       })
-    }, null, true, 'Europe/Istanbul', null, true)
+    }, null, true, 'Europe/Istanbul', null, true),
+    resetUserGoalsCronJob: () => new CronJob('0 0 0 * * 1', () => {
+      deleteAllUserGoals().catch(error => {
+        logger.error(error.stack)
+      })
+    }, null, true, 'Europe/Istanbul', null, false)
   }
 }
