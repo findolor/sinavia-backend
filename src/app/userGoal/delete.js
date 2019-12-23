@@ -10,7 +10,16 @@ module.exports = ({ userGoalRepository }) => {
     })
   }
 
+  const deleteAll = () => {
+    return Promise.resolve().then(() => {
+      return userGoalRepository.destroy({
+        where: {}
+      })
+    })
+  }
+
   return {
-    deleteGoal
+    deleteGoal,
+    deleteAll
   }
 }
