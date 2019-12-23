@@ -95,11 +95,14 @@ module.exports = ({
       getUserJokerUseCase
         .getOne({ userId: req.params.userId, jokerId: req.body.jokerId })
         .then(data => {
+          const { dataValues } = data
+          data = dataValues
+
           data.amount += 2
 
           putUserJokerUseCase
             .updateUserJoker({ userJokerEntity: data })
-            .then(data => {
+            .then(() => {
               res.status(Status.OK).json(Success(data))
             })
             .catch(error => {

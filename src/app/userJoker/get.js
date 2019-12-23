@@ -25,7 +25,12 @@ module.exports = ({ userJokerRepository, database }) => {
           where: {
             userId: userId,
             jokerId: jokerId
-          }
+          },
+          include: [
+            {
+              model: database.models.jokers
+            }
+          ]
         })
         return userJoker
       })
