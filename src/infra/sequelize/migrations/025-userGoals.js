@@ -15,6 +15,7 @@ module.exports = {
           model: 'users',
           key: 'id'
         },
+        unique: 'unique_goals',
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
@@ -25,6 +26,7 @@ module.exports = {
           model: 'subjectEntities',
           key: 'id'
         },
+        unique: 'unique_goals',
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
@@ -39,7 +41,8 @@ module.exports = {
       },
       startDate: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: new Date()
       },
       createdAt: {
         allowNull: false,
@@ -50,6 +53,13 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.fn('NOW')
+      }
+    }, {
+      uniqueKeys: {
+        unique_tag: {
+          customIndex: true,
+          fields: ['userId', 'subjectId']
+        }
       }
     })
   },

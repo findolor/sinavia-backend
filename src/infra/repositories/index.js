@@ -165,10 +165,10 @@ module.exports = ({ database }) => {
   // USER_GOALS belongs to one user and subject 1-1
   // USER has many subject as goals M-N
   // SUBJECT goals has many users M-N
-  userModel.belongsToMany(subjectEntityModel, { through: userGoalModel })
-  subjectEntityModel.belongsToMany(userModel, { through: userGoalModel })
-  userGoalModel.belongsTo(userModel)
-  userGoalModel.belongsTo(subjectEntityModel)
+  userModel.belongsToMany(subjectEntityModel, { through: userGoalModel, foreignKey: 'userId' })
+  subjectEntityModel.belongsToMany(userModel, { through: userGoalModel, foreignKey: 'subjectId' })
+  userGoalModel.belongsTo(userModel, { foreignKey: 'userId' })
+  userGoalModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
 
   return {
     userRepository: User({ model: userModel }),

@@ -6,9 +6,9 @@ const UserGoal = t.struct({
   id: t.maybe(t.Number),
   userId: t.String,
   subjectId: t.Number,
-  questionSolved: t.Number,
+  questionSolved: t.maybe(t.Number),
   goalAmount: t.Number,
-  startDate: t.Date,
+  startDate: t.maybe(t.Date),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })
