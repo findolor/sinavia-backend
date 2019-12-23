@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     goalAmount: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    startDate: {
+      type: DataTypes.DATE,
+      allowNull: false
     }
   }, {
     freezeTableName: true,
