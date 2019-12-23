@@ -11,7 +11,9 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -262,6 +264,7 @@ class GroupGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
@@ -321,20 +324,15 @@ class GroupGame {
     }
   }
 
-  // TODO need to implement replay logic for group
-  // This code might change later
-  // TODO Might delete this
-  resetRoom () {
-    const playerIds = Object.keys(this.groupState.playerProps)
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
 
-    playerIds.forEach(element => {
-      this.groupState.playerProps[element].answers = []
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
     })
-
-    this.groupState.questionNumber = -1
-    this.groupState.questionProps = []
-    this.groupState.questionList = []
-    this.groupState.stateInformation = ''
   }
 }
 

@@ -12,7 +12,22 @@ module.exports = ({ userGoalRepository }) => {
       })
   }
 
+  const getOne = ({ userId, subjectId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const userGoals = userGoalRepository.findOne({
+          where: {
+            userId: userId,
+            subjectId: subjectId
+          }
+        })
+        return userGoals
+      })
+  }
+
   return {
-    getBatch
+    getBatch,
+    getOne
   }
 }

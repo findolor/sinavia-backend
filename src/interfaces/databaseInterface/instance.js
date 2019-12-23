@@ -10,7 +10,7 @@ const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch }
 const { getExamEntity } = require('src/app/examEntity')
 const { postNotification, putNotification } = require('src/app/notification')
 const { getUnsolvedQuestion, postUnsolvedQuestion, deleteUnsolvedQuestion } = require('src/app/unsolvedQuestion')
-const { deleteUserGoal, putUserGoal } = require('src/app/userGoal')
+const { deleteUserGoal, putUserGoal, getUserGoal } = require('src/app/userGoal')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -81,6 +81,7 @@ module.exports = () => {
   const deleteUnsolvedQuestionUseCase = deleteUnsolvedQuestion({ unsolvedQuestionRepository })
   const putUserGoalUseCase = putUserGoal({ userGoalRepository })
   const deleteUserGoalUseCase = deleteUserGoal({ userGoalRepository })
+  const getUserGoalUseCase = getUserGoal({ userGoalRepository })
 
   return {
     getQuestionUseCase,
@@ -109,6 +110,7 @@ module.exports = () => {
     postUnsolvedQuestionUseCase,
     deleteUnsolvedQuestionUseCase,
     putUserGoalUseCase,
-    deleteUserGoalUseCase
+    deleteUserGoalUseCase,
+    getUserGoalUseCase
   }
 }

@@ -144,3 +144,11 @@ exports.deleteUnsolvedQuestion = async (userId, questionId) => {
 exports.deleteAllUserGoals = async () => {
   return engineInterface().deleteUserGoalUseCase.deleteAll()
 }
+
+exports.updateUserGoals = async (userGoalEntity) => {
+  return engineInterface().putUserGoalUseCase.updateUserGoal({ userGoalEntity: userGoalEntity })
+}
+
+exports.getOneUserGoal = async (userId, subjectId) => {
+  return engineInterface().getUserGoalUseCase.getOne({ userId: userId, subjectId: subjectId })
+}

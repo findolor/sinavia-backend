@@ -11,7 +11,9 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -226,6 +228,7 @@ class SoloModeGame {
 
       this.decideUserJokers(userJokers)
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
+      this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
 
     // Adding the wrong solved questions to db
@@ -283,6 +286,17 @@ class SoloModeGame {
         logger.error(error.stack)
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    }).catch(error => logger.error(error.stack))
   }
 
   resetRoom () {

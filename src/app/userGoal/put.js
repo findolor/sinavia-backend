@@ -8,7 +8,8 @@ module.exports = ({ userGoalRepository }) => {
 
         await userGoalRepository.update(userGoal, {
           where: {
-            userId: userGoalEntity.userId
+            userId: userGoalEntity.userId,
+            subjectId: userGoalEntity.subjectId
           }
         })
 

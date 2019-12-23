@@ -10,9 +10,11 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore
+  postUserScore,
   /* deleteUnsolvedQuestion,
   getUnsolvedQuestions */
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -226,6 +228,7 @@ class UnsolvedQuestionsGame {
 
       this.decideUserJokers(userJokers)
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
+      this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
 
     logger.info(`Unsolved questions mode ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
@@ -270,6 +273,17 @@ class UnsolvedQuestionsGame {
         logger.error(error.stack)
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
   }
 
   resetRoom () {
