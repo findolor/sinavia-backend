@@ -5,6 +5,7 @@ module.exports = ({ userGoalRepository }) => {
     return Promise.resolve().then(() => {
       const entity = Object.assign({}, {
         userId: body.userId,
+        courseId: body.courseId,
         subjectId: body.subjectId,
         goalAmount: body.goalAmount
       })

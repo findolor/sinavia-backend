@@ -5,6 +5,7 @@ const { cleanData } = require('../helper')
 const UserGoal = t.struct({
   id: t.maybe(t.Number),
   userId: t.String,
+  courseId: t.Number,
   subjectId: t.Number,
   questionSolved: t.maybe(t.Number),
   goalAmount: t.Number,
