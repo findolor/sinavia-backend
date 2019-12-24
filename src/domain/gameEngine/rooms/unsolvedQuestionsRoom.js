@@ -326,6 +326,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
     this.questionAmount = 5
     this.userJokers = []
     this.userScores = {}
+    this.isQuestionsAvailable = false
   }
 
   onInit (options) {
@@ -347,13 +348,22 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
         options.subjectId,
         this.questionAmount
       ).then(questionProps => {
+        // If we dont have any questions to show, we end the game
+        if (Object.keys(questionProps).length !== 0) this.isQuestionsAvailable = true
+        if (!this.isQuestionsAvailable) {
+          this.broadcast({ action: 'no-questions' })
+          return
+        }
+        // If we have less than 5 questions we set the question variable again
+        if (Object.keys(questionProps).length !== this.questionAmount) this.questionAmount = Object.keys(questionProps).length
+
         const questionList = []
         const props = []
         // Getting only the question links
         questionProps.forEach(element => {
           const { dataValues } = element.question
           element = dataValues
-          console.log(element)
+
           props.push(element)
           questionList.push(element.questionLink)
         })
@@ -579,7 +589,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
       })
 
       // If the match was still going on
-      if (!this.isMatchFinished) {
+      if (!this.isMatchFinished && this.isQuestionsAvailable) {
         this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
       }
     } catch (error) {
