@@ -58,7 +58,10 @@ const calculateResults = (playerList) => {
 const calculateResultsSolo = (player) => {
   // Results are returned in this list
   const resultList = []
+  // This is for the questions that are incorrectly answered
   const unsolvedIndex = []
+  // This is for the questions that are correctly answered
+  const solvedIndex = []
 
   let playerCorrect = 0
   let playerIncorrect = 0
@@ -81,6 +84,7 @@ const calculateResultsSolo = (player) => {
         break
       case true:
         playerCorrect++
+        solvedIndex.push(index)
         break
       case false:
         playerIncorrect++
@@ -100,7 +104,8 @@ const calculateResultsSolo = (player) => {
 
   return {
     resultList: resultList,
-    unsolvedIndex: unsolvedIndex
+    unsolvedIndex: unsolvedIndex,
+    solvedIndex: solvedIndex
   }
 }
 

@@ -137,8 +137,8 @@ exports.postUnsolvedQuestion = async (unsolvedQuestionEntity) => {
   return engineInterface().postUnsolvedQuestionUseCase.create({ unsolvedQuestionEntity: unsolvedQuestionEntity })
 }
 
-exports.deleteUnsolvedQuestion = async (userId, questionId) => {
-  return engineInterface().deleteUnsolvedQuestionUseCase.destroy({ userId: userId, questionId: questionId })
+exports.deleteUnsolvedQuestion = async (userId, questionIdList) => {
+  return engineInterface().deleteUnsolvedQuestionUseCase.deleteBatch({ userId: userId, questionIdList: questionIdList })
 }
 
 exports.deleteAllUserGoals = async () => {

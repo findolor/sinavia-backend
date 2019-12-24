@@ -11,8 +11,8 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  /* deleteUnsolvedQuestion,
-  getUnsolvedQuestions */
+  deleteUnsolvedQuestion,
+  getUnsolvedQuestions,
   updateUserGoals,
   getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
@@ -206,6 +206,7 @@ class UnsolvedQuestionsGame {
   saveMatchResults (soloModeRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -230,6 +231,15 @@ class UnsolvedQuestionsGame {
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
       this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
+
+    if (Object.keys(results.solvedIndex).length !== 0) {
+      const correctlyAnsweredQuestionIds = []
+      // Deleting the correctly solved questions from unsolved table
+      results.solvedIndex.forEach(correctlyAnsweredIndex => {
+        correctlyAnsweredQuestionIds.push(questionProps[correctlyAnsweredIndex].id)
+      })
+      deleteUnsolvedQuestion(playerProps.databaseId, correctlyAnsweredQuestionIds).catch(error => logger.error(error.stack))
+    }
 
     logger.info(`Unsolved questions mode ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
@@ -330,20 +340,25 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
       }
 
       // Fetching questions from database
-      getMultipleQuestions(
+      getUnsolvedQuestions(
+        options.databaseId,
         options.examId,
         options.courseId,
         options.subjectId,
         this.questionAmount
       ).then(questionProps => {
         const questionList = []
-
+        const props = []
         // Getting only the question links
         questionProps.forEach(element => {
+          const { dataValues } = element.question
+          element = dataValues
+          console.log(element)
+          props.push(element)
           questionList.push(element.questionLink)
         })
         // Setting general match related info
-        this.state.setQuestions(questionProps, questionList)
+        this.state.setQuestions(props, questionList)
         this.state.setMatchInformation(matchInformation)
       }).catch(error => {
         logger.error('GAME ENGINE INTERFACE => Cannot get questions')
