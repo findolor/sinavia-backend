@@ -16,8 +16,8 @@ module.exports = ({ model }) => {
   const findOne = (...args) =>
     model.findOne(...args)
       .then((dataValues) => {
-        if (dataValues === null) return null
-        else return dataValues
+        if (dataValues === null) return false
+        else return dataValues.dataValues
       })
       .catch((error) => { throw new Error(error) })
 

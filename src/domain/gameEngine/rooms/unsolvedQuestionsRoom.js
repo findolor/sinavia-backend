@@ -10,9 +10,11 @@ const {
   putUserJoker,
   getUserScore,
   putUserScore,
-  postUserScore
-  /* deleteUnsolvedQuestion,
-  getUnsolvedQuestions */
+  postUserScore,
+  deleteUnsolvedQuestion,
+  getUnsolvedQuestions,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -204,6 +206,7 @@ class UnsolvedQuestionsGame {
   saveMatchResults (soloModeRoomId, userJokers, userScores) {
     const matchInformation = this.getMatchInformation()
     const playerProps = this.getPlayerProps()
+    const questionProps = this.getQuestionProps()
 
     const results = this.getTotalResults()
 
@@ -226,7 +229,17 @@ class UnsolvedQuestionsGame {
 
       this.decideUserJokers(userJokers)
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
+      this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
+
+    if (Object.keys(results.solvedIndex).length !== 0) {
+      const correctlyAnsweredQuestionIds = []
+      // Deleting the correctly solved questions from unsolved table
+      results.solvedIndex.forEach(correctlyAnsweredIndex => {
+        correctlyAnsweredQuestionIds.push(questionProps[correctlyAnsweredIndex].id)
+      })
+      deleteUnsolvedQuestion(playerProps.databaseId, correctlyAnsweredQuestionIds).catch(error => logger.error(error.stack))
+    }
 
     logger.info(`Unsolved questions mode ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
@@ -272,6 +285,17 @@ class UnsolvedQuestionsGame {
     }
   }
 
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
+  }
+
   resetRoom () {
     this.unsolvedQuestionsState.playerProps.answers = []
     this.unsolvedQuestionsState.questionNumber = -1
@@ -302,6 +326,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
     this.questionAmount = 5
     this.userJokers = []
     this.userScores = {}
+    this.isQuestionsAvailable = false
   }
 
   onInit (options) {
@@ -316,20 +341,34 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
       }
 
       // Fetching questions from database
-      getMultipleQuestions(
+      getUnsolvedQuestions(
+        options.databaseId,
         options.examId,
         options.courseId,
         options.subjectId,
         this.questionAmount
       ).then(questionProps => {
-        const questionList = []
+        // If we dont have any questions to show, we end the game
+        if (Object.keys(questionProps).length !== 0) this.isQuestionsAvailable = true
+        if (!this.isQuestionsAvailable) {
+          this.broadcast({ action: 'no-questions' })
+          return
+        }
+        // If we have less than 5 questions we set the question variable again
+        if (Object.keys(questionProps).length !== this.questionAmount) this.questionAmount = Object.keys(questionProps).length
 
+        const questionList = []
+        const props = []
         // Getting only the question links
         questionProps.forEach(element => {
+          const { dataValues } = element.question
+          element = dataValues
+
+          props.push(element)
           questionList.push(element.questionLink)
         })
         // Setting general match related info
-        this.state.setQuestions(questionProps, questionList)
+        this.state.setQuestions(props, questionList)
         this.state.setMatchInformation(matchInformation)
       }).catch(error => {
         logger.error('GAME ENGINE INTERFACE => Cannot get questions')
@@ -550,7 +589,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
       })
 
       // If the match was still going on
-      if (!this.isMatchFinished) {
+      if (!this.isMatchFinished && this.isQuestionsAvailable) {
         this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
       }
     } catch (error) {

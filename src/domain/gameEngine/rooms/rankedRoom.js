@@ -12,7 +12,9 @@ const {
   getUserJoker,
   putUserJoker,
   updateUserTotalPoints,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -325,6 +327,7 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
       // Adding the wrong solved questions to db
@@ -382,6 +385,7 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
       // Adding the wrong solved questions to db
@@ -468,6 +472,17 @@ class RankedGame {
         }
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    }).catch(error => logger.error(error.stack))
   }
 
   decideUserInformationTotalPoints (userInformation, earnedPoints) {

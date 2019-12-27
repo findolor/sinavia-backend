@@ -11,7 +11,9 @@ module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
         // Gets the whole game content from db at 4 AM and puts it in cache
         .then(cronJob.makeGameContentCronJob)
         // Leaderboard cron job that runs at 4 AM
-        .then(cronJob.leaderboardCronJob())
+        .then(cronJob.leaderboardCronJob)
+        // Cron job that runs every monday to delete user goals
+        .then(cronJob.resetUserGoalsCronJob)
         .catch(err => logger.error(err.stack))
   }
 }

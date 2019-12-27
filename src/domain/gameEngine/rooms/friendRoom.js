@@ -14,7 +14,9 @@ const {
   putUserScore,
   postUserScore,
   getFriendMatches,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -293,6 +295,7 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
@@ -368,6 +371,7 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
       // Adding the wrong solved questions to db
       results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
@@ -537,6 +541,17 @@ class FriendGame {
         logger.error(error.stack)
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses
