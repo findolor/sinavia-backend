@@ -98,7 +98,7 @@ module.exports = ({
           const { dataValues } = data
           data = dataValues
 
-          data.amount += 2
+          data.amount += req.body.jokerAmount
 
           putUserJokerUseCase
             .updateUserJoker({ userJokerEntity: data })
