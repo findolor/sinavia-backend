@@ -454,14 +454,12 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('show-results')
             // Sending the questions in full for favouriting
-            this.clock.setTimeout(() => {
-              this.broadcast({
-                action: 'save-questions',
-                fullQuestionList: this.state.getQuestionProps()
-              })
-            }, 1000)
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+            this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
             this.clock.setTimeout(() => {
               this.state.changeStateInformation('match-finished')

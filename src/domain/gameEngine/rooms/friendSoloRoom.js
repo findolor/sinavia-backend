@@ -444,14 +444,12 @@ class FriendSoloRoom extends colyseus.Room {
         break
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-          this.state.changeStateInformation('show-results')
           // Sending the questions in full for favouriting
-          this.clock.setTimeout(() => {
-            this.broadcast({
-              action: 'save-questions',
-              fullQuestionList: this.state.getQuestionProps()
-            })
-          }, 1000)
+          this.broadcast({
+            action: 'save-questions',
+            fullQuestionList: this.state.getQuestionProps()
+          })
+          this.state.changeStateInformation('show-results')
           // Getting the relevant friend match infos from db
           getOngoingMatch(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
             getFriendMatches(ongoingMatch.ongoingMatchUser.dataValues.id, ongoingMatch.ongoingMatchFriend.dataValues.id).then(friendMatches => {
