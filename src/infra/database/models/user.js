@@ -65,6 +65,10 @@ module.exports = (sequelize, DataTypes) => {
     premiumEndDate: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    signInMethod: {
+      type: DataTypes.ENUM('normal', 'google', 'facebook'),
+      allowNull: false
     }
   }, {
     hooks: {

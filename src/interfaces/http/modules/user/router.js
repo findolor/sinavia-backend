@@ -125,6 +125,20 @@ module.exports = ({
         })
     })
 
+  router
+    .get('/check', (req, res) => {
+      getUseCase
+        .getOneWithEmail({ email: req.query.email })
+        .then(data => {
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
   router.use(auth.authenticate())
 
   router
