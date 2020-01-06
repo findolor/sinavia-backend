@@ -67,6 +67,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true
       },
+      signInMethod: {
+        type: Sequelize.ENUM('normal', 'google', 'facebook'),
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

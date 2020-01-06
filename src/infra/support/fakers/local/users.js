@@ -21,7 +21,8 @@ module.exports = () => {
       deviceId: 'E6559387-A6D2-4CCD-903A-3C8D2F936AD0',
       profilePicture: profilePicture,
       coverPicture: coverPicture,
-      isPremium: false
+      isPremium: false,
+      signInMethod: 'normal'
     },
     {
       id: 'c4b812f2-78d5-4bc3-a46a-87a03bdf97fc',
@@ -35,7 +36,8 @@ module.exports = () => {
       deviceId: '6B58287D-49D3-452F-832C-5FFA0DE4EEB8',
       profilePicture: profilePicture,
       coverPicture: coverPicture,
-      isPremium: false
+      isPremium: false,
+      signInMethod: 'normal'
     },
     {
       id: 'b46c9693-c17d-498a-adf6-bd618c23f4b3',
@@ -49,7 +51,8 @@ module.exports = () => {
       deviceId: '9B2B72B8-4AB3-4522-9D4F-44A357160F6A',
       profilePicture: profilePicture,
       coverPicture: coverPicture,
-      isPremium: false
+      isPremium: false,
+      signInMethod: 'normal'
     },
     {
       id: '08f228a0-443b-4003-8b17-efe835cf6916',
@@ -62,7 +65,8 @@ module.exports = () => {
       profilePicture: profilePicture,
       coverPicture: coverPicture,
       isPremium: true,
-      premiumEndDate: moment().add(1, 'weeks').toDate()
+      premiumEndDate: moment().add(1, 'weeks').toDate(),
+      signInMethod: 'normal'
     },
     {
       id: '72b6fa48-94c0-4691-8ac9-db679a67a9b3',
@@ -75,7 +79,8 @@ module.exports = () => {
       profilePicture: profilePicture,
       coverPicture: coverPicture,
       isPremium: true,
-      premiumEndDate: moment().add(1, 'weeks').toDate()
+      premiumEndDate: moment().add(1, 'weeks').toDate(),
+      signInMethod: 'normal'
     }
   ]
 }

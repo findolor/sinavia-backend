@@ -18,6 +18,7 @@ const User = t.struct({
   isPremium: t.maybe(t.Boolean),
   premiumEndDate: t.maybe(t.Date),
   password: t.maybe(t.String),
+  signInMethod: t.String,
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })
