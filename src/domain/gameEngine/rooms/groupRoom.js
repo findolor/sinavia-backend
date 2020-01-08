@@ -75,6 +75,15 @@ class GroupGame {
     }
   }
 
+  // Checks if the player is already in the match
+  isPlayerInGroup (databaseId) {
+    const clientIds = Object.keys(this.groupState.playerProps)
+    if (clientIds.some((clientId) => {
+      return this.groupState.playerProps[clientId].databaseId === databaseId
+    })) return true
+    return false
+  }
+
   // Sets the players answers then sends a response to our client
   setPlayerAnswerResults (clientId, button) {
     this.groupState.playerProps[clientId].answers.push({
@@ -391,6 +400,8 @@ class GroupRoom extends colyseus.Room {
 
       // We check if the room code is valid
       if (ROOM_CODE_CHECK) {
+        // Checks if the player is already in the group
+        if (this.state.isPlayerInGroup(options.databaseId)) return false
         // User can join the room
         return true
         // Failed room code check
