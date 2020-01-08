@@ -100,6 +100,12 @@ class RankedGame {
     return true
   }
 
+  // Checks players database ids to prevent users from playing a game with themselves
+  isBothPlayersSame () {
+    if (this.rankedState.playerProps[this.rankedState.playerOneId].databaseId === this.rankedState.playerProps[this.rankedState.playerTwoId].databaseId) return true
+    else return false
+  }
+
   // Sets the players answers then sends a response to our client
   setPlayerAnswerResults (clientId, button) {
     this.rankedState.playerProps[clientId].answers.push({
@@ -589,6 +595,7 @@ class RankedRoom extends colyseus.Room {
     this.userJokers = {}
     this.userInformations = {}
     this.isBotGame = false
+    this.isMatchStarted = false
   }
 
   // If this room is full new users will join another room
@@ -700,6 +707,12 @@ class RankedRoom extends colyseus.Room {
         if (this.state.addPlayer(client.id, userInformation, this.userScores, false)) this.addedUserNumber++
 
         if (this.addedUserNumber === 2) {
+          // Checking if the users are different
+          if (this.state.isBothPlayersSame()) {
+            this.disconnect()
+            return
+          }
+
           // We send the clients player information
           this.clock.setTimeout(() => {
             this.broadcast(this.state.getPlayerProps())
@@ -724,9 +737,10 @@ class RankedRoom extends colyseus.Room {
       // Players send 'ready' action to server for letting it know that they are ready for the game
         case 'ready':
           if (++this.readyPlayerCount === 2) {
-          // When players get the 'question' action they start the round and play.
-          // This delay will be longer due to pre-match player showcases.
-          /* setTimeout(() => {
+            this.isMatchStarted = true
+            // When players get the 'question' action they start the round and play.
+            // This delay will be longer due to pre-match player showcases.
+            /* setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
           }, 3000) */
@@ -965,6 +979,7 @@ class RankedRoom extends colyseus.Room {
         clientId: client.id,
         consented: consented
       })
+      if (!this.isMatchStarted) return
       // TODO add errors on all of these events
       // If the room is not empty
       if (this.clients.length !== 0) {
