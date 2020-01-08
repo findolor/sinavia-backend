@@ -101,8 +101,8 @@ class RankedGame {
   }
 
   // Checks players database ids to prevent users from playing a game with themselves
-  isBothPlayersSame () {
-    if (this.rankedState.playerProps[this.rankedState.playerOneId].databaseId === this.rankedState.playerProps[this.rankedState.playerTwoId].databaseId) return true
+  isBothPlayersSame (databaseId) {
+    if (this.rankedState.playerProps[this.rankedState.playerOneId].databaseId === databaseId) return true
     else return false
   }
 
@@ -611,6 +611,10 @@ class RankedRoom extends colyseus.Room {
                                         (matchInformation.subjectId === options.subjectId)
       if (ROOM_AVAILABILITY_CHECK) { // First we check if the room is available for joining
         if (EXAM_COURSE_SUBJECT_CHECK) { // Then we check if this is the same game with both players
+          // Checking if the users are different
+          if (this.state.isBothPlayersSame(options.databaseId)) {
+            return false
+          }
           return true // User can join the game
         } else { return false } // Failed exam/course/subject check
       } else { return false } // Failed room availability check
@@ -707,12 +711,6 @@ class RankedRoom extends colyseus.Room {
         if (this.state.addPlayer(client.id, userInformation, this.userScores, false)) this.addedUserNumber++
 
         if (this.addedUserNumber === 2) {
-          // Checking if the users are different
-          if (this.state.isBothPlayersSame()) {
-            this.disconnect()
-            return
-          }
-
           // We send the clients player information
           this.clock.setTimeout(() => {
             this.broadcast(this.state.getPlayerProps())
