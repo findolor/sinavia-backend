@@ -18,6 +18,7 @@ const OngoingMatch = require('./ongoingMatch')
 const GameEnergy = require('./gameEnergy')
 const UnsolvedQuestion = require('./unsolvedQuestion')
 const UserGoal = require('./userGoal')
+const PurchaseReceipt = require('./purchaseReceipt')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -40,6 +41,7 @@ module.exports = ({ database }) => {
   const gameEnergyModel = database.models.gameEnergies
   const unsolvedQuestionModel = database.models.unsolvedQuestions
   const userGoalModel = database.models.userGoals
+  const purchaseReceiptModel = database.models.purchaseReceipts
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -170,6 +172,11 @@ module.exports = ({ database }) => {
   userGoalModel.belongsTo(userModel, { foreignKey: 'userId' })
   userGoalModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
 
+  // USER has many PURCHASE_RECEIPTs
+  // PURCHASE_RECEIPT belongs to one USER
+  userModel.hasMany(purchaseReceiptModel, { foreignKey: 'userId' })
+  purchaseReceiptModel.belongsTo(userModel, { foreignKey: 'userId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -190,6 +197,7 @@ module.exports = ({ database }) => {
     ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel }),
     gameEnergyRepository: GameEnergy({ model: gameEnergyModel }),
     unsolvedQuestionRepository: UnsolvedQuestion({ model: unsolvedQuestionModel }),
-    userGoalRepository: UserGoal({ model: userGoalModel })
+    userGoalRepository: UserGoal({ model: userGoalModel }),
+    purchaseReceiptRepository: PurchaseReceipt({ model: purchaseReceiptModel })
   }
 }
