@@ -29,6 +29,7 @@ module.exports = ({
 
   router
     .post('/', (req, res) => {
+      console.log(req.body)
       postPurchaseReceiptUseCase
         .create({ body: req.body })
         .then(data => {
