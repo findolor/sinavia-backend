@@ -3,6 +3,18 @@ const { Router } = require('express')
 const moment = require('moment')
 moment.locale('tr')
 
+const randomCodeGenerator = (lenght) => {
+  var result = ''
+  var characters = 'ABCDEFGHIJKLMNOPQRSTVUXWYZabcdefghijklmnopqrstvuxwyz0123456789'
+  var charactersLength = characters.length
+  for (var i = 0; i < lenght; i++) {
+    result += characters.charAt(
+      Math.floor(Math.random() * charactersLength)
+    )
+  }
+  return result
+}
+
 module.exports = ({
   getUseCase,
   postUseCase,
@@ -124,7 +136,7 @@ module.exports = ({
             postInviteCodeUseCase
               .create({ body: {
                 userId: data.id,
-                code: 'dsdsdsd'
+                code: randomCodeGenerator(7)
               } })
               .catch(error => {
                 logger.error(error.stack)
