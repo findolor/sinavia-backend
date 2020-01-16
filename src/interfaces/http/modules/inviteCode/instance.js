@@ -3,10 +3,11 @@ const { getInviteCode } = require('src/app/inviteCode')
 
 module.exports = () => {
   const {
-    repository: { inviteCodeRepository }
+    repository: { inviteCodeRepository },
+    database
   } = container.cradle
 
-  const getInviteCodeUseCase = getInviteCode({ inviteCodeRepository })
+  const getInviteCodeUseCase = getInviteCode({ inviteCodeRepository, database })
 
   return {
     getInviteCodeUseCase

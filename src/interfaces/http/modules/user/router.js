@@ -1,5 +1,7 @@
 const Status = require('http-status')
 const { Router } = require('express')
+const moment = require('moment')
+moment.locale('tr')
 
 module.exports = ({
   getUseCase,
@@ -9,6 +11,9 @@ module.exports = ({
   getFriendsMatchUseCase,
   // postGameEnergyUseCase,
   postUserJokerUseCase,
+  postInviteCodeUseCase,
+  deleteInviteCodeUseCase,
+  getInviteCodeUseCase,
   logger,
   auth,
   smtpService,
@@ -96,6 +101,7 @@ module.exports = ({
       postUseCase
         .create({ body: req.body })
         .then(data => {
+          // Giving 3 jokers to user
           for (let i = 1; i < 4; i++) {
             postUserJokerUseCase
               .createUserJoker({ userJokerEntity: {
@@ -106,6 +112,61 @@ module.exports = ({
                 shouldRenew: false,
                 dateRenewed: new Date()
               } })
+              .catch(error => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(
+                  Fail(error.message))
+              })
+          }
+
+          // Giving 4 invite codes to the user
+          for (let k = 0; k < 4; k++) {
+            postInviteCodeUseCase
+              .create({ body: {
+                userId: data.id,
+                code: 'dsdsdsd'
+              } })
+              .catch(error => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(
+                  Fail(error.message))
+              })
+          }
+
+          if (req.body.friendInviteCode !== null) {
+            getInviteCodeUseCase
+              .getUserFromCode({ inviteCode: req.body.friendInviteCode })
+              .then(inviteCodeData => {
+                if (inviteCodeData !== null) {
+                  // dataValues is user information
+                  const { dataValues } = inviteCodeData.user
+
+                  // Increasing the premiumEndDate 7 days
+                  const newPremiumDate = moment(dataValues.premiumEndDate).add(1, 'weeks').toDate()
+                  dataValues.premiumEndDate = newPremiumDate
+
+                  // Updating premiumEndDate
+                  putUseCase
+                    .updateUser({ id: dataValues.id, body: dataValues })
+                    .then(() => {
+                    // Deleting the used code
+                      deleteInviteCodeUseCase
+                        .deleteInviteCode({ inviteCodeId: inviteCodeData.id })
+                        .catch((error) => {
+                          logger.error(error.stack)
+                          res.status(Status.BAD_REQUEST).json(Fail(error.message))
+                        })
+                    })
+                    .catch((error) => {
+                      logger.error(error.stack)
+                      res.status(Status.BAD_REQUEST).json(Fail(error.message))
+                    })
+                }
+              })
+              .catch((error) => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(Fail(error.message))
+              })
           }
 
           delete data.createdAt

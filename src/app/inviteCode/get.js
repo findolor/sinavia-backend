@@ -1,4 +1,4 @@
-module.exports = ({ inviteCodeRepository }) => {
+module.exports = ({ inviteCodeRepository, database }) => {
   const getBatch = ({ userId }) => {
     return Promise
       .resolve()
@@ -12,7 +12,22 @@ module.exports = ({ inviteCodeRepository }) => {
       })
   }
 
+  const getUserFromCode = ({ inviteCode }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const inviteCodeEntity = inviteCodeRepository.findOne({
+          where: {
+            code: inviteCode
+          },
+          include: [{ model: database.models.users }]
+        })
+        return inviteCodeEntity
+      })
+  }
+
   return {
-    getBatch
+    getBatch,
+    getUserFromCode
   }
 }

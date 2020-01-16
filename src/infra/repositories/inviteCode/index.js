@@ -15,7 +15,12 @@ module.exports = ({ model }) => {
 
   const findOne = (...args) =>
     model.findOne(...args)
-      .then(({ dataValues }) => toEntity(dataValues))
+      .then((data) => {
+        if (data) {
+          const { dataValues } = data
+          return dataValues
+        } else return null
+      })
       .catch((error) => { throw new Error(error) })
 
   const findAll = (...args) =>
