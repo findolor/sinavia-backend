@@ -18,6 +18,7 @@ const OngoingMatch = require('./ongoingMatch')
 const GameEnergy = require('./gameEnergy')
 const UnsolvedQuestion = require('./unsolvedQuestion')
 const UserGoal = require('./userGoal')
+const InviteCode = require('./inviteCode')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -40,6 +41,7 @@ module.exports = ({ database }) => {
   const gameEnergyModel = database.models.gameEnergies
   const unsolvedQuestionModel = database.models.unsolvedQuestions
   const userGoalModel = database.models.userGoals
+  const inviteCodeModel = database.models.inviteCodes
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -162,13 +164,15 @@ module.exports = ({ database }) => {
   unsolvedQuestionModel.belongsTo(userModel)
   unsolvedQuestionModel.belongsTo(questionModel)
 
-  // USER_GOALS belongs to one user and subject 1-1
-  // USER has many subject as goals M-N
-  // SUBJECT goals has many users M-N
-  userModel.belongsToMany(subjectEntityModel, { through: userGoalModel, foreignKey: 'userId' })
-  subjectEntityModel.belongsToMany(userModel, { through: userGoalModel, foreignKey: 'subjectId' })
+  // USER has many USER_GOALs
+  // USER_GOAL belongs to one USER
+  userModel.hasMany(userGoalModel, { foreignKey: 'userId' })
   userGoalModel.belongsTo(userModel, { foreignKey: 'userId' })
-  userGoalModel.belongsTo(subjectEntityModel, { foreignKey: 'subjectId' })
+
+  // USER has many INVITE_CODEs
+  // INVITE_CODE belongs to one USER
+  userModel.hasMany(inviteCodeModel, { foreignKey: 'userId' })
+  inviteCodeModel.belongsTo(userModel, { foreignKey: 'userId' })
 
   return {
     userRepository: User({ model: userModel }),
@@ -190,6 +194,7 @@ module.exports = ({ database }) => {
     ongoingMatchRepository: OngoingMatch({ model: ongoingMatchModel }),
     gameEnergyRepository: GameEnergy({ model: gameEnergyModel }),
     unsolvedQuestionRepository: UnsolvedQuestion({ model: unsolvedQuestionModel }),
-    userGoalRepository: UserGoal({ model: userGoalModel })
+    userGoalRepository: UserGoal({ model: userGoalModel }),
+    inviteCodeRepository: InviteCode({ model: inviteCodeModel })
   }
 }

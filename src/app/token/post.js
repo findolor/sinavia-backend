@@ -26,7 +26,7 @@ module.exports = ({ userRepository, webToken }) => {
         userCredentials.password
       )
 
-      if (!validatePass(credentials.password)) {
+      if (userCredentials.signInMethod === 'normal' && !validatePass(credentials.password)) {
         throw new Error('Invalid Credentials')
       }
       const signIn = webToken.signin()
