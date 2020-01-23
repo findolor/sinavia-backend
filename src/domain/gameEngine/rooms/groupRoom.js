@@ -75,6 +75,15 @@ class GroupGame {
     }
   }
 
+  // Checks if the player is already in the match
+  isPlayerInGroup (databaseId) {
+    const clientIds = Object.keys(this.groupState.playerProps)
+    if (clientIds.some((clientId) => {
+      return this.groupState.playerProps[clientId].databaseId === databaseId
+    })) return true
+    return false
+  }
+
   // Sets the players answers then sends a response to our client
   setPlayerAnswerResults (clientId, button) {
     this.groupState.playerProps[clientId].answers.push({
@@ -391,6 +400,8 @@ class GroupRoom extends colyseus.Room {
 
       // We check if the room code is valid
       if (ROOM_CODE_CHECK) {
+        // Checks if the player is already in the group
+        if (this.state.isPlayerInGroup(options.databaseId)) return false
         // User can join the room
         return true
         // Failed room code check
@@ -498,14 +509,12 @@ class GroupRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('show-results')
             // Sending the questions in full for favouriting
-            this.clock.setTimeout(() => {
-              this.broadcast({
-                action: 'save-questions',
-                fullQuestionList: this.state.getQuestionProps()
-              })
-            }, 1000)
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+            this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
             setTimeout(() => {
               this.state.changeStateInformation('match-finished')
