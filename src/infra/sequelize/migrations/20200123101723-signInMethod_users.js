@@ -2,12 +2,10 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn('users', {
-      signInMethod: {
-        type: Sequelize.ENUM('normal', 'google', 'facebook'),
-        defaultValue: 'normal',
-        allowNull: false
-      }
+    return queryInterface.addColumn('users', 'signInMethod', {
+      type: Sequelize.ENUM('normal', 'google', 'facebook'),
+      defaultValue: 'normal',
+      allowNull: false
     }
     )
   },
