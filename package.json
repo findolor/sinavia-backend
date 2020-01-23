@@ -27,7 +27,7 @@
     "db:reset-test": "cross-env NODE_PATH=. && echo $NODE_PATH && npm run db:refresh-test && npm run seed:test",
     "db:refresh": "sequelize db:migrate:undo:all && sequelize db:migrate",
     "db:refresh-test": "sequelize db:migrate:undo:all --env test && sequelize db:migrate --env test",
-    "migrate": "cross-env NODE_PATH=. sequelize db:migrate",
+    "migrate": "NODE_ENV=test NODE_PATH=. sequelize db:migrate",
     "migrate:test": "cross-env NODE_PATH=. sequelize db:migrate --env test",
     "seed": "NODE_ENV=test NODE_PATH=. sequelize db:seed:all --seeders-path=./src/infra/sequelize/seeders/test",
     "seed:test": "cross-env NODE_ENV=test NODE_PATH=. sequelize db:seed:all --env test --seeders-path=./src/infra/sequelize/seeders/test",
