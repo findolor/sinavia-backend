@@ -157,6 +157,9 @@ module.exports = ({
                   const newPremiumDate = moment(dataValues.premiumEndDate).add(1, 'weeks').toDate()
                   dataValues.premiumEndDate = newPremiumDate
 
+                  // Deleting user password for not updating it
+                  delete dataValues.password
+
                   // Updating premiumEndDate
                   putUseCase
                     .updateUser({ id: dataValues.id, body: dataValues })
