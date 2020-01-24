@@ -9,14 +9,16 @@ let clients = [iterationCount]
 let joinOptions
 let finishCount = 0
 let joined = 0
+let totalJoinedUsers = []
+let totalFinishedUsers = []
+let totalClientErrors = []
 
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    clients[i] = new Colyseus.Client('http://35.246.252.239:5000')
-    // clients[i] = new Colyseus.Client('http://localhost:5000')
+    // clients[i] = new Colyseus.Client('ws://35.246.252.239:5000')
+    clients[i] = new Colyseus.Client('ws://localhost:5000')
 
-    // console.log(i % 2)
     joinOptions = {
       create: true,
       examId: 1,
@@ -31,6 +33,7 @@ for (let i = 0; i < iterationCount; i++) {
 
       rooms[i].onJoin.add(() => {
         console.log(++joined, 'join count')
+        totalJoinedUsers.push(i)
         // console.log(clients[i])
 
         // Game state coming from server
@@ -44,6 +47,7 @@ for (let i = 0; i < iterationCount; i++) {
               break
             case 'match-finished':
               console.log(++finishCount, 'finish count')
+              totalFinishedUsers.push(i)
               rooms[i].leave()
               break
           }
@@ -67,9 +71,11 @@ for (let i = 0; i < iterationCount; i++) {
     })
 
     clients[i].onError.add(error => {
+      totalClientErrors.push(i)
       console.error(error)
     })
-  }, Math.floor(Math.random() * 60000) + 5000)
+    // Users join in the given amount of time
+  }, Math.floor(Math.random() * 300000) + 1000)
 }
 
 function answerQuestion (room) {
@@ -84,3 +90,10 @@ function answerQuestion (room) {
     })
   }, 2000)
 }
+
+process.on('SIGINT', function () {
+  console.log('Total number of joined players: ', totalJoinedUsers.length)
+  console.log('Total number of finished players: ', totalFinishedUsers.length)
+  console.log('Total number of client errors: ', totalClientErrors.length)
+  process.exit()
+})

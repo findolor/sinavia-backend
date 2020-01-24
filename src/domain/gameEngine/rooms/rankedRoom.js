@@ -713,6 +713,10 @@ class RankedRoom extends colyseus.Room {
         if (this.addedUserNumber === 2) {
           // We send the clients player information
           this.clock.setTimeout(() => {
+            // FOR TESTING PURPOSES
+            this.broadcast({ action: 'game-init' })
+            // END OF TEST CODE
+
             this.broadcast(this.state.getPlayerProps())
           }, 500)
           logger.info(`Ranked game starts with p1: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId} and p2: ${this.state.getPlayerProps()[this.state.getPlayerId(2)].databaseId}`)
