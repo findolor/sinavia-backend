@@ -2,8 +2,12 @@ const Colyseus = require('colyseus.js')
 
 const shellBreaker = '72b6fa48-94c0-4691-8ac9-db679a67a9b3'
 const marmelade = '08f228a0-443b-4003-8b17-efe835cf6916'
+const firstIdTestServer = '28b2131b-8a45-4a14-87fc-c1f596127d7d'
+const secondIdTestServer = 'adc0e4c5-fdee-42e3-9ded-7fd065d98fc3'
 
-let iterationCount = 1000
+const isServerTest = true
+
+let iterationCount = 2
 let rooms = [iterationCount]
 let clients = [iterationCount]
 let joinOptions
@@ -16,15 +20,14 @@ let totalClientErrors = []
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    // clients[i] = new Colyseus.Client('ws://35.246.252.239:5000')
-    clients[i] = new Colyseus.Client('ws://localhost:5000')
+    clients[i] = isServerTest ? new Colyseus.Client('ws://35.246.252.239:5000') : new Colyseus.Client('ws://localhost:5000')
 
     joinOptions = {
       create: true,
       examId: 1,
       courseId: 1,
       subjectId: 1,
-      databaseId: i % 2 === 0 ? shellBreaker : marmelade
+      databaseId: i % 2 === 0 ? isServerTest === true ? firstIdTestServer : shellBreaker : isServerTest === true ? secondIdTestServer : marmelade
     }
     // console.log(joinOptions.databaseId)
     clients[i].onOpen.add(() => {
@@ -38,6 +41,7 @@ for (let i = 0; i < iterationCount; i++) {
 
         // Game state coming from server
         rooms[i].onStateChange.add(state => {
+          console.log(state)
           switch (state.rankedState.stateInformation) {
             case 'question':
               // Answering the question 2 seconds later
@@ -61,7 +65,7 @@ for (let i = 0; i < iterationCount; i++) {
             rooms[i].send({
               action: 'ready'
             })
-          }, 1000)
+          }, 2000)
         }
       })
 
@@ -75,7 +79,7 @@ for (let i = 0; i < iterationCount; i++) {
       console.error(error)
     })
     // Users join in the given amount of time
-  }, Math.floor(Math.random() * 300000) + 1000)
+  }, Math.floor(Math.random() * 10000) + 1000)
 }
 
 function answerQuestion (room) {
