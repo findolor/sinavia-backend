@@ -275,18 +275,22 @@ class GroupGame {
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
       this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
