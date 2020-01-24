@@ -336,19 +336,23 @@ class RankedGame {
         this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -394,19 +398,23 @@ class RankedGame {
         this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
