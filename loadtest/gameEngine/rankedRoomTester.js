@@ -41,7 +41,6 @@ for (let i = 0; i < iterationCount; i++) {
 
         // Game state coming from server
         rooms[i].onStateChange.add(state => {
-          console.log(state)
           switch (state.rankedState.stateInformation) {
             case 'question':
               // Answering the question 2 seconds later

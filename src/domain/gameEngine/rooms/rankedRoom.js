@@ -738,9 +738,7 @@ class RankedRoom extends colyseus.Room {
       switch (data.action) {
       // Players send 'ready' action to server for letting it know that they are ready for the game
         case 'ready':
-          logger.info('got ready signal')
           if (++this.readyPlayerCount === 2) {
-            logger.info('inside ready block')
             this.isMatchStarted = true
             // When players get the 'question' action they start the round and play.
             // This delay will be longer due to pre-match player showcases.
