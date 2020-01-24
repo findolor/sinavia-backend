@@ -123,8 +123,7 @@
   "standard": {
     "ignore": [
       "/public/docs",
-      "src/interfaces/proxy",
-      "loadtest/"
+      "src/interfaces/proxy"
     ],
     "globals": [
       "request",
