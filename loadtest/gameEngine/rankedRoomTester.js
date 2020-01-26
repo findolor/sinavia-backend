@@ -4,17 +4,16 @@ const shellBreaker = '72b6fa48-94c0-4691-8ac9-db679a67a9b3'
 const marmelade = '08f228a0-443b-4003-8b17-efe835cf6916'
 
 let iterationCount = 1000
-let rooms = [iterationCount]
-let clients = [iterationCount]
 let joinOptions
 let finishCount = 0
 let joined = 0
+let joinErrs = 0
 
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    clients[i] = new Colyseus.Client('http://35.246.252.239:5000')
-    // clients[i] = new Colyseus.Client('http://localhost:5000')
+    // clients[i] = new Colyseus.Client('http://35.246.252.239:5000')
+    let client = new Colyseus.Client('http://localhost:5000')
 
     // console.log(i % 2)
     joinOptions = {
@@ -24,52 +23,46 @@ for (let i = 0; i < iterationCount; i++) {
       subjectId: 1,
       databaseId: i % 2 === 0 ? shellBreaker : marmelade
     }
-    // console.log(joinOptions.databaseId)
-    clients[i].onOpen.add(() => {
-      // Joins a room or creates one with given options
-      rooms[i] = clients[i].join('rankedRoom', joinOptions)
 
-      rooms[i].onJoin.add(() => {
-        console.log(++joined, 'join count')
-        // console.log(clients[i])
+    // Joins a room or creates one with given options
+    client.joinOrCreate('rankedRoom', joinOptions).then(room => {
+      console.log(++joined, 'join count')
 
-        // Game state coming from server
-        rooms[i].onStateChange.add(state => {
-          switch (state.rankedState.stateInformation) {
-            case 'question':
-              // Answering the question 2 seconds later
-              setTimeout(() => {
-                answerQuestion(rooms[i])
-              }, Math.floor(Math.random() * 3000) + 1)
-              break
-            case 'match-finished':
-              console.log(++finishCount, 'finish count')
-              rooms[i].leave()
-              break
-          }
-        })
+      // Game state coming from server
+      room.onStateChange(state => {
+        switch (state.rankedState.stateInformation) {
+          case 'question':
+            // Answering the question 2 seconds later
+            setTimeout(() => {
+              answerQuestion(room)
+            }, Math.floor(Math.random() * 3000) + 1)
+            break
+          case 'match-finished':
+            console.log(++finishCount, 'finish count')
+            room.leave()
+            break
+        }
       })
 
-      rooms[i].onMessage.add(message => {
+      room.onMessage(message => {
         if (message.action === 'game-init') {
           // We send the server a 'ready' signal to let it know client is ready
           setTimeout(() => {
-            rooms[i].send({
+            room.send({
               action: 'ready'
             })
           }, 1000)
         }
       })
 
-      rooms[i].onError.add(error => {
+      room.onError(error => {
         console.error(error)
       })
+    }).catch(error => {
+      joinErrs++
+      console.log('Error while joining room: ', error)
     })
-
-    clients[i].onError.add(error => {
-      console.error(error)
-    })
-  }, Math.floor(Math.random() * 60000) + 5000)
+  }, Math.floor(Math.random() * 30000) + 1000)
 }
 
 function answerQuestion (room) {
@@ -84,3 +77,16 @@ function answerQuestion (room) {
     })
   }, 2000)
 }
+
+process.on('exit', function () {
+  console.log('Total number of joined players: ', joined)
+  console.log('Total number of finished players: ', finishCount)
+  console.log('Total number of join errors: ', joinErrs)
+})
+
+process.on('SIGINT', function () {
+  console.log('Total number of joined players: ', joined)
+  console.log('Total number of finished players: ', finishCount)
+  console.log('Total number of join errors: ', joinErrs)
+  process.exit()
+})

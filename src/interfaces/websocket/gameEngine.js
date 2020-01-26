@@ -1,5 +1,6 @@
 const http = require('http')
 const colyseus = require('colyseus')
+const MongooseDriver = require('colyseus/lib/matchmaker/drivers/MongooseDriver').MongooseDriver
 const express = require('express')
 const roomRegisterService = require('../../domain/gameEngine')
 const cors = require('cors')
@@ -18,10 +19,11 @@ module.exports = ({ logger, config }) => {
 
       const server = http.createServer(app)
       const gameEngine = new colyseus.Server({
-        server: server
-        /* presence: new colyseus.RedisPresence({
-          url: "redis://127.0.0.1:6379/0"
-        }) */
+        server: server,
+        presence: new colyseus.RedisPresence({
+          url: 'redis://' + config.cache.host
+        }),
+        driver: new MongooseDriver()
       })
 
       const registeredGameEngine = roomRegisterService(gameEngine)
