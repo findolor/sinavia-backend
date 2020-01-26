@@ -12,7 +12,9 @@ const {
   getUserJoker,
   putUserJoker,
   updateUserTotalPoints,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -96,6 +98,12 @@ class RankedGame {
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
 
     return true
+  }
+
+  // Checks players database ids to prevent users from playing a game with themselves
+  isBothPlayersSame (databaseId) {
+    if (this.rankedState.playerProps[this.rankedState.playerOneId].databaseId === databaseId) return true
+    else return false
   }
 
   // Sets the players answers then sends a response to our client
@@ -325,21 +333,26 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -382,21 +395,26 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -468,6 +486,17 @@ class RankedGame {
         }
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    }).catch(error => logger.error(error.stack))
   }
 
   decideUserInformationTotalPoints (userInformation, earnedPoints) {
@@ -574,6 +603,7 @@ class RankedRoom extends colyseus.Room {
     this.userJokers = {}
     this.userInformations = {}
     this.isBotGame = false
+    this.isMatchStarted = false
   }
 
   onCreate (options) {
@@ -690,9 +720,10 @@ class RankedRoom extends colyseus.Room {
       // Players send 'ready' action to server for letting it know that they are ready for the game
         case 'ready':
           if (++this.readyPlayerCount === 2) {
-          // When players get the 'question' action they start the round and play.
-          // This delay will be longer due to pre-match player showcases.
-          /* setTimeout(() => {
+            this.isMatchStarted = true
+            // When players get the 'question' action they start the round and play.
+            // This delay will be longer due to pre-match player showcases.
+            /* setTimeout(() => {
             that.state.nextQuestion()
             that.state.changeStateInformation('question')
           }, 3000) */
@@ -725,14 +756,12 @@ class RankedRoom extends colyseus.Room {
             // We check if this is the last question
             // We extract one because questionNumber started from -1
             if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-              this.state.changeStateInformation('show-results')
               // Sending the questions in full for favouriting
-              this.clock.setTimeout(() => {
-                this.broadcast({
-                  action: 'save-questions',
-                  fullQuestionList: this.state.getQuestionProps()
-                })
-              }, 1000)
+              this.broadcast({
+                action: 'save-questions',
+                fullQuestionList: this.state.getQuestionProps()
+              })
+              this.state.changeStateInformation('show-results')
               // Like always there is a delay to show the answers
               this.clock.setTimeout(() => {
                 this.state.changeStateInformation('match-finished')
@@ -930,6 +959,7 @@ class RankedRoom extends colyseus.Room {
         clientId: client.sessionId,
         consented: consented
       })
+      if (!this.isMatchStarted) return
       // TODO add errors on all of these events
       // If the room is not empty
       if (this.clients.length !== 0) {

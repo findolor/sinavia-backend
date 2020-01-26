@@ -18,7 +18,8 @@ const {
   postUserScore,
   putUserScore,
   createNotification,
-  updateNotification
+  updateNotification,
+  deleteAllUserGoals
 } = require('../../interfaces/databaseInterface/interface')
 
 const ongoingMatchesList = []
@@ -203,16 +204,20 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
               // Creating the notification
               createNotification(notificationBody).then(() => {
               // Sending the notification
-                fcmService.sendNotificationDataMessage(
-                  data.ongoingMatchUser.fcmToken,
-                  {
-                    title: 'Arkadaş oyunu!',
-                    body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
-                  },
-                  {
-                    type: 'friendMatchResult'
-                  }
-                )
+                try {
+                  fcmService.sendNotificationDataMessage(
+                    data.ongoingMatchUser.fcmToken,
+                    {
+                      title: 'Arkadaş oyunu!',
+                      body: `${data.ongoingMatchFriend.username} aranızda olan oyunu bitirdi! Sonuçları görmek için tıkla!`
+                    },
+                    {
+                      type: 'friendMatchResult'
+                    }
+                  )
+                } catch (error) {
+                  logger.error(error.stack)
+                }
 
                 // Stopping ongoing match cron
                 findAndStopMatchCron(ongoingMatchId)
@@ -457,6 +462,11 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
             logger.error(error.stack)
           })
       })
-    }, null, true, 'Europe/Istanbul', null, true)
+    }, null, true, 'Europe/Istanbul', null, true),
+    resetUserGoalsCronJob: () => new CronJob('0 0 0 * * 1', () => {
+      deleteAllUserGoals().catch(error => {
+        logger.error(error.stack)
+      })
+    }, null, true, 'Europe/Istanbul', null, false)
   }
 }

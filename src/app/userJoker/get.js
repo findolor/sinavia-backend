@@ -17,7 +17,27 @@ module.exports = ({ userJokerRepository, database }) => {
       })
   }
 
+  const getOne = ({ userId, jokerId }) => {
+    return Promise
+      .resolve()
+      .then(() => {
+        const userJoker = userJokerRepository.findOne({
+          where: {
+            userId: userId,
+            jokerId: jokerId
+          },
+          include: [
+            {
+              model: database.models.jokers
+            }
+          ]
+        })
+        return userJoker
+      })
+  }
+
   return {
-    getJokers
+    getJokers,
+    getOne
   }
 }

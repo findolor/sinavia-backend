@@ -10,10 +10,10 @@ module.exports = ({ userRepository }) => {
         // We do this if we have a password
         if (body.password) body.password = encryptPassword(body.password)
 
-        if (body.premiumEndDate !== null) body.premiumEndDate = new Date(body.premiumEndDate)
+        if (body.premiumEndDate && body.premiumEndDate !== null) body.premiumEndDate = new Date(body.premiumEndDate)
 
         const user = User(body)
-        if (body.premiumEndDate === null) user.premiumEndDate = null
+        if (body.premiumEndDate && body.premiumEndDate === null) user.premiumEndDate = null
 
         await userRepository.update(user, {
           where: { id }

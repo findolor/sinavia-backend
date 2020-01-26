@@ -10,6 +10,7 @@ const { getOngoingMatch, postOngoingMatch, deleteOngoingMatch, putOngoingMatch }
 const { getExamEntity } = require('src/app/examEntity')
 const { postNotification, putNotification } = require('src/app/notification')
 const { getUnsolvedQuestion, postUnsolvedQuestion, deleteUnsolvedQuestion } = require('src/app/unsolvedQuestion')
+const { deleteUserGoal, putUserGoal, getUserGoal } = require('src/app/userGoal')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -47,6 +48,9 @@ module.exports = () => {
     },
     repository: {
       unsolvedQuestionRepository
+    },
+    repository: {
+      userGoalRepository
     }
   } = container.cradle
 
@@ -75,6 +79,9 @@ module.exports = () => {
   const getUnsolvedQuestionUseCase = getUnsolvedQuestion({ unsolvedQuestionRepository, database })
   const postUnsolvedQuestionUseCase = postUnsolvedQuestion({ unsolvedQuestionRepository })
   const deleteUnsolvedQuestionUseCase = deleteUnsolvedQuestion({ unsolvedQuestionRepository })
+  const putUserGoalUseCase = putUserGoal({ userGoalRepository })
+  const deleteUserGoalUseCase = deleteUserGoal({ userGoalRepository })
+  const getUserGoalUseCase = getUserGoal({ userGoalRepository })
 
   return {
     getQuestionUseCase,
@@ -101,6 +108,9 @@ module.exports = () => {
     getFriendsMatchUseCase,
     getUnsolvedQuestionUseCase,
     postUnsolvedQuestionUseCase,
-    deleteUnsolvedQuestionUseCase
+    deleteUnsolvedQuestionUseCase,
+    putUserGoalUseCase,
+    deleteUserGoalUseCase,
+    getUserGoalUseCase
   }
 }

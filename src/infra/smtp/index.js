@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer')
 
 module.exports = ({ config, logger }) => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'smtp.yandex.ru',
     port: 465,
     secure: true,
     auth: {

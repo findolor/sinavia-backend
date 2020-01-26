@@ -45,10 +45,70 @@ module.exports = ({
                     logger.error(error.stack)
                     res.status(Status.BAD_REQUEST).json(Fail(error.message))
                   })
+              } else {
+                userJoker.dateRenewed = new Date()
+
+                putUserJokerUseCase
+                  .updateUserJoker({ userJokerEntity: userJoker })
+                  .catch(error => {
+                    logger.error(error.stack)
+                    res.status(Status.BAD_REQUEST).json(Fail(error.message))
+                  })
               }
             }
           })
           res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
+    .put('/reward/all/:userId', (req, res) => {
+      getUserJokerUseCase
+        .getJokers({ userId: req.params.userId })
+        .then(data => {
+          data.forEach(userJoker => {
+            userJoker.amount += 2
+
+            putUserJokerUseCase
+              .updateUserJoker({ userJokerEntity: userJoker })
+              .catch(error => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(Fail(error.message))
+              })
+          })
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack) // we still need to log every error for debugging
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
+    .put('/reward/:userId', (req, res) => {
+      getUserJokerUseCase
+        .getOne({ userId: req.params.userId, jokerId: req.body.jokerId })
+        .then(data => {
+          const { dataValues } = data
+          data = dataValues
+
+          data.amount += req.body.jokerAmount
+
+          putUserJokerUseCase
+            .updateUserJoker({ userJokerEntity: data })
+            .then(() => {
+              res.status(Status.OK).json(Success(data))
+            })
+            .catch(error => {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(Fail(error.message))
+            })
         })
         .catch((error) => {
           logger.error(error.stack) // we still need to log every error for debugging

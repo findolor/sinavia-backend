@@ -10,7 +10,9 @@ const {
   updateOngoingMatch,
   getOngoingMatch,
   getFriendMatches,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -243,19 +245,24 @@ class FriendSoloGame {
       })
 
       this.decideUserJokers(userJokers, userId)
+      this.decideUserGoals(playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex.forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex.forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Friend solo game ends roomId: ${friendRoomId}`)
@@ -287,6 +294,17 @@ class FriendSoloGame {
         }
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses
@@ -430,14 +448,12 @@ class FriendSoloRoom extends colyseus.Room {
         break
       case 'finished-solo':
         if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-          this.state.changeStateInformation('show-results')
           // Sending the questions in full for favouriting
-          this.clock.setTimeout(() => {
-            this.broadcast({
-              action: 'save-questions',
-              fullQuestionList: this.state.getQuestionProps()
-            })
-          }, 1000)
+          this.broadcast({
+            action: 'save-questions',
+            fullQuestionList: this.state.getQuestionProps()
+          })
+          this.state.changeStateInformation('show-results')
           // Getting the relevant friend match infos from db
           getOngoingMatch(this.state.getMatchInformation().ongoingMatchId).then(ongoingMatch => {
             getFriendMatches(ongoingMatch.ongoingMatchUser.dataValues.id, ongoingMatch.ongoingMatchFriend.dataValues.id).then(friendMatches => {

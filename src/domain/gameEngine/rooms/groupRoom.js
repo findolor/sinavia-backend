@@ -11,7 +11,9 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults
@@ -70,6 +72,15 @@ class GroupGame {
       this.groupState.playerProps[clientId].readyStatus = true
       this.groupState.playerProps[clientId].isLeader = true
     }
+  }
+
+  // Checks if the player is already in the match
+  isPlayerInGroup (databaseId) {
+    const clientIds = Object.keys(this.groupState.playerProps)
+    if (clientIds.some((clientId) => {
+      return this.groupState.playerProps[clientId].databaseId === databaseId
+    })) return true
+    return false
   }
 
   // Sets the players answers then sends a response to our client
@@ -261,19 +272,24 @@ class GroupGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
@@ -320,20 +336,15 @@ class GroupGame {
     }
   }
 
-  // TODO need to implement replay logic for group
-  // This code might change later
-  // TODO Might delete this
-  resetRoom () {
-    const playerIds = Object.keys(this.groupState.playerProps)
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
 
-    playerIds.forEach(element => {
-      this.groupState.playerProps[element].answers = []
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
     })
-
-    this.groupState.questionNumber = -1
-    this.groupState.questionProps = []
-    this.groupState.questionList = []
-    this.groupState.stateInformation = ''
   }
 }
 
@@ -478,14 +489,12 @@ class GroupRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('show-results')
             // Sending the questions in full for favouriting
-            this.clock.setTimeout(() => {
-              this.broadcast({
-                action: 'save-questions',
-                fullQuestionList: this.state.getQuestionProps()
-              })
-            }, 1000)
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+            this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
             setTimeout(() => {
               this.state.changeStateInformation('match-finished')

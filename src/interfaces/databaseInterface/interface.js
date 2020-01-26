@@ -137,6 +137,18 @@ exports.postUnsolvedQuestion = async (unsolvedQuestionEntity) => {
   return engineInterface().postUnsolvedQuestionUseCase.create({ unsolvedQuestionEntity: unsolvedQuestionEntity })
 }
 
-exports.deleteUnsolvedQuestion = async (userId, questionId) => {
-  return engineInterface().deleteUnsolvedQuestionUseCase.destroy({ userId: userId, questionId: questionId })
+exports.deleteUnsolvedQuestion = async (userId, questionIdList) => {
+  return engineInterface().deleteUnsolvedQuestionUseCase.deleteBatch({ userId: userId, questionIdList: questionIdList })
+}
+
+exports.deleteAllUserGoals = async () => {
+  return engineInterface().deleteUserGoalUseCase.deleteAll()
+}
+
+exports.updateUserGoals = async (userGoalEntity) => {
+  return engineInterface().putUserGoalUseCase.updateUserGoal({ userGoalEntity: userGoalEntity })
+}
+
+exports.getOneUserGoal = async (userId, subjectId) => {
+  return engineInterface().getUserGoalUseCase.getOne({ userId: userId, subjectId: subjectId })
 }

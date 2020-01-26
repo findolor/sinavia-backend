@@ -11,7 +11,9 @@ const {
   getUserScore,
   putUserScore,
   postUserScore,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResultsSolo
@@ -226,20 +228,25 @@ class SoloModeGame {
 
       this.decideUserJokers(userJokers)
       this.decideUserScores(userScores, matchInformation, playerProps.databaseId)
+      this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
 
-    // Adding the wrong solved questions to db
-    results.unsolvedIndex.forEach(wrongQuestionIndex => {
-      postUnsolvedQuestion({
-        userId: playerProps.databaseId,
-        questionId: questionProps[wrongQuestionIndex].id
-      }).catch(error => {
-        if (error.message !== 'Validation error') {
-          logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-          logger.error(error.stack)
-        }
+    try {
+      // Adding the wrong solved questions to db
+      results.unsolvedIndex.forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
+          userId: playerProps.databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+            logger.error(error.stack)
+          }
+        })
       })
-    })
+    } catch (error) {
+      logger.error(error.stack)
+    }
 
     logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
@@ -283,6 +290,17 @@ class SoloModeGame {
         logger.error(error.stack)
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    }).catch(error => logger.error(error.stack))
   }
 
   resetRoom () {
@@ -422,14 +440,12 @@ class SoloModeRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
-            this.state.changeStateInformation('show-results')
             // Sending the questions in full for favouriting
-            this.clock.setTimeout(() => {
-              this.broadcast({
-                action: 'save-questions',
-                fullQuestionList: this.state.getQuestionProps()
-              })
-            }, 1000)
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
+            this.state.changeStateInformation('show-results')
             // Like always there is a delay to show the answers
             this.clock.setTimeout(() => {
               this.state.changeStateInformation('match-finished')

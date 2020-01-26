@@ -14,7 +14,9 @@ const {
   putUserScore,
   postUserScore,
   getFriendMatches,
-  postUnsolvedQuestion
+  postUnsolvedQuestion,
+  updateUserGoals,
+  getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
   calculateResults,
@@ -293,19 +295,24 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     switch (winLoseDraw[0].status) {
@@ -368,19 +375,24 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     switch (winLoseDraw[0].status) {
@@ -439,18 +451,22 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex.forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex.forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Friend solo game ends roomId: ${friendRoomId}`)
@@ -537,6 +553,17 @@ class FriendGame {
         logger.error(error.stack)
       })
     }
+  }
+
+  decideUserGoals (databaseId, subjectId, solvedQuestionAmount) {
+    if (solvedQuestionAmount === 0) return
+    getOneUserGoal(databaseId, subjectId).then(data => {
+      if (data) {
+        data.questionSolved += solvedQuestionAmount
+
+        updateUserGoals(data).catch(error => logger.error(error.stack))
+      }
+    })
   }
 
   // This is used for deciding if the users had draw, one of them wins and the other loses
@@ -821,13 +848,12 @@ class FriendRoom extends colyseus.Room {
           // We check if this is the last question
           // We extract one because questionNumber started from -1
           if (this.state.getQuestionNumber() === this.questionAmount - 1) {
+            // Sending the questions in full for favouriting
+            this.broadcast({
+              action: 'save-questions',
+              fullQuestionList: this.state.getQuestionProps()
+            })
             this.state.changeStateInformation('show-results')
-            this.clock.setTimeout(() => {
-              this.broadcast({
-                action: 'save-questions',
-                fullQuestionList: this.state.getQuestionProps()
-              })
-            }, 1000)
             // Like always there is a delay to show the answers
             setTimeout(() => {
               this.state.changeStateInformation('match-finished')
