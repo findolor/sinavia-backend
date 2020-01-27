@@ -15,10 +15,10 @@ module.exports = ({ config, router, logger, auth }) => {
   // we define our static folder
   app.use(express.static('public'))
 
-  let port = 0
+  let port = config.apiPort
 
-  if (config.isProxyEnabled) port = Number(config.apiPort) + Number(process.env.NODE_APP_INSTANCE)
-  else port = config.apiPort
+  /* if (config.isProxyEnabled) port = Number(config.apiPort) + Number(process.env.NODE_APP_INSTANCE)
+  else port = config.apiPort */
 
   return {
     app,

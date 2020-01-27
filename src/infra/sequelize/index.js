@@ -11,7 +11,12 @@ module.exports = ({ config, basePath }) => {
       port: config.db.port,
       host: config.db.host,
       dialect: 'postgres',
-      logging: false
+      logging: false,
+      pool: {
+        max: 5,
+        min: 0,
+        idle: 10000
+      }
     }
   )
 
