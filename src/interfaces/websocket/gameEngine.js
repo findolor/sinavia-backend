@@ -6,10 +6,7 @@ const roomRegisterService = require('../../domain/gameEngine')
 const cors = require('cors')
 
 module.exports = ({ logger, config }) => {
-  let port
-
-  if (config.isProxyEnabled) port = Number(config.gameEnginePort) + Number(process.env.NODE_APP_INSTANCE)
-  else port = config.gameEnginePort
+  let port = Number(config.gameEnginePort) + Number(process.env.NODE_APP_INSTANCE)
 
   return {
     start: () => new Promise((resolve) => {

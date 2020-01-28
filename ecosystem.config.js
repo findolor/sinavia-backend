@@ -1,20 +1,17 @@
 const os = require('os')
 module.exports = {
   apps: [
-    /* {
-      name: 'backend_app',
-      script: 'index.js', // your entrypoint file
-      watch: true, // optional
+    {
+      name: 'backend',
+      script: 'index.js',
       instances: os.cpus().length,
-      exec_mode: 'fork', // Must be fork!!
+      exec_mode: 'cluster',
       env: {
-        DEBUG: 'colyseus:errors',
-        NODE_ENV: 'local',
+        NODE_ENV: process.env.NODE_ENV || 'local',
         NODE_PATH: '.'
       }
-    }, */
+    },
     {
-      port: 5000,
       name: 'colyseus',
       script: 'startGameEngine.js', // your entrypoint file
       // watch: true, // optional
