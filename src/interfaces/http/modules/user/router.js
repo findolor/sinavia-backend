@@ -26,6 +26,7 @@ module.exports = ({
   postInviteCodeUseCase,
   deleteInviteCodeUseCase,
   getInviteCodeUseCase,
+  postAppleIdentityTokenUseCase,
   logger,
   auth,
   smtpService,
@@ -137,6 +138,21 @@ module.exports = ({
               .create({ body: {
                 userId: data.id,
                 code: randomCodeGenerator(7)
+              } })
+              .catch(error => {
+                logger.error(error.stack)
+                res.status(Status.BAD_REQUEST).json(
+                  Fail(error.message))
+              })
+          }
+
+          // We save the apple identity token to a different table
+          // For getting the user info in later log-ins
+          if (req.body.signInMethod === 'apple') {
+            postAppleIdentityTokenUseCase
+              .create({ body: {
+                userId: data.id,
+                identityToken: req.body.identityToken
               } })
               .catch(error => {
                 logger.error(error.stack)
