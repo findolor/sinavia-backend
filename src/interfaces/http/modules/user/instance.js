@@ -4,7 +4,7 @@ const { getFriendsMatch } = require('src/app/friendsMatch')
 // const { postGameEnergy } = require('src/app/gameEnergy')
 const { postUserJoker } = require('src/app/userJoker')
 const { postInviteCode, deleteInviteCode, getInviteCode } = require('src/app/inviteCode')
-const { postAppleIdentityToken } = require('src/app/appleIdentityToken')
+const { postAppleIdentityToken, getAppleIdentityToken } = require('src/app/appleIdentityToken')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -29,6 +29,7 @@ module.exports = () => {
   const deleteInviteCodeUseCase = deleteInviteCode({ inviteCodeRepository })
   const getInviteCodeUseCase = getInviteCode({ inviteCodeRepository, database })
   const postAppleIdentityTokenUseCase = postAppleIdentityToken({ appleIdentityTokenRepository })
+  const getAppleIdentityTokenUseCase = getAppleIdentityToken({ appleIdentityTokenRepository, database })
 
   return {
     getUseCase,
@@ -41,6 +42,7 @@ module.exports = () => {
     postInviteCodeUseCase,
     deleteInviteCodeUseCase,
     getInviteCodeUseCase,
-    postAppleIdentityTokenUseCase
+    postAppleIdentityTokenUseCase,
+    getAppleIdentityTokenUseCase
   }
 }

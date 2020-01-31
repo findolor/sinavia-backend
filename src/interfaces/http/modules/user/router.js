@@ -27,6 +27,7 @@ module.exports = ({
   deleteInviteCodeUseCase,
   getInviteCodeUseCase,
   postAppleIdentityTokenUseCase,
+  getAppleIdentityTokenUseCase,
   logger,
   auth,
   smtpService,
@@ -218,11 +219,27 @@ module.exports = ({
     })
 
   router
-    .get('/check', (req, res) => {
+    .get('/check/email', (req, res) => {
       getUseCase
         .getOneWithEmail({ email: req.query.email })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
+          if (data === null) res.status(Status.OK).json(Success(data))
+          else throw new Error('existing-user')
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
+    .get('/check/identityToken', (req, res) => {
+      getAppleIdentityTokenUseCase
+        .getOne({ identityToken: req.query.identityToken })
+        .then(data => {
+          if (data === null) res.status(Status.OK).json(Success(data))
+          else throw new Error('existing-user')
         })
         .catch((error) => {
           logger.error(error.stack)
