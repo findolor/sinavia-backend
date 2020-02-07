@@ -114,7 +114,7 @@ module.exports = ({
     .post('/', (req, res) => {
       postUseCase
         .create({ body: req.body })
-        .then(data => {
+        .then(async data => {
           // Giving 3 jokers to user
           for (let i = 1; i < 4; i++) {
             postUserJokerUseCase
@@ -150,16 +150,18 @@ module.exports = ({
           // We save the apple identity token to a different table
           // For getting the user info in later log-ins
           if (req.body.signInMethod === 'apple') {
-            postAppleIdentityTokenUseCase
-              .create({ body: {
-                userId: data.id,
-                identityToken: req.body.identityToken
-              } })
-              .catch(error => {
-                logger.error(error.stack)
-                res.status(Status.BAD_REQUEST).json(
-                  Fail(error.message))
-              })
+            // TODO THINK ABOUT THE AWAIT KEYWORD HERE
+            try {
+              await postAppleIdentityTokenUseCase
+                .create({ body: {
+                  userId: data.id,
+                  identityToken: req.body.identityToken
+                } })
+            } catch (error) {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            }
           }
 
           if (req.body.friendInviteCode !== null) {
@@ -224,7 +226,7 @@ module.exports = ({
         .getOneWithEmail({ email: req.query.email })
         .then(data => {
           if (data === null) res.status(Status.OK).json(Success(data))
-          else throw new Error('existing-user')
+          else res.status(Status.OK).json(Success(data.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)
@@ -239,7 +241,7 @@ module.exports = ({
         .getOne({ identityToken: req.query.identityToken })
         .then(data => {
           if (data === null) res.status(Status.OK).json(Success(data))
-          else throw new Error('existing-user')
+          else res.status(Status.OK).json(Success(data.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)
