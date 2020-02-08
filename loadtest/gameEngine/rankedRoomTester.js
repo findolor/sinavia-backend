@@ -2,8 +2,12 @@ const Colyseus = require('colyseus.js')
 
 const shellBreaker = '72b6fa48-94c0-4691-8ac9-db679a67a9b3'
 const marmelade = '08f228a0-443b-4003-8b17-efe835cf6916'
+const firstIdTestServer = '28b2131b-8a45-4a14-87fc-c1f596127d7d'
+const secondIdTestServer = 'adc0e4c5-fdee-42e3-9ded-7fd065d98fc3'
 
-let iterationCount = 1000
+const isServerTest = true
+
+let iterationCount = 2000
 let joinOptions
 let finishCount = 0
 let joined = 0
@@ -12,9 +16,9 @@ let joinErrs = 0
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    // clients[i] = new Colyseus.Client('http://35.246.252.239:5000')
-    // let client = new Colyseus.Client('http://localhost:5000')
-    let client = new Colyseus.Client('http://localhost:5000/')
+    // let client = new Colyseus.Client('http://35.246.252.239:3000')
+    let client = new Colyseus.Client('http://35.246.252.239:5000')
+    // let client = new Colyseus.Client('http://localhost:5000/')
 
     // console.log(i % 2)
     joinOptions = {
@@ -22,7 +26,7 @@ for (let i = 0; i < iterationCount; i++) {
       examId: 1,
       courseId: 1,
       subjectId: 1,
-      databaseId: i % 2 === 0 ? shellBreaker : marmelade
+      databaseId: i % 2 === 0 ? isServerTest === true ? firstIdTestServer : shellBreaker : isServerTest === true ? secondIdTestServer : marmelade
     }
 
     // Joins a room or creates one with given options
@@ -63,7 +67,7 @@ for (let i = 0; i < iterationCount; i++) {
       joinErrs++
       console.log('Error while joining room: ', error)
     })
-  }, Math.floor(Math.random() * 5000) + 1000)
+  }, Math.floor(Math.random() * 10000) + 1000)
 }
 
 function answerQuestion (room) {
