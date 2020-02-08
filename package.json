@@ -123,7 +123,8 @@
   "standard": {
     "ignore": [
       "/public/docs",
-      "src/interfaces/proxy"
+      "src/interfaces/proxy",
+      "ecosystem.config.js"
     ],
     "globals": [
       "request",

@@ -1,8 +1,8 @@
 const container = require('src/container')
-const app = container.resolve('app')
+const engine = container.resolve('gameEngine')
 
-app
-  .startGameEngine()
+engine
+  .start()
   .catch((error) => {
     app.logger.error(error.stack)
     process.exit()
