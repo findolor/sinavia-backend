@@ -1,7 +1,7 @@
 const os = require('os')
 module.exports = {
   apps: [
-    {
+    /* {
       name: 'backend',
       script: 'index.js',
       instances: os.cpus().length,
@@ -10,7 +10,7 @@ module.exports = {
         NODE_ENV: process.env.NODE_ENV || 'local',
         NODE_PATH: '.'
       }
-    },
+    }, */
     {
       name: 'colyseus',
       script: 'startGameEngine.js', // your entrypoint file

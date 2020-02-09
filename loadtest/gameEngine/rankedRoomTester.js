@@ -7,7 +7,7 @@ const secondIdTestServer = 'adc0e4c5-fdee-42e3-9ded-7fd065d98fc3'
 
 const isServerTest = true
 
-let iterationCount = 2000
+let iterationCount = 1000
 let joinOptions
 let finishCount = 0
 let joined = 0
@@ -16,9 +16,9 @@ let joinErrs = 0
 for (let i = 0; i < iterationCount; i++) {
   setTimeout(() => {
     // Connect our client to game engine
-    // let client = new Colyseus.Client('http://35.246.252.239:3000')
-    let client = new Colyseus.Client('http://35.246.252.239:5000')
-    // let client = new Colyseus.Client('http://localhost:5000/')
+    let client = new Colyseus.Client('ws://35.246.252.239:5000')
+    // let client = new Colyseus.Client('http://35.246.252.239:5000')
+    // let client = new Colyseus.Client('ws://localhost:80')
 
     // console.log(i % 2)
     joinOptions = {
@@ -56,18 +56,19 @@ for (let i = 0; i < iterationCount; i++) {
             room.send({
               action: 'ready'
             })
-          }, 1000)
+          }, 2000)
         }
       })
 
       room.onError(error => {
         console.error(error)
+        room.leave()
       })
     }).catch(error => {
       joinErrs++
       console.log('Error while joining room: ', error)
     })
-  }, Math.floor(Math.random() * 10000) + 1000)
+  }, Math.floor(Math.random() * 60000) + 1000)
 }
 
 function answerQuestion (room) {
