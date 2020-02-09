@@ -226,7 +226,7 @@ module.exports = ({
         .getOneWithEmail({ email: req.query.email })
         .then(data => {
           if (data === null) res.status(Status.OK).json(Success(data))
-          else res.status(Status.OK).json(Success(data.signInMethod))
+          else res.status(Status.OK).json(Success(data.user.dataValues.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)
@@ -241,7 +241,7 @@ module.exports = ({
         .getOne({ identityToken: req.query.identityToken })
         .then(data => {
           if (data === null) res.status(Status.OK).json(Success(data))
-          else res.status(Status.OK).json(Success(data.signInMethod))
+          else res.status(Status.OK).json(Success(data.user.dataValues.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)

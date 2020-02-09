@@ -351,7 +351,9 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
         // If we dont have any questions to show, we end the game
         if (Object.keys(questionProps).length !== 0) this.isQuestionsAvailable = true
         if (!this.isQuestionsAvailable) {
-          this.broadcast({ action: 'no-questions' })
+          this.clock.setTimeout(() => {
+            this.broadcast({ action: 'no-questions' })
+          }, 4000)
           return
         }
         // If we have less than 5 questions we set the question variable again
@@ -380,6 +382,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    if (!this.isQuestionsAvailable) return
     try {
       // We get user jokers from database
       // Later on we send all the joker names and ids to the client
