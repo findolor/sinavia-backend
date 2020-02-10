@@ -336,19 +336,23 @@ class RankedGame {
         this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -394,19 +398,23 @@ class RankedGame {
         this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
       } else playerList.pop()
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        if (playerProps[userId].databaseId === 'bot_id') return
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          if (playerProps[userId].databaseId === 'bot_id') return
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Ranked game ends with p1: ${winLoseDrawAndPoints[0].status} and p2: ${winLoseDrawAndPoints[1].status} roomId: ${rankedRoomId}`)
@@ -598,30 +606,7 @@ class RankedRoom extends colyseus.Room {
     this.isMatchStarted = false
   }
 
-  // If this room is full new users will join another room
-  // TODO DEPRECATED IN 0.10.8
-  requestJoin (options, isNew) {
-    if (isNew) {
-      return (options.create && isNew)
-    } else {
-      const matchInformation = this.state.getMatchInformation()
-      const ROOM_AVAILABILITY_CHECK = (options.create && isNew) || this.clients.length > 0
-      const EXAM_COURSE_SUBJECT_CHECK = (matchInformation.examId === options.examId) &&
-                                        (matchInformation.courseId === options.courseId) &&
-                                        (matchInformation.subjectId === options.subjectId)
-      if (ROOM_AVAILABILITY_CHECK) { // First we check if the room is available for joining
-        if (EXAM_COURSE_SUBJECT_CHECK) { // Then we check if this is the same game with both players
-          // Checking if the users are different
-          if (this.state.isBothPlayersSame(options.databaseId)) {
-            return false
-          }
-          return true // User can join the game
-        } else { return false } // Failed exam/course/subject check
-      } else { return false } // Failed room availability check
-    }
-  }
-
-  onInit (options) {
+  onCreate (options) {
     try {
       // We initialize our game here
       this.setState(new RankedGame())
@@ -667,9 +652,9 @@ class RankedRoom extends colyseus.Room {
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
     getUserJoker(options.databaseId).then(userJokers => {
-      this.userJokers[client.id] = []
+      this.userJokers[client.sessionId] = []
       userJokers.forEach(userJoker => {
-        this.userJokers[client.id].push({
+        this.userJokers[client.sessionId].push({
           isUsed: false,
           joker: userJoker,
           id: userJoker.jokerId
@@ -684,7 +669,7 @@ class RankedRoom extends colyseus.Room {
     getOneUser(options.databaseId).then(userInformation => {
       const { dataValues } = userInformation
       userInformation = dataValues
-      this.userInformations[client.id] = userInformation
+      this.userInformations[client.sessionId] = userInformation
 
       // We get the user score from database
       // Check if it exists; if it is null we set shouldUpdate false, otherwise true
@@ -696,19 +681,19 @@ class RankedRoom extends colyseus.Room {
         options.subjectId
       ).then(userScore => {
         if (userScore === null) {
-          this.userScores[client.id] = {
+          this.userScores[client.sessionId] = {
             shouldUpdate: false,
             userScore: userScore
           }
         } else {
-          this.userScores[client.id] = {
+          this.userScores[client.sessionId] = {
             shouldUpdate: true,
             userScore: userScore
           }
         }
 
         // Finally adding the player to our room state
-        if (this.state.addPlayer(client.id, userInformation, this.userScores, false)) this.addedUserNumber++
+        if (this.state.addPlayer(client.sessionId, userInformation, this.userScores, false)) this.addedUserNumber++
 
         if (this.addedUserNumber === 2) {
           // We send the clients player information
@@ -823,19 +808,19 @@ class RankedRoom extends colyseus.Room {
           break
           // 'button-press' action is sent when a player presses a button
         case 'button-press':
-          this.state.setPlayerAnswerResults(client.id, data.button)
+          this.state.setPlayerAnswerResults(client.sessionId, data.button)
           break
         case 'remove-options-joker':
           // We mark the joker as used
-          if (this.userJokers[client.id] !== null) {
-            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-            if (this.userJokers[client.id][index].joker.amount === 0) {
+          if (this.userJokers[client.sessionId] !== null) {
+            let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+            if (this.userJokers[client.sessionId][index].joker.amount === 0) {
               this.send(client, {
                 action: 'error-joker'
               })
               break
             }
-            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.sessionId][index].isUsed = true
           }
           let optionsToRemove
 
@@ -849,15 +834,15 @@ class RankedRoom extends colyseus.Room {
           break
         case 'second-chance-joker':
           // We mark the joker as used
-          if (this.userJokers[client.id] !== null) {
-            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-            if (this.userJokers[client.id][index].joker.amount === 0) {
+          if (this.userJokers[client.sessionId] !== null) {
+            let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+            if (this.userJokers[client.sessionId][index].joker.amount === 0) {
               this.send(client, {
                 action: 'error-joker'
               })
               break
             }
-            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.sessionId][index].isUsed = true
           }
 
           const questionAnswer = this.state.getQuestionAnswer()
@@ -870,15 +855,15 @@ class RankedRoom extends colyseus.Room {
           break
         case 'see-opponent-answer-joker':
           // We mark the joker as used
-          if (this.userJokers[client.id] !== null) {
-            let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-            if (this.userJokers[client.id][index].joker.amount === 0) {
+          if (this.userJokers[client.sessionId] !== null) {
+            let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+            if (this.userJokers[client.sessionId][index].joker.amount === 0) {
               this.send({
                 action: 'error-joker'
               })
               break
             }
-            this.userJokers[client.id][index].isUsed = true
+            this.userJokers[client.sessionId][index].isUsed = true
 
             this.send(client, {
               action: 'see-opponent-answer-joker'
@@ -887,7 +872,7 @@ class RankedRoom extends colyseus.Room {
           break
         case 'replay':
           this.clients.forEach(element => {
-            if (element.id !== client.id) {
+            if (element.id !== client.sessionId) {
               this.send(element, {
                 action: 'replay'
               })
@@ -955,14 +940,11 @@ class RankedRoom extends colyseus.Room {
           this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
-            clientId: client.id,
+            clientId: client.sessionId,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
-          this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
-          break
-        case 'ping':
-          this.send(client, { action: 'ping' })
+          this.state.saveUnfinishedMatchResults(client.sessionId, this.roomId, this.userScores, this.userJokers, this.userInformations)
           break
       }
     } catch (error) {
@@ -974,7 +956,7 @@ class RankedRoom extends colyseus.Room {
     try {
       logger.info({
         message: 'Client leaving',
-        clientId: client.id,
+        clientId: client.sessionId,
         consented: consented
       })
       if (!this.isMatchStarted) return
@@ -985,13 +967,13 @@ class RankedRoom extends colyseus.Room {
 
         this.send(lastClient, {
           action: 'client-leaving',
-          clientId: lastClient.id,
+          clientId: lastClient.sessionId,
           playerProps: this.state.getPlayerProps(),
           fullQuestionList: this.state.getQuestionProps()
         })
 
         // We save the leaving clients id to mark it as lost for later
-        this.leavingClientId = client.id
+        this.leavingClientId = client.sessionId
 
         // If the match was still going on
         if (!this.isMatchFinished) {
@@ -1000,7 +982,7 @@ class RankedRoom extends colyseus.Room {
           this.state.saveUnfinishedMatchResults(this.leavingClientId, this.roomId, this.userScores, this.userJokers, this.userInformations)
         }
       } else {
-        if (!this.isMatchFinished && this.isBotGame) this.state.saveUnfinishedMatchResults(client.id, this.roomId, this.userScores, this.userJokers, this.userInformations)
+        if (!this.isMatchFinished && this.isBotGame) this.state.saveUnfinishedMatchResults(client.sessionId, this.roomId, this.userScores, this.userJokers, this.userInformations)
       }
     } catch (error) {
       logger.error(error.stack)

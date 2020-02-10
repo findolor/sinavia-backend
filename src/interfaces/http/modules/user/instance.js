@@ -3,6 +3,8 @@ const { getUser, postUser, putUser, removeUser } = require('src/app/user')
 const { getFriendsMatch } = require('src/app/friendsMatch')
 // const { postGameEnergy } = require('src/app/gameEnergy')
 const { postUserJoker } = require('src/app/userJoker')
+const { postInviteCode, deleteInviteCode, getInviteCode } = require('src/app/inviteCode')
+const { postAppleIdentityToken, getAppleIdentityToken } = require('src/app/appleIdentityToken')
 const Sequelize = require('sequelize')
 
 module.exports = () => {
@@ -11,6 +13,8 @@ module.exports = () => {
     repository: { friendsMatchRepository },
     // repository: { gameEnergyRepository },
     repository: { userJokerRepository },
+    repository: { inviteCodeRepository },
+    repository: { appleIdentityTokenRepository },
     database
   } = container.cradle
 
@@ -21,6 +25,11 @@ module.exports = () => {
   const getFriendsMatchUseCase = getFriendsMatch({ friendsMatchRepository, Sequelize })
   // const postGameEnergyUseCase = postGameEnergy({ gameEnergyRepository })
   const postUserJokerUseCase = postUserJoker({ userJokerRepository })
+  const postInviteCodeUseCase = postInviteCode({ inviteCodeRepository })
+  const deleteInviteCodeUseCase = deleteInviteCode({ inviteCodeRepository })
+  const getInviteCodeUseCase = getInviteCode({ inviteCodeRepository, database })
+  const postAppleIdentityTokenUseCase = postAppleIdentityToken({ appleIdentityTokenRepository })
+  const getAppleIdentityTokenUseCase = getAppleIdentityToken({ appleIdentityTokenRepository, database })
 
   return {
     getUseCase,
@@ -29,6 +38,11 @@ module.exports = () => {
     deleteUseCase,
     getFriendsMatchUseCase,
     // postGameEnergyUseCase
-    postUserJokerUseCase
+    postUserJokerUseCase,
+    postInviteCodeUseCase,
+    deleteInviteCodeUseCase,
+    getInviteCodeUseCase,
+    postAppleIdentityTokenUseCase,
+    getAppleIdentityTokenUseCase
   }
 }

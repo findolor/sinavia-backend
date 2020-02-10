@@ -22,7 +22,6 @@ const {
 // A placeholder variable for the empty option
 const emptyAnswer = 6
 
-// TODO add log to all events
 class GroupState {
   constructor (
     playerIdList,
@@ -275,18 +274,22 @@ class GroupGame {
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
       this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
 
-      // Adding the wrong solved questions to db
-      results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
-        postUnsolvedQuestion({
-          userId: playerProps[userId].databaseId,
-          questionId: questionProps[wrongQuestionIndex].id
-        }).catch(error => {
-          if (error.message !== 'Validation error') {
-            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-            logger.error(error.stack)
-          }
+      try {
+        // Adding the wrong solved questions to db
+        results.unsolvedIndex[key].forEach(wrongQuestionIndex => {
+          postUnsolvedQuestion({
+            userId: playerProps[userId].databaseId,
+            questionId: questionProps[wrongQuestionIndex].id
+          }).catch(error => {
+            if (error.message !== 'Validation error') {
+              logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+              logger.error(error.stack)
+            }
+          })
         })
-      })
+      } catch (error) {
+        logger.error(error.stack)
+      }
     })
 
     logger.info(`Group game ends roomId: ${groupRoomId}`)
@@ -372,8 +375,7 @@ class GroupRoom extends colyseus.Room {
     this.userScores = {}
   }
 
-  // TODO USE THE NEW FUNCTIONS
-  onInit (options) {
+  onCreate (options) {
     // We initialize our game here
     this.setState(new GroupGame())
 
@@ -387,28 +389,6 @@ class GroupRoom extends colyseus.Room {
     this.state.setMatchInformation(matchInformation)
   }
 
-  // If this room is full new users will join another room
-  // There is only a room code check here
-  // No need to check for exam/subject/course names
-  requestJoin (options, isNew) {
-    if (isNew) {
-      if (options.create) return true
-      else return false
-    } else {
-      const matchInformation = this.state.getMatchInformation()
-      const ROOM_CODE_CHECK = (options.roomCode === matchInformation.roomCode)
-
-      // We check if the room code is valid
-      if (ROOM_CODE_CHECK) {
-        // Checks if the player is already in the group
-        if (this.state.isPlayerInGroup(options.databaseId)) return false
-        // User can join the room
-        return true
-        // Failed room code check
-      } else { return false }
-    }
-  }
-
   onJoin (client, options) {
     if (this._maxClientsReached) this.lock()
 
@@ -417,9 +397,9 @@ class GroupRoom extends colyseus.Room {
     // Later on we send all the joker names and ids to the client
     // If the client doesnt have a joker it will be blacked out
     getUserJoker(options.databaseId).then(userJokers => {
-      this.userJokers[client.id] = []
+      this.userJokers[client.sessionId] = []
       userJokers.forEach(userJoker => {
-        this.userJokers[client.id].push({
+        this.userJokers[client.sessionId].push({
           isUsed: false,
           joker: userJoker,
           id: userJoker.jokerId
@@ -440,12 +420,12 @@ class GroupRoom extends colyseus.Room {
       matchInformation.subjectId
     ).then(userScore => {
       if (userScore === null) {
-        this.userScores[client.id] = {
+        this.userScores[client.sessionId] = {
           shouldUpdate: false,
           userScore: userScore
         }
       } else {
-        this.userScores[client.id] = {
+        this.userScores[client.sessionId] = {
           shouldUpdate: true,
           userScore: userScore
         }
@@ -460,7 +440,7 @@ class GroupRoom extends colyseus.Room {
       const { dataValues } = userInformation
       userInformation = dataValues
       // Finally adding the player to our room state
-      this.state.addPlayer(client.id, userInformation, options.databaseId)
+      this.state.addPlayer(client.sessionId, userInformation, options.databaseId)
       // We send the clients player information
       this.broadcast({
         action: 'player-props',
@@ -536,19 +516,19 @@ class GroupRoom extends colyseus.Room {
         break
       // 'button-press' action is sent when a player presses a button
       case 'button-press':
-        this.state.setPlayerAnswerResults(client.id, data.button)
+        this.state.setPlayerAnswerResults(client.sessionId, data.button)
         break
       case 'remove-options-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         let optionsToRemove
@@ -563,15 +543,15 @@ class GroupRoom extends colyseus.Room {
         break
       case 'second-chance-joker':
         // We mark the joker as used
-        if (this.userJokers[client.id] !== null) {
-          let index = this.userJokers[client.id].findIndex(x => x.id === data.jokerId)
-          if (this.userJokers[client.id][index].joker.amount === 0) {
+        if (this.userJokers[client.sessionId] !== null) {
+          let index = this.userJokers[client.sessionId].findIndex(x => x.id === data.jokerId)
+          if (this.userJokers[client.sessionId][index].joker.amount === 0) {
             this.send(client, {
               action: 'error-joker'
             })
             break
           }
-          this.userJokers[client.id][index].isUsed = true
+          this.userJokers[client.sessionId][index].isUsed = true
         }
 
         const questionAnswer = this.state.getQuestionAnswer()
@@ -588,14 +568,14 @@ class GroupRoom extends colyseus.Room {
         const props = this.state.getPlayerProps()
         // If the ready status is true we change it to false
         // Then we send the client infos to clients
-        if (props[client.id].readyStatus) {
-          props[client.id].readyStatus = false
+        if (props[client.sessionId].readyStatus) {
+          props[client.sessionId].readyStatus = false
           this.broadcast({
             action: 'player-props',
             playerProps: props
           })
         } else {
-          props[client.id].readyStatus = true
+          props[client.sessionId].readyStatus = true
           this.broadcast({
             action: 'player-props',
             playerProps: props
@@ -655,13 +635,10 @@ class GroupRoom extends colyseus.Room {
       case 'leave-match':
         this.send(client, {
           action: 'leave-match',
-          clientId: client.id,
+          clientId: client.sessionId,
           playerProps: this.state.getPlayerProps(),
           fullQuestionList: this.state.getQuestionProps()
         })
-        break
-      case 'ping':
-        this.send(client, { action: 'ping' })
         break
     }
   }
@@ -670,7 +647,7 @@ class GroupRoom extends colyseus.Room {
   onLeave (client, consented) {
     logger.info({
       message: 'Client leaving',
-      clientId: client.id,
+      clientId: client.sessionId,
       consented: consented
     })
 
@@ -684,20 +661,20 @@ class GroupRoom extends colyseus.Room {
     const secondPlayerId = this.state.getPlayerId(2)
 
     // If the leaving client is the leader we give the second player in the list leadership
-    if (playerProps[client.id].isLeader) {
-      playerProps[client.id].isLeader = false
+    if (playerProps[client.sessionId].isLeader) {
+      playerProps[client.sessionId].isLeader = false
       playerProps[secondPlayerId].isLeader = true
       playerProps[secondPlayerId].readyStatus = 'Hazır'
     }
 
     // If the match started prior to client leaving, we don't delete the client object but mark it as left
     // This is because even if the client leaves, we still add the results to our database
-    if (this.isMatchStarted) playerProps[client.id].isLeft = true
+    if (this.isMatchStarted) playerProps[client.sessionId].isLeft = true
     else {
       // If the match hasn't started yet, we just delete the client object and move on
-      delete playerProps[client.id]
-      delete this.userJokers[client.id]
-      const index = playerIdList.indexOf(client.id)
+      delete playerProps[client.sessionId]
+      delete this.userJokers[client.sessionId]
+      const index = playerIdList.indexOf(client.sessionId)
       playerIdList.splice(index, 1)
     }
 
@@ -715,7 +692,7 @@ class GroupRoom extends colyseus.Room {
     if (this.clients.length !== 1) {
       this.broadcast({
         action: 'client-leaving',
-        username: playerProps[client.id].username
+        username: playerProps[client.sessionId].username
       })
     } else {
       // If everyone left the game but one client, we send "only-client" signal to it

@@ -231,18 +231,22 @@ class SoloModeGame {
       this.decideUserGoals(playerProps.databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
     })
 
-    // Adding the wrong solved questions to db
-    results.unsolvedIndex.forEach(wrongQuestionIndex => {
-      postUnsolvedQuestion({
-        userId: playerProps.databaseId,
-        questionId: questionProps[wrongQuestionIndex].id
-      }).catch(error => {
-        if (error.message !== 'Validation error') {
-          logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
-          logger.error(error.stack)
-        }
+    try {
+      // Adding the wrong solved questions to db
+      results.unsolvedIndex.forEach(wrongQuestionIndex => {
+        postUnsolvedQuestion({
+          userId: playerProps.databaseId,
+          questionId: questionProps[wrongQuestionIndex].id
+        }).catch(error => {
+          if (error.message !== 'Validation error') {
+            logger.error('GAME ENGINE INTERFACE => Cannot post unsolvedQuestion')
+            logger.error(error.stack)
+          }
+        })
       })
-    })
+    } catch (error) {
+      logger.error(error.stack)
+    }
 
     logger.info(`Solo game ends with player: ${playerProps.databaseId} roomId: ${soloModeRoomId}`)
 
@@ -331,7 +335,7 @@ class SoloModeRoom extends colyseus.Room {
     this.userScores = {}
   }
 
-  onInit (options) {
+  onCreate (options) {
     // We initialize our game here
     this.setState(new SoloModeGame())
 
@@ -412,7 +416,7 @@ class SoloModeRoom extends colyseus.Room {
       const { dataValues } = userInformation
       userInformation = dataValues
       // Finally adding the player to our room state
-      this.state.addPlayer(client.id, userInformation)
+      this.state.addPlayer(client.sessionId, userInformation)
 
       logger.info(`Solo game starts with player: ${this.state.getPlayerProps().databaseId}`)
     }).catch(error => {
@@ -545,14 +549,11 @@ class SoloModeRoom extends colyseus.Room {
           this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
-            clientId: client.id,
+            clientId: client.sessionId,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
           this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
-          break
-        case 'ping':
-          this.send(client, { action: 'ping' })
           break
       }
     } catch (error) {
@@ -564,7 +565,7 @@ class SoloModeRoom extends colyseus.Room {
     try {
       logger.info({
         message: 'Client leaving',
-        clientId: client.id,
+        clientId: client.sessionId,
         consented: consented
       })
 
