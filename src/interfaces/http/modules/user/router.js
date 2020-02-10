@@ -26,6 +26,8 @@ module.exports = ({
   postInviteCodeUseCase,
   deleteInviteCodeUseCase,
   getInviteCodeUseCase,
+  postAppleIdentityTokenUseCase,
+  getAppleIdentityTokenUseCase,
   logger,
   auth,
   smtpService,
@@ -112,7 +114,7 @@ module.exports = ({
     .post('/', (req, res) => {
       postUseCase
         .create({ body: req.body })
-        .then(data => {
+        .then(async data => {
           // Giving 3 jokers to user
           for (let i = 1; i < 4; i++) {
             postUserJokerUseCase
@@ -143,6 +145,23 @@ module.exports = ({
                 res.status(Status.BAD_REQUEST).json(
                   Fail(error.message))
               })
+          }
+
+          // We save the apple identity token to a different table
+          // For getting the user info in later log-ins
+          if (req.body.signInMethod === 'apple') {
+            // TODO THINK ABOUT THE AWAIT KEYWORD HERE
+            try {
+              await postAppleIdentityTokenUseCase
+                .create({ body: {
+                  userId: data.id,
+                  identityToken: req.body.identityToken
+                } })
+            } catch (error) {
+              logger.error(error.stack)
+              res.status(Status.BAD_REQUEST).json(
+                Fail(error.message))
+            }
           }
 
           if (req.body.friendInviteCode !== null) {
@@ -202,11 +221,27 @@ module.exports = ({
     })
 
   router
-    .get('/check', (req, res) => {
+    .get('/check/email', (req, res) => {
       getUseCase
         .getOneWithEmail({ email: req.query.email })
         .then(data => {
-          res.status(Status.OK).json(Success(data))
+          if (data === null) res.status(Status.OK).json(Success(data))
+          else res.status(Status.OK).json(Success(data.user.dataValues.signInMethod))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
+    .get('/check/identityToken', (req, res) => {
+      getAppleIdentityTokenUseCase
+        .getOne({ identityToken: req.query.identityToken })
+        .then(data => {
+          if (data === null) res.status(Status.OK).json(Success(data))
+          else res.status(Status.OK).json(Success(data.user.dataValues.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)

@@ -335,7 +335,7 @@ class SoloModeRoom extends colyseus.Room {
     this.userScores = {}
   }
 
-  onInit (options) {
+  onCreate (options) {
     // We initialize our game here
     this.setState(new SoloModeGame())
 
@@ -416,7 +416,7 @@ class SoloModeRoom extends colyseus.Room {
       const { dataValues } = userInformation
       userInformation = dataValues
       // Finally adding the player to our room state
-      this.state.addPlayer(client.id, userInformation)
+      this.state.addPlayer(client.sessionId, userInformation)
 
       logger.info(`Solo game starts with player: ${this.state.getPlayerProps().databaseId}`)
     }).catch(error => {
@@ -549,14 +549,11 @@ class SoloModeRoom extends colyseus.Room {
           this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
-            clientId: client.id,
+            clientId: client.sessionId,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
           this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
-          break
-        case 'ping':
-          this.send(client, { action: 'ping' })
           break
       }
     } catch (error) {
@@ -568,7 +565,7 @@ class SoloModeRoom extends colyseus.Room {
     try {
       logger.info({
         message: 'Client leaving',
-        clientId: client.id,
+        clientId: client.sessionId,
         consented: consented
       })
 

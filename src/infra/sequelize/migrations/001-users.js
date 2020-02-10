@@ -68,9 +68,8 @@ module.exports = {
         allowNull: true
       },
       signInMethod: {
-        type: Sequelize.ENUM('normal', 'google', 'facebook'),
-        allowNull: false,
-        defaultValue: 'normal'
+        type: Sequelize.ENUM('normal', 'google', 'apple'),
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

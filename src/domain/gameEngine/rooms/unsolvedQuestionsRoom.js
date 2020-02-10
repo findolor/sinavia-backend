@@ -329,7 +329,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
     this.isQuestionsAvailable = false
   }
 
-  onInit (options) {
+  onCreate (options) {
     try {
       // We initialize our game here
       this.setState(new UnsolvedQuestionsGame())
@@ -351,7 +351,9 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
         // If we dont have any questions to show, we end the game
         if (Object.keys(questionProps).length !== 0) this.isQuestionsAvailable = true
         if (!this.isQuestionsAvailable) {
-          this.broadcast({ action: 'no-questions' })
+          this.clock.setTimeout(() => {
+            this.broadcast({ action: 'no-questions' })
+          }, 4000)
           return
         }
         // If we have less than 5 questions we set the question variable again
@@ -380,6 +382,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    if (!this.isQuestionsAvailable) return
     try {
       // We get user jokers from database
       // Later on we send all the joker names and ids to the client
@@ -427,7 +430,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
         const { dataValues } = userInformation
         userInformation = dataValues
         // Finally adding the player to our room state
-        this.state.addPlayer(client.id, userInformation)
+        this.state.addPlayer(client.sessionId, userInformation)
 
         logger.info(`Unsolved questions mode starts with player: ${this.state.getPlayerProps().databaseId}`)
       }).catch(error => {
@@ -563,14 +566,11 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
           this.isMatchFinished = true
           this.send(client, {
             action: 'leave-match',
-            clientId: client.id,
+            clientId: client.sessionId,
             playerProps: this.state.getPlayerProps(),
             fullQuestionList: this.state.getQuestionProps()
           })
           this.state.saveMatchResults(this.roomId, this.userJokers, this.userScores)
-          break
-        case 'ping':
-          this.send(client, { action: 'ping' })
           break
       }
     } catch (error) {
@@ -582,7 +582,7 @@ class UnsolvedQuestionsRoom extends colyseus.Room {
     try {
       logger.info({
         message: 'Client leaving',
-        clientId: client.id,
+        clientId: client.sessionId,
         consented: consented
       })
 
