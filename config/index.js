@@ -31,14 +31,6 @@ function loadCacheConfig () {
   throw new Error('Cache configuration is required')
 }
 
-function loadAWSConfig () {
-  if (fs.existsSync(path.join(__dirname, './aws.js'))) {
-    return require('./aws')
-  }
-
-  throw new Error('AWS configuration is required')
-}
-
 function loadFCMConfig () {
   if (fs.existsSync(path.join(__dirname, './fcm.js'))) {
     return require('./fcm')[ENV]
@@ -60,7 +52,6 @@ const ENV = process.env.NODE_ENV || 'development'
 const appConfig = loadAppConfig()
 const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()
-const awsConfig = loadAWSConfig()
 const fcmConfig = loadFCMConfig()
 const smtpConfig = loadSMTPConfig()
 
@@ -75,7 +66,6 @@ const config = Object.assign({
   env: ENV,
   db: dbConfig,
   cache: cacheConfig,
-  aws: awsConfig,
   fcm: fcmConfig,
   smtp: smtpConfig
 }, appConfig)
@@ -88,9 +78,6 @@ if (!config.cache) {
 }
 if (!config.apiPort) {
   throw new Error('app config file log not found')
-}
-if (!config.aws) {
-  throw new Error('aws config file log not found')
 }
 if (!config.fcm) {
   throw new Error('fcm config file log not found')
