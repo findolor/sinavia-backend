@@ -69,7 +69,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/purchaseReceipts', controller('purchaseReceipt').router)
   apiRouter.use('/inviteCodes', controller('inviteCode').router)
 
-  router.use(`/api/${config.version}`, apiRouter)
+  router.use(`/${config.version}`, apiRouter)
 
   router.use(partialRight(errorHandler, [logger, config]))
 
