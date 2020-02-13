@@ -226,7 +226,7 @@ module.exports = ({
         .getOneWithEmail({ email: req.query.email })
         .then(data => {
           if (data === null) res.status(Status.OK).json(Success(data))
-          else res.status(Status.OK).json(Success(data.user.dataValues.signInMethod))
+          else res.status(Status.OK).json(Success(data.dataValues.signInMethod))
         })
         .catch((error) => {
           logger.error(error.stack)
