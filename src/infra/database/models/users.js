@@ -67,7 +67,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     signInMethod: {
-      type: DataTypes.ENUM('normal', 'google', 'facebook'),
+      type: DataTypes.ENUM('normal', 'google', 'apple'),
       allowNull: false
     }
   }, {

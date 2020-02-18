@@ -18,7 +18,9 @@ const OngoingMatch = require('./ongoingMatch')
 const GameEnergy = require('./gameEnergy')
 const UnsolvedQuestion = require('./unsolvedQuestion')
 const UserGoal = require('./userGoal')
+const PurchaseReceipt = require('./purchaseReceipt')
 const InviteCode = require('./inviteCode')
+const AppleIdentityToken = require('./appleIdentityToken')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -41,7 +43,9 @@ module.exports = ({ database }) => {
   const gameEnergyModel = database.models.gameEnergies
   const unsolvedQuestionModel = database.models.unsolvedQuestions
   const userGoalModel = database.models.userGoals
+  const purchaseReceiptModel = database.models.purchaseReceipts
   const inviteCodeModel = database.models.inviteCodes
+  const appleIdentityTokenModel = database.models.appleIdentityTokens
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -174,6 +178,16 @@ module.exports = ({ database }) => {
   userModel.hasMany(inviteCodeModel, { foreignKey: 'userId' })
   inviteCodeModel.belongsTo(userModel, { foreignKey: 'userId' })
 
+  // USER has one APPLE_IDENTITY_TOKEN
+  // APPLE_IDENTITY_TOKEN belongs to one USER
+  userModel.hasMany(appleIdentityTokenModel, { foreignKey: 'userId' })
+  appleIdentityTokenModel.belongsTo(userModel, { foreignKey: 'userId' })
+
+  // USER has many PURCHASE_RECEIPTs
+  // PURCHASE_RECEIPT belongs to one USER
+  userModel.hasMany(purchaseReceiptModel, { foreignKey: 'userId' })
+  purchaseReceiptModel.belongsTo(userModel, { foreignKey: 'userId' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -195,6 +209,8 @@ module.exports = ({ database }) => {
     gameEnergyRepository: GameEnergy({ model: gameEnergyModel }),
     unsolvedQuestionRepository: UnsolvedQuestion({ model: unsolvedQuestionModel }),
     userGoalRepository: UserGoal({ model: userGoalModel }),
-    inviteCodeRepository: InviteCode({ model: inviteCodeModel })
+    purchaseReceiptRepository: PurchaseReceipt({ model: purchaseReceiptModel }),
+    inviteCodeRepository: InviteCode({ model: inviteCodeModel }),
+    appleIdentityTokenRepository: AppleIdentityToken({ model: appleIdentityTokenModel })
   }
 }
