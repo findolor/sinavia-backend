@@ -1,4 +1,4 @@
-module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
+module.exports = ({ server, database, logger, cronJob }) => {
   return {
     start: () =>
       Promise
@@ -14,11 +14,6 @@ module.exports = ({ server, database, gameEngine, logger, cronJob }) => {
         .then(cronJob.leaderboardCronJob)
         // Cron job that runs every monday to delete user goals
         .then(cronJob.resetUserGoalsCronJob)
-        .catch(err => logger.error(err.stack)),
-    startGameEngine: () =>
-      Promise
-        .resolve()
-        .then(gameEngine.start)
         .catch(err => logger.error(err.stack))
   }
 }
