@@ -46,6 +46,14 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
+      solvedQuestionVideo: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      solvedQuestionImage: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

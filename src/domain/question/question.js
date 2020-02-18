@@ -9,6 +9,8 @@ const Question = t.struct({
   subjectId: t.Number,
   questionLink: t.String,
   correctAnswer: t.Number,
+  solvedQuestionImage: t.maybe(t.String),
+  solvedQuestionVideo: t.maybe(t.String),
   createdAt: t.maybe(t.Date),
   updatedAt: t.maybe(t.Date)
 })
