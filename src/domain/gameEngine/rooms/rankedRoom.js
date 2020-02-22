@@ -82,17 +82,22 @@ class RankedGame {
 
     if (!isBot) this.rankedState.playerProps[clientId].totalPoints = userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
     else {
-      // We randomize a point based on the clients points
-      const pointDifference = Math.floor(Math.random() * this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1)
       let addOrSubtract
       // We get true/false for adding or subtracting
-      // This is with a probability of 25%
+      // This is true with a probability of 25%
       (function () {
         addOrSubtract = Math.random() <= 0.25
       })()
       // Then we either add it or subtract it
-      if (addOrSubtract) this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 2500
-      else this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints - pointDifference
+      if (addOrSubtract) {
+        // With 75% probability we add one level
+        // With 25% we add two levels to users level
+        if (Math.random() <= 0.7) this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 750
+        else this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1500
+      } else { // We randomize a point based on the clients points
+        const pointDifference = Math.floor(Math.random() * this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1)
+        this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints - pointDifference
+      }
     }
 
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
@@ -604,6 +609,7 @@ class RankedRoom extends colyseus.Room {
     this.userInformations = {}
     this.isBotGame = false
     this.isMatchStarted = false
+    this.userSuccessPercentage = null
   }
 
   onCreate (options) {
@@ -729,8 +735,28 @@ class RankedRoom extends colyseus.Room {
           }, 3000) */
             // We set a timeout for bot
             if (this.isBotGame) {
-              let botAnswer = Math.floor((Math.random() * 6) + 1)
-              let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+              let botAnswer
+
+              // Gets a correct percentage value for getting a random answer
+              const correctPercentage = Math.random() <= this.userSuccessPercentage.toFixed(2)
+              // This means true
+              if (correctPercentage) botAnswer = this.state.getQuestionProps()[0].correctAnswer
+              else {
+                // We keep the loop until we get a valid answer
+                while (true) {
+                  // Get a rand answer between 1 and 6
+                  botAnswer = Math.floor((Math.random() * 6) + 1)
+
+                  // If the exam is 4 option exam and we get 5, we loop it again
+                  if (this.state.getMatchInformation().examId === 1 && botAnswer === 5) continue
+
+                  // If it is same as the correct answer, we loop it again
+                  if (botAnswer === this.state.getQuestionProps()[0].correctAnswer) continue
+                  else break
+                }
+              }
+              // let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+              let botTimer = 2000
 
               this.clock.setTimeout(() => {
                 // Bot answers the question
@@ -790,8 +816,28 @@ class RankedRoom extends colyseus.Room {
               that.state.changeStateInformation('question')
 
               if (this.isBotGame) {
-                let botAnswer = Math.floor((Math.random() * 6) + 1)
-                let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+                let botAnswer
+
+                // Gets a correct percentage value for getting a random answer
+                const correctPercentage = Math.random() <= this.userSuccessPercentage.toFixed(2)
+                // This means true
+                if (correctPercentage) botAnswer = this.state.getQuestionAnswer()
+                else {
+                // We keep the loop until we get a valid answer
+                  while (true) {
+                  // Get a rand answer between 1 and 6
+                    botAnswer = Math.floor((Math.random() * 6) + 1)
+
+                    // If the exam is 4 option exam and we get 5, we loop it again
+                    if (this.state.getMatchInformation().examId === 1 && botAnswer === 5) continue
+
+                    // If it is same as the correct answer, we loop it again
+                    if (botAnswer === this.state.getQuestionAnswer()) continue
+                    else break
+                  }
+                }
+                // let botTimer = Math.floor(((Math.random() * 20) + 15) * 1000)
+                let botTimer = 2000
 
                 this.clock.setTimeout(() => {
                   this.state.setPlayerAnswerResults(BOT_CLIENT_ID, botAnswer)
@@ -926,6 +972,9 @@ class RankedRoom extends colyseus.Room {
           userInformation.coverPicture = BOT_CITY
           // Adding the bot to our props
           this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
+
+          const score = this.userScores[this.state.getPlayerId(1)].userScore
+          this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
 
           // Lock the room as usual and broadcast the props
           this.lock()
