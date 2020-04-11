@@ -25,6 +25,14 @@ module.exports = (sequelize, DataTypes) => {
     correctAnswer: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    solvedQuestionImage: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    solvedQuestionVideo: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     freezeTableName: true,

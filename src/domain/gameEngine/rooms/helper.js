@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 // Takes players from the rooms and calculates their results and returns it.
 // Can be used for 1 and more players
 const calculateResults = (playerList) => {
@@ -109,7 +111,40 @@ const calculateResultsSolo = (player) => {
   }
 }
 
+const getBotInformation = async () => {
+  return new Promise((resolve, reject) => {
+    let nameList
+    let lastnameList
+    let cityList
+
+    fs.readFile('./src/domain/gameEngine/botFiles/names.txt', 'utf-8', (err, data) => {
+      if (err) reject(err)
+      nameList = data.split('\n')
+
+      fs.readFile('./src/domain/gameEngine/botFiles/lastnames.txt', 'utf-8', (err, data) => {
+        if (err) reject(err)
+        lastnameList = data.split('\n')
+
+        fs.readFile('./src/domain/gameEngine/botFiles/cities.txt', 'utf-8', (err, data) => {
+          if (err) reject(err)
+          cityList = data.split('\n')
+
+          const nameRand = Math.floor(Math.random() * nameList.length)
+          const lastnameRand = Math.floor(Math.random() * lastnameList.length)
+          const cityRand = Math.floor(Math.random() * cityList.length)
+
+          resolve({
+            username: nameList[nameRand] + lastnameList[lastnameRand],
+            city: cityList[cityRand]
+          })
+        })
+      })
+    })
+  })
+}
+
 module.exports = {
   calculateResults,
-  calculateResultsSolo
+  calculateResultsSolo,
+  getBotInformation
 }
