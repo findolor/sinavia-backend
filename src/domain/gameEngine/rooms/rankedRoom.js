@@ -17,7 +17,8 @@ const {
   getOneUserGoal
 } = require('../../../interfaces/databaseInterface/interface')
 const {
-  calculateResults
+  calculateResults,
+  getBotInformation
 } = require('./helper')
 
 // A placeholder variable for the empty option
@@ -26,11 +27,13 @@ const FINISH_MATCH_POINT = 20
 const WIN_MATCH_POINT = 100
 const CORRECT_ANSWER_MULTIPLIER = 20
 const DRAW_MATCH_POINT = 50
+// Bot dummy room session id
 const BOT_CLIENT_ID = 'bot_client_id'
-const BOT_USERNAME = 'BOT'
+let BOT_USERNAME = 'BOT'
 const BOT_COVER_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/coverPictures%2FdefaultCoverPicture.jpg?alt=media&token=146b2665-502d-4d0e-b83f-94557731da56'
 const BOT_PROFILE_PICTURE = 'https://firebasestorage.googleapis.com/v0/b/sinavia-deploy-test-258708.appspot.com/o/profilePictures%2FdefaultProfilePicture.jpg?alt=media&token=1f12dcc9-2b87-48b9-b374-de6d93cd4cd1'
-const BOT_CITY = 'İzmir'
+let BOT_CITY = 'İzmir'
+// Bot dummy db id
 const BOT_ID = 'bot_id'
 
 class RankedState {
@@ -961,29 +964,38 @@ class RankedRoom extends colyseus.Room {
           })
           break
         case 'start-with-bot':
+          // Lock the room as usual and broadcast the props
+          this.lock()
+
           // We set the game as bot game
           this.isBotGame = true
 
-          const userInformation = {}
-          userInformation.username = BOT_USERNAME
-          userInformation.id = BOT_ID
-          userInformation.profilePicture = BOT_PROFILE_PICTURE
-          userInformation.coverPicture = BOT_COVER_PICTURE
-          userInformation.coverPicture = BOT_CITY
-          // Adding the bot to our props
-          this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
+          getBotInformation().then(data => {
+            BOT_USERNAME = data.username
+            BOT_CITY = data.city
 
-          const score = this.userScores[this.state.getPlayerId(1)].userScore
-          this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
+            const userInformation = {}
+            userInformation.username = BOT_USERNAME
+            userInformation.id = BOT_ID
+            userInformation.profilePicture = BOT_PROFILE_PICTURE
+            userInformation.coverPicture = BOT_COVER_PICTURE
+            userInformation.city = BOT_CITY
+            // Adding the bot to our props
+            this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
 
-          // Lock the room as usual and broadcast the props
-          this.lock()
-          // We send the clients player information
-          this.clock.setTimeout(() => {
-            this.readyPlayerCount++
-            this.broadcast(this.state.getPlayerProps())
-          }, 500)
-          logger.info(`Ranked game with bot starts with p: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId}`)
+            const score = this.userScores[this.state.getPlayerId(1)].userScore
+            this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
+
+            // We send the clients player information
+            this.clock.setTimeout(() => {
+              this.readyPlayerCount++
+              this.broadcast(this.state.getPlayerProps())
+            }, 500)
+            logger.info(`Ranked game with bot starts with p: ${this.state.getPlayerProps()[this.state.getPlayerId(1)].databaseId}`)
+          })
+            .catch(error => {
+              logger.error(error.stack)
+            })
           break
         case 'leave-match':
           this.isMatchFinished = true
