@@ -7,7 +7,7 @@ module.exports = {
       out_file: './logs/pm2_logs/out.log',
       log_file: './logs/pm2_logs/combined.log',
       time: true,
-      instances: 1,
+      instances: -1,
       exec_mode: 'fork', // Must be fork!!
       env: {
         NODE_ENV: process.env.NODE_ENV,
