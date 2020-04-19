@@ -18,9 +18,10 @@ module.exports = ({ config, logger, database }) => {
     router.use(statusMonitor())
   }
 
-  if (config.env !== 'production') {
+  /* if (config.env !== 'production') {
     router.use(httpLogger(logger))
-  }
+  } */
+  router.use(httpLogger(logger))
 
   const apiRouter = Router()
 

@@ -13,7 +13,7 @@ module.exports = ({ config }) => {
       })
     )
   ]
-  if (config.env !== 'production') {
+  if (config.env !== 'prod') {
     transports.push(new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),

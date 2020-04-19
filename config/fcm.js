@@ -6,5 +6,9 @@ module.exports = {
   local: {
     databaseURL: process.env.FCM_DATABASE_URL,
     serviceAccount: require('./fcmCredentials.local.json')
+  },
+  prod: {
+    databaseURL: process.env.FCM_DATABASE_URL,
+    serviceAccount: require('./fcmCredentials.prod.json')
   }
 }

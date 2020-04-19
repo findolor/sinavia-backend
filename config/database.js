@@ -51,7 +51,7 @@ module.exports = {
       // socketPath: process.env.SOCKET_PATH
     }
   },
-  production: {
+  prod: {
     database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
     port: process.env.DATABASE_PORT,
