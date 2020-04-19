@@ -14,10 +14,9 @@ postgres-data
 redis-data
 
 .env.*
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
 
 ./config/fcmCredentials.test.json
 ./config/fcmCredentials.local.json
+./config/fcmCredentials.prod.json
+
+./secrets/*
