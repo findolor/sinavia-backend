@@ -13,11 +13,7 @@ module.exports = ({ config, basePath }) => {
       dialect: 'postgres',
       logging: false,
       dialectOptions: config.db.dialectOptions,
-      ssl: {
-        ca: fs.readFileSync('./secrets/server-ca.pem').toString(),
-        key: fs.readFileSync('./secrets/client-key.pem').toString(),
-        cert: fs.readFileSync('./secrets/client-cert.pem').toString()
-      }
+      ssl: true
     }
   )
 

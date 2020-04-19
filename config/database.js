@@ -1,9 +1,6 @@
-/**
- * since mocha don't see enviroment variables we have to use dotenv
- */
+const fs = require('fs')
 require('dotenv-flow').config()
 
-// TODO fix SSL issue
 module.exports = {
   local: {
     database: process.env.DATABASE_NAME,
@@ -58,10 +55,12 @@ module.exports = {
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     dialect: 'postgres',
-    ssl: process.env.DATABASE_SSL_ENABLED,
     dialectOptions: {
       ssl: {
-        require: process.env.DATABASE_SSL_ENABLED
+        // require: process.env.DATABASE_SSL_ENABLED,
+        ca: fs.readFileSync('./secrets/server-ca.pem').toString(),
+        key: fs.readFileSync('./secrets/client-key.pem').toString(),
+        cert: fs.readFileSync('./secrets/client-cert.pem').toString()
       }
     }
   }
