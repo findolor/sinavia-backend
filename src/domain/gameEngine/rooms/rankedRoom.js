@@ -82,7 +82,6 @@ class RankedGame {
       coverPicture: userInformation.coverPicture,
       city: userInformation.city
     }
-
     if (!isBot) this.rankedState.playerProps[clientId].totalPoints = userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
     else {
       let addOrSubtract
@@ -101,6 +100,7 @@ class RankedGame {
         const pointDifference = Math.floor(Math.random() * this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1)
         this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints - pointDifference
       }
+      if (this.rankedState.playerProps[clientId].totalPoints < 0) this.rankedState.playerProps[clientId].totalPoints = 250
     }
 
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
