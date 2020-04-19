@@ -984,8 +984,11 @@ class RankedRoom extends colyseus.Room {
             this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
 
             const score = this.userScores[this.state.getPlayerId(1)].userScore
-            if (score) this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
-            else this.userSuccessPercentage = 0.5
+            if (score) {
+              if (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw >= 10) {
+                this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
+              } else this.userSuccessPercentage = 0.5
+            } else this.userSuccessPercentage = 0.5
 
             // We send the clients player information
             this.clock.setTimeout(() => {
