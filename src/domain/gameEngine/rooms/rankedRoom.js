@@ -82,7 +82,6 @@ class RankedGame {
       coverPicture: userInformation.coverPicture,
       city: userInformation.city
     }
-
     if (!isBot) this.rankedState.playerProps[clientId].totalPoints = userScores[clientId].userScore !== null ? userScores[clientId].userScore.totalPoints : 0
     else {
       let addOrSubtract
@@ -101,6 +100,7 @@ class RankedGame {
         const pointDifference = Math.floor(Math.random() * this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints + 1)
         this.rankedState.playerProps[clientId].totalPoints = this.rankedState.playerProps[this.rankedState.playerOneId].totalPoints - pointDifference
       }
+      if (this.rankedState.playerProps[clientId].totalPoints < 0) this.rankedState.playerProps[clientId].totalPoints = 250
     }
 
     this.rankedState.playerOneId === '' ? this.rankedState.playerOneId = clientId : this.rankedState.playerTwoId = clientId
@@ -984,7 +984,11 @@ class RankedRoom extends colyseus.Room {
             this.state.addPlayer(BOT_CLIENT_ID, userInformation, this.userScores, true)
 
             const score = this.userScores[this.state.getPlayerId(1)].userScore
-            this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
+            if (score) {
+              if (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw >= 10) {
+                this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
+              } else this.userSuccessPercentage = 0.5
+            } else this.userSuccessPercentage = 0.5
 
             // We send the clients player information
             this.clock.setTimeout(() => {

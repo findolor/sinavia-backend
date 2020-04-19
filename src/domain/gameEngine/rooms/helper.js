@@ -129,6 +129,10 @@ const getBotInformation = async () => {
           if (err) reject(err)
           cityList = data.split('\n')
 
+          nameList.pop()
+          lastnameList.pop()
+          cityList.pop()
+
           const nameRand = Math.floor(Math.random() * nameList.length)
           const lastnameRand = Math.floor(Math.random() * lastnameList.length)
           const cityRand = Math.floor(Math.random() * cityList.length)
