@@ -678,7 +678,8 @@ class FriendRoom extends colyseus.Room {
         action: 'game-reject'
       })
       this.gameRejected = true
-    } else return true
+    }
+    return true
   }
 
   async onCreate (options) {
