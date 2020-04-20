@@ -1,9 +1,14 @@
 const fs = require('fs')
 const winston = require('winston')
+const { LoggingWinston } = require('@google-cloud/logging-winston')
 
 if (!fs.existsSync(`logs`)) {
   fs.mkdirSync(`logs`)
 }
+
+const loggingWinston = new LoggingWinston({
+  projectId: 'sinavia-deploy-test-258708'
+})
 
 module.exports = ({ config }) => {
   var transports = [
@@ -20,6 +25,8 @@ module.exports = ({ config }) => {
         winston.format.simple()
       )
     }))
+  } else {
+    transports.push(loggingWinston)
   }
   // eslint-disable-next-line new-cap
   return new winston.createLogger({
