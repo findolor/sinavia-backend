@@ -54,7 +54,7 @@ const dbConfig = loadDbConfig()
 const cacheConfig = loadCacheConfig()
 const fcmConfig = loadFCMConfig()
 const smtpConfig = loadSMTPConfig()
-console.log(fcmConfig)
+
 admin.initializeApp({
   credential: admin.credential.cert(fcmConfig.serviceAccount),
   databaseURL: fcmConfig.databaseURL
