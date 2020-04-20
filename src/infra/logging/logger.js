@@ -7,7 +7,8 @@ if (!fs.existsSync(`logs`)) {
 }
 
 const loggingWinston = new LoggingWinston({
-  projectId: 'sinavia-deploy-test-258708'
+  projectId: 'sinavia-deploy-test-258708',
+  logName: 'sinavia-prod'
 })
 
 module.exports = ({ config }) => {
