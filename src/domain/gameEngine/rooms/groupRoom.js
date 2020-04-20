@@ -272,7 +272,7 @@ class GroupGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, matchInformation, userId, playerProps[userId].databaseId)
-      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
 
       try {
         // Adding the wrong solved questions to db

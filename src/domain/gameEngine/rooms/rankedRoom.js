@@ -341,7 +341,7 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
-        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
       } else playerList.pop()
 
       try {
@@ -403,7 +403,7 @@ class RankedGame {
         this.decideUserScores(userScores, winLoseDrawAndPoints, matchInformation, key, userId, playerProps[userId].databaseId)
         this.decideUserJokers(userJokers, userId)
         this.decideUserInformationTotalPoints(userInformations[userId], winLoseDrawAndPoints[key].points)
-        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+        this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
       } else playerList.pop()
 
       try {
@@ -602,7 +602,7 @@ class RankedRoom extends colyseus.Room {
     this.maxClients = 2
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionAmount = 3
+    this.questionAmount = 5
     this.isMatchFinished = false
     this.leavingClientId = null
     this.joinedPlayerNum = 0
@@ -987,8 +987,8 @@ class RankedRoom extends colyseus.Room {
             if (score) {
               if (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw >= 10) {
                 this.userSuccessPercentage = score.totalRankedWin / (score.totalRankedWin + score.totalRankedLose + score.totalRankedDraw)
-              } else this.userSuccessPercentage = 0.5
-            } else this.userSuccessPercentage = 0.5
+              } else this.userSuccessPercentage = 0.25
+            } else this.userSuccessPercentage = 0.25
 
             // We send the clients player information
             this.clock.setTimeout(() => {

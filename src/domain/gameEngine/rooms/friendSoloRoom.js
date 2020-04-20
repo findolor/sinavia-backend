@@ -245,7 +245,7 @@ class FriendSoloGame {
       })
 
       this.decideUserJokers(userJokers, userId)
-      this.decideUserGoals(playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+      this.decideUserGoals(playerProps[this.getPlayerId(parseInt(key, 10) + 1)].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
 
       try {
         // Adding the wrong solved questions to db

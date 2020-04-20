@@ -295,7 +295,7 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
-      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
 
       try {
         // Adding the wrong solved questions to db
@@ -375,7 +375,7 @@ class FriendGame {
 
       this.decideUserJokers(userJokers, userId)
       this.decideUserScores(userScores, winLoseDraw, matchInformation, key, userId, playerProps[userId].databaseId)
-      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect)
+      this.decideUserGoals(playerProps[userId].databaseId, matchInformation.subjectId, results.resultList[key].correct + results.resultList[key].incorrect + results.resultList[key].unanswered)
 
       try {
         // Adding the wrong solved questions to db
@@ -659,7 +659,7 @@ class FriendRoom extends colyseus.Room {
     this.maxClients = 2
     this.readyPlayerCount = 0
     this.finishedPlayerCount = 0
-    this.questionAmount = 3
+    this.questionAmount = 5
     this.isMatchFinished = false
     this.leavingClientId = null
     this.joinedPlayerNum = 0
@@ -1000,7 +1000,7 @@ class FriendRoom extends colyseus.Room {
           this.userJokers[userId].isUsed = false
         })
 
-        this.questionAmount = 3
+        this.questionAmount = 5
         this.readyPlayerCount = 0
         this.finishedPlayerCount = 0
         this.isMatchFinished = false
