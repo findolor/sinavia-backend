@@ -7,3 +7,5 @@ app
     app.logger.error(error.stack)
     process.exit()
   })
+
+setInterval(() => global.gc(), process.env.GARBAGE_COLLECTOR_MINUTES)
