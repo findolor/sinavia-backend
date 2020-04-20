@@ -21,3 +21,5 @@ redis-data
 
 ./config/fcmCredentials.test.json
 ./config/fcmCredentials.local.json
+
+secrets
