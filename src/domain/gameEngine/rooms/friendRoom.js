@@ -747,13 +747,14 @@ class FriendRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
-    if (this.gameRejected) {
-      this.disconnect()
-      return
-    }
     // If we have reached the maxClients, we lock the room for unexpected things
     if (this._maxClientsReached) { this.lock() }
-
+    if (this.gameRejected) {
+      this.broadcast({
+        action: 'close-game'
+      })
+      return
+    }
     // Sending the scores to the users
     this.send(client, {
       action: 'save-user-points',
