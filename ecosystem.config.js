@@ -10,7 +10,7 @@ module.exports = {
       instances: -1,
       exec_mode: 'fork', // Must be fork!!
       env: {
-        NODE_ENV: process.env.NODE_ENV,
+        NODE_ENV: 'prod',
         NODE_PATH: '.'
       }
     }
