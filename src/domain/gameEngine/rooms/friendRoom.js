@@ -669,6 +669,7 @@ class FriendRoom extends colyseus.Room {
     this.isSoloGame = false
     this.soloGameDBId = 0
     this.friendMatches = null
+    this.gameRejected = false
   }
 
   onAuth (client, options, request) {
@@ -676,7 +677,7 @@ class FriendRoom extends colyseus.Room {
       this.broadcast({
         action: 'game-reject'
       })
-      this.disconnect()
+      this.gameRejected = true
     } else return true
   }
 
@@ -745,6 +746,10 @@ class FriendRoom extends colyseus.Room {
   }
 
   onJoin (client, options) {
+    if (this.gameRejected) {
+      this.disconnect()
+      return
+    }
     // If we have reached the maxClients, we lock the room for unexpected things
     if (this._maxClientsReached) { this.lock() }
 
