@@ -191,10 +191,10 @@ module.exports = ({ database }) => {
   purchaseReceiptModel.belongsTo(userModel, { foreignKey: 'userId' })
 
   // REPORTS belongs to users
-  userModel.hasMany(friendshipModel, { as: 'reporting', foreignKey: 'reportingUserId' })
-  userModel.hasMany(friendshipModel, { as: 'reported', foreignKey: 'reportedUserId' })
-  friendshipModel.belongsTo(userModel, { as: 'reporting' })
-  friendshipModel.belongsTo(userModel, { as: 'reported' })
+  userModel.hasMany(reportedUserModel, { as: 'reporting', foreignKey: 'reportingUserId' })
+  userModel.hasMany(reportedUserModel, { as: 'reported', foreignKey: 'reportedUserId' })
+  reportedUserModel.belongsTo(userModel, { as: 'reporting' })
+  reportedUserModel.belongsTo(userModel, { as: 'reported' })
 
   return {
     userRepository: User({ model: userModel }),
