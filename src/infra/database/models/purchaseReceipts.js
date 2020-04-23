@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     receipt: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: false
     }
   }, {

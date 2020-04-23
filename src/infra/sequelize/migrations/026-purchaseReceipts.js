@@ -19,7 +19,7 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       receipt: {
-        type: Sequelize.TEXT,
+        type: Sequelize.JSON,
         allowNull: false
       },
       createdAt: {
