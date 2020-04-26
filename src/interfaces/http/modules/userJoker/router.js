@@ -120,7 +120,7 @@ module.exports = ({
       router
     .put('/purchaseBundle/:userId', (req, res) => {
       getUserJokerUseCase
-        .getOne({ userId: req.params.userId })
+        .getJokers({ userId: req.params.userId })
         .then(data => {
           data.forEach(userJoker => {
             userJoker.amount += req.body.jokerAmount
