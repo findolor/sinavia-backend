@@ -22,6 +22,7 @@ const PurchaseReceipt = require('./purchaseReceipt')
 const InviteCode = require('./inviteCode')
 const AppleIdentityToken = require('./appleIdentityToken')
 const ReportedUser = require('./reportedUser')
+const Price = require('./price')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -48,6 +49,7 @@ module.exports = ({ database }) => {
   const inviteCodeModel = database.models.inviteCodes
   const appleIdentityTokenModel = database.models.appleIdentityTokens
   const reportedUserModel = database.models.reportedUsers
+  const priceModel = database.models.prices
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -220,6 +222,7 @@ module.exports = ({ database }) => {
     purchaseReceiptRepository: PurchaseReceipt({ model: purchaseReceiptModel }),
     inviteCodeRepository: InviteCode({ model: inviteCodeModel }),
     appleIdentityTokenRepository: AppleIdentityToken({ model: appleIdentityTokenModel }),
-    reportedUserRepository: ReportedUser({ model: reportedUserModel })
+    reportedUserRepository: ReportedUser({ model: reportedUserModel }),
+    priceRepository: Price({ model: priceModel })
   }
 }

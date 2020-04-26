@@ -70,6 +70,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/inviteCodes', controller('inviteCode').router)
   apiRouter.use('/report', controller('reportedUser').router)
   apiRouter.use('/agreement', controller('agreement').router)
+  apiRouter.use('/prices', controller('price').router)
 
   router.use(`/${config.version}`, apiRouter)
 
