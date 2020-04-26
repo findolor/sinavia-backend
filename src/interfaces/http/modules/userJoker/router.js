@@ -117,7 +117,7 @@ module.exports = ({
         })
     })
 
-      router
+  router
     .put('/purchaseBundle/:userId', (req, res) => {
       getUserJokerUseCase
         .getJokers({ userId: req.params.userId })

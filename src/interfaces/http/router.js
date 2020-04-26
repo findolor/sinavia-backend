@@ -71,7 +71,7 @@ module.exports = ({ config, logger, database }) => {
   apiRouter.use('/report', controller('reportedUser').router)
   apiRouter.use('/agreement', controller('agreement').router)
 
-  router.use(`/api/${config.version}`, apiRouter)
+  router.use(`/${config.version}`, apiRouter)
 
   router.use(partialRight(errorHandler, [logger, config]))
 
