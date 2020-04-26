@@ -15,9 +15,9 @@ redis-data
 
 .env.*
 
-./config/fcmCredentials.test.json
-./config/fcmCredentials.local.json
-./config/fcmCredentials.prod.json
+fcmCredentials.test.json
+fcmCredentials.local.json
+fcmCredentials.prod.json
 
 secrets
 
