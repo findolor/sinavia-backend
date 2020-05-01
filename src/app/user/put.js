@@ -26,7 +26,41 @@ module.exports = ({ userRepository }) => {
     })
   }
 
+  const addPremiumTime = ({ id, body }) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let user = await userRepository.findOne({
+          where: {
+            id: id
+          },
+          attributes: { exclude: ['password'] }
+        })
+        const { dataValues } = user
+        user = dataValues
+
+        if (user.isPremium) {
+          const premiumDate = new Date(user.premiumEndDate)
+          const newDate = new Date(premiumDate.setMonth(premiumDate.getMonth() + body.premiumTime))
+          user.premiumEndDate = newDate
+        } else {
+          const now = new Date()
+          const newDate = new Date(now.setMonth(now.getMonth() + body.premiumTime))
+          user.premiumEndDate = newDate
+          user.isPremium = true
+        }
+
+        await userRepository.update(user, {
+          where: { id }
+        })
+        resolve(user)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
   return {
-    updateUser
+    updateUser,
+    addPremiumTime
   }
 }
