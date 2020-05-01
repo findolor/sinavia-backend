@@ -401,6 +401,20 @@ module.exports = ({
     })
 
   router
+    .put('/purchase/premium/:id', (req, res) => {
+      putUseCase
+        .addPremiumTime({ id: req.params.id, body: req.body })
+        .then(data => {
+          res.status(Status.OK).json(Success(data))
+        })
+        .catch((error) => {
+          logger.error(error.stack)
+          res.status(Status.BAD_REQUEST).json(
+            Fail(error.message))
+        })
+    })
+
+  router
     .delete('/:id', (req, res) => {
       deleteUseCase
         .remove({ id: req.params.id })
