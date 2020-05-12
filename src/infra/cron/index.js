@@ -286,11 +286,13 @@ module.exports = ({ logger, nodeCache, fcmService }) => {
             userList[userScore.userId].totalPoints += leaderboardEntity.totalPoints
           }
         })
+        const tempList = Object.values(userList)
+        tempList.sort((a, b) => (a.totalPoints < b.totalPoints) ? 1 : -1)
 
         const leaderboardList = []
 
-        Object.keys(userList).forEach(userId => {
-          leaderboardList.push(JSON.stringify(userList[userId]))
+        tempList.forEach(score => {
+          leaderboardList.push(JSON.stringify(score))
         })
 
         if (Object.keys(leaderboardList).length !== 0) {
