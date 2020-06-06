@@ -201,7 +201,7 @@ module.exports = ({ database }) => {
   reportedUserModel.belongsTo(userModel, { as: 'reported' })
 
   // REPORTS belongs to questions
-  userModel.hasMany(reportedQuestionModel, { foreignKey: 'reportedUserId' })
+  userModel.hasMany(reportedQuestionModel, { foreignKey: 'reportingUserId' })
   questionModel.hasMany(reportedQuestionModel, { foreignKey: 'reportedQuestionId' })
   reportedQuestionModel.belongsTo(userModel)
   reportedQuestionModel.belongsTo(questionModel)
