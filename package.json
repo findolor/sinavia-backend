@@ -9,7 +9,7 @@
   },
   "scripts": {
     "gc": "git-cz",
-    "start": "NODE_PATH=. node -r dotenv-flow/config index.js",
+    "start": "cross-env NODE_PATH=. node -r dotenv-flow/config index.js",
     "proxy:colyseus": "NODE_PATH=. node -r dotenv-flow/config src/interfaces/proxy/colyseusProxy/proxy.js",
     "proxy:backend": "NODE_PATH=. node -r dotenv-flow/config src/interfaces/proxy/backendProxy/proxy.js",
     "start:inspect": "NODE_PATH=. node --inspect -r dotenv-flow/config index.js",
