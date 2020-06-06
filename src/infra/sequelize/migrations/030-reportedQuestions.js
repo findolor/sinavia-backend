@@ -1,7 +1,7 @@
 'use strict'
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('reportedUsers', {
+    return queryInterface.createTable('reportedQuestions', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -20,7 +20,7 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'questions',
           key: 'id'
         },
         onUpdate: 'CASCADE',

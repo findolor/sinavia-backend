@@ -37,3 +37,4 @@ module.exports = (sequelize, DataTypes) => {
     return ReportedQuestions
   }
   
+  

@@ -6,11 +6,17 @@ module.exports = () => {
     repository: { reportedUserRepository }
   } = container.cradle
 
+  const {
+    repository: { reportedQuestionRepository }
+  } = container.cradle
+
   // const getReportedUserUseCase = getReportedUser({ reportedUserRepository })
   const postReportedUserUseCase = postReportedUser({ reportedUserRepository })
+  const postReportedQuestionUseCase = postReportedQuestion({ reportedQuestionRepository })
 
   return {
     // getReportedUserUseCase,
-    postReportedUserUseCase
+    postReportedUserUseCase,
+    postReportedQuestionUseCase
   }
 }
