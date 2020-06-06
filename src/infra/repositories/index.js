@@ -201,7 +201,7 @@ module.exports = ({ database }) => {
   reportedUserModel.belongsTo(userModel, { as: 'reported' })
 
   // REPORTS belongs to questions
-  userModel.hasMany(reportedQuestionModel, { foreignKey: 'reportedQuestionId' })
+  userModel.hasMany(reportedQuestionModel, { foreignKey: 'reportedUserId' })
   questionModel.hasMany(reportedQuestionModel, { foreignKey: 'reportedQuestionId' })
   reportedQuestionModel.belongsTo(userModel)
   reportedQuestionModel.belongsTo(questionModel)
@@ -231,6 +231,7 @@ module.exports = ({ database }) => {
     inviteCodeRepository: InviteCode({ model: inviteCodeModel }),
     appleIdentityTokenRepository: AppleIdentityToken({ model: appleIdentityTokenModel }),
     reportedUserRepository: ReportedUser({ model: reportedUserModel }),
-    priceRepository: Price({ model: priceModel })
+    priceRepository: Price({ model: priceModel }),
+    reportedQuestionRepository: ReportedQuestion({ model: reportedQuestionModel })
   }
 }
