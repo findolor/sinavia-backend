@@ -23,6 +23,7 @@ const InviteCode = require('./inviteCode')
 const AppleIdentityToken = require('./appleIdentityToken')
 const ReportedUser = require('./reportedUser')
 const Price = require('./price')
+const ReportedQuestion = require('./reportedQuestion')
 
 module.exports = ({ database }) => {
   const userModel = database.models.users
@@ -50,6 +51,7 @@ module.exports = ({ database }) => {
   const appleIdentityTokenModel = database.models.appleIdentityTokens
   const reportedUserModel = database.models.reportedUsers
   const priceModel = database.models.prices
+  const reportedQuestionModel = database.models.reportedQuestions
 
   // USER has many STATISTICs 1-N
   // STATISTIC belongs to one user 1-1
@@ -198,6 +200,14 @@ module.exports = ({ database }) => {
   reportedUserModel.belongsTo(userModel, { as: 'reporting' })
   reportedUserModel.belongsTo(userModel, { as: 'reported' })
 
+  // REPORTED_QUESTIONS belongs to one user and question 1-1
+  // USER has many questions M-N
+  // QUESTION has many users M-N
+  userModel.hasMany(reportedQuestionModel, { foreignKey: 'userId', as: 'reportingUser' })
+  questionModel.hasMany(reportedQuestionModel, { foreignKey: 'questionId', as: 'reportedQuestion' })
+  reportedQuestionModel.belongsTo(userModel, { as: 'reportingUser' })
+  reportedQuestionModel.belongsTo(questionModel, { as: 'reportedQuestion' })
+
   return {
     userRepository: User({ model: userModel }),
     questionRepository: Question({ model: questionModel }),
@@ -223,6 +233,7 @@ module.exports = ({ database }) => {
     inviteCodeRepository: InviteCode({ model: inviteCodeModel }),
     appleIdentityTokenRepository: AppleIdentityToken({ model: appleIdentityTokenModel }),
     reportedUserRepository: ReportedUser({ model: reportedUserModel }),
-    priceRepository: Price({ model: priceModel })
+    priceRepository: Price({ model: priceModel }),
+    reportedQuestionRepository: ReportedQuestion({ model: reportedQuestionModel })
   }
 }
