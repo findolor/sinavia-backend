@@ -26,12 +26,12 @@ module.exports = ({
 
             if (currentDate > renewedDate) {
               if (userJoker.shouldRenew) {
-                // 10 is the given joker count for every player
-                // If joker is less then 10 we subtract the number from 10 and add that amount
-                // If it is equal to 10 and more we add 10
-                if (userJoker.amountUsed < 10) {
+                // 3 is the given joker count for every player
+                // If joker is less then 3 we subtract the number from 3 and add that amount
+                // If it is equal to 3 and more we add 3
+                if (userJoker.amountUsed < 3) {
                   userJoker.amount += userJoker.amountUsed
-                } else userJoker.amount += 10
+                } else userJoker.amount += 3
                 // We mark shouldRenew false
                 userJoker.shouldRenew = false
                 // We mark the new date
